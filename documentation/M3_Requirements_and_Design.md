@@ -215,7 +215,7 @@ Not necessary to explain our requirements.
 
 ### **4.6. Functional Requirements Sequence Diagram**
 1. [**[WRITE_NAME_HERE]**](#fr1)\
-[SEQUENCE_DIAGRAM_HERE]
+[SEQUENCE_DIAGRAM_HERE](images/sequenceManageTrip.png)
 2. ...
 
 
