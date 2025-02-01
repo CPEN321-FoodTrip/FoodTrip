@@ -227,8 +227,8 @@ Not necessary to explain our requirements.
 
 
 ### **4.7. Non-Functional Requirements Design**
-1. [**[WRITE_NAME_HERE]**](#nfr1)
-    - **Validation**: ...
+1. [Efficient performance](#nfr1)
+    - **Validation**: The system will use caching and asynchronous processing to improve response times. Frequently accessed data will be cached to reduce redundant computations, and background tasks will handle complex operations without blocking user interactions.
 2. ...
 
 
