@@ -95,32 +95,54 @@ Not necessary to explain our requirements.
 
 ## 4. Designs Specification
 ### **4.1. Main Components**
-1. **[WRITE_NAME_HERE]**
+1. **[Virtual Route Manager]**
+    - **Purpose**: Manages the virtual trip by allowing it to convert the coordinates given into a list of recipes which are returned to the user. Designed to handle all the logic and API calls required to create a virtual trip
+    - **Interfaces**: 
+        1. ...
+            - **Purpose**: ...
+        2. ...
+2. **[]**
     - **Purpose**: ...
     - **Interfaces**: 
         1. ...
             - **Purpose**: ...
         2. ...
-2. ...
+3. **[WRITE_NAME_HERE]**
+    - **Purpose**: ...
+    - **Interfaces**: 
+        1. ...
+            - **Purpose**: ...
+        2. ...
+4. **[WRITE_NAME_HERE]**
+    - **Purpose**: ...
+    - **Interfaces**: 
+        1. ...
+            - **Purpose**: ...
+        2. ...
 
 
 ### **4.2. Databases**
-1. **[WRITE_NAME_HERE]**
-    - **Purpose**: ...
+1. **[Trips]**
+    - **Purpose**: Stores all trips for a given user and the recipes used in that trip
 2. ...
 
 
 ### **4.3. External Modules**
-1. **[WRITE_NAME_HERE]** 
-    - **Purpose**: ...
-2. ...
+1. **[Edamam API]** 
+    - **Purpose**: Used to lookup recipes. Chosen for its ability to lookup 2.3 million recipes and 30 day free trial, as well as being utilized in other similar use cases requiring recipe lookup
+2. **[Google Maps]** 
+    - **Purpose**: Used for creating virtual trips and planning local grocery trips. Chosen for its popularity and abundant support/documentation
+3. **[Meta API]** 
+    - **Purpose**: Used to share recipes used in a virtual trip, the route taken in a virtual trip, or pictures of the food that users have made to a Meta platform(Facebook, Instagram, WhatsApp, etc.)
 
 
 ### **4.4. Frameworks**
 1. **AWS**
     - **Purpose**: EC2 Instance
     - **Reason**: ...
-2. ...
+2. **MongoDB**
+    - **Purpose**: User Database
+    - **Reason**: All members have experience with MongoDB and it is a permitted framework
 
 
 ### **4.5. Dependencies Diagram**
@@ -139,16 +161,32 @@ Not necessary to explain our requirements.
 
 
 ### **4.8. Main Project Complexity Design**
-**[WRITE_NAME_HERE]**
-- **Description**: ...
-- **Why complex?**: ...
+**[Convert_Virtual_Trip]**
+- **Description**: Converts a virtual trip from google maps into a list of ingredients. Formally, it takes a pair of coordinates and finds a combination of transportation methods between those points via google maps. Must be able to associate the path travelled to certain ethnic foods, then search for recipes for said food through edamam API, finally returning a series of recipes that an individual may reasonably find if they were to actually travel between the two inputs points. A dish would be considered reasonable if the region associated with it is within a certain distance of a virtual path between the points as given by google maps. The user may specify dietary restrictions and the number of subcultures within a given country, which would be relevant as it may arbitrarily restrict the recipes that are associated with the selected virtual path
+- **Why complex?**: Since users are expected to travel across multiple countries, many different paths could be taken depending on the forms of transportation available, meaning that there are many different viable virtual paths. For any given virtual path, the algorithm must be able to determine what recipes are associated with that path, and then find a combination of recipes that satisfies the number of dishes per country whilst obeying user dietary restrictions
 - **Design**:
-    - **Input**: ...
-    - **Output**: ...
+    - **Input**: a pair of points, number of stops per country, number of subcultures per country, dietary restrictions
+    - **Output**: a list of recipes associated with the virtual path between input points
     - **Main computational logic**: ...
     - **Pseudo-code**: ...
         ```
-        
+        attempted_paths = 0
+        viable_routes = []
+        recipes = []
+        countries = []
+        while (attemptedpaths < attempt_limit) // to prevent insane delays from trying every possible path
+            route = call_mapsAPI(firstpoint_lat, firstpoint_long, secondpoint_lat, secondpoint_long)
+            countries = find_countries_from_route(route)
+            for country in countries
+                potential_recipes = find_recipes_for_country(route,country)
+                remove_violating_recipes(potential_recipes, dietary_restrictions)
+                if potential_recipes.length < stops_per_country
+                    continue // try another path
+                selected_recipes = select_recipes(potential_recipes, stops_per_country, subcultures_per_country)
+                recipes.add(selected_recipes)
+                viable_routes.add(route)
+            attemptedpaths++
+        return(recipes,viable_routes)
         ```
 
 
