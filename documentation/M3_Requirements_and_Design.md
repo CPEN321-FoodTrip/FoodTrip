@@ -266,7 +266,7 @@ Not necessary to explain our requirements.
 
 
 ## 5. Contributions
-- ...
+- Kenny Tang - Help review the details and the sequence diagrams. (Work Time: 3 hours)
 - Eric Omielan - Wrote requirement specifications, project description, frameworks section, and databases section. Helped with reflections pdf. (Work time 10 hours)
 - Rudy Ma - Made Use-case diagram, sequence diagrams, and dependency diagrams according to the project design and requirements. Made Reflections pdf. (Work Time: 5 hours)
 - Evan Lai - Work Time: 3.5.2, 4.1, 4.2, 4.3, 4.7.2, 4.8 . 13 hours
