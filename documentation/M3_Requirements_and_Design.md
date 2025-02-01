@@ -4,6 +4,7 @@
 <!-- Leave blank for M3 -->
 
 ## 2. Project Description
+FoodTrip is an android app that helps users explore global cuisines by planning a virtual food trip. Users can choose a starting and ending country, and the app will generate a travel route with recipes from different locations along the way. It also creates a smart grocery list which can be used to optimize ingredient reuse and allow users to see local store discounts. Additionally, FoodTrip allows dietary preference customization and social media sharing, so users can tailor their meals to their needs and share their journeys with friends.
 
 
 ## 3. Requirements Specification
@@ -203,10 +204,13 @@ Not necessary to explain our requirements.
 ### **4.4. Frameworks**
 1. **AWS**
     - **Purpose**: EC2 Instance
-    - **Reason**: ...
+    - **Reason**: All team members have prior experience with AWS from M1. We are also familiar with setting up CI/CD pipelines using GitHub Actions to automatically deploy the backend whenever changes are made to the main branch.
 2. **MongoDB**
     - **Purpose**: User Database
-    - **Reason**: All members have experience with MongoDB and it is a permitted framework
+    - **Reason**: All team members have experience working with MongoDB, and it is an approved framework for the project. We also have hands-on experience from tutorials on setting up the database and integrating it with our backend.
+3. **Node.js & Express**
+    - **Purpose**: Backend API
+    - **Reason**: All members are familiar with it, and it meets the project requirements. It also integrates well with MongoDB.
 
 
 ### **4.5. Dependencies Diagram**
