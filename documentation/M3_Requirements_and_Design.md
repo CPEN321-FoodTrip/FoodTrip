@@ -89,9 +89,9 @@ Not necessary to explain our requirements.
 1. **Efficient performance**
     - **Description**: The system should generate food trips and grocery lists in under 10 seconds.
     - **Justification**: Helps to ensure a good user experience without long loading times.
-2. **Security and privacy**
-    - **Description**: User data such as dietary preferences and grocery lists should be securely stored and only accessible from an authenticated account.
-    - **Justification**: Helps build user trust and ensures data protection.
+2. **Scalability**
+    - **Description**: User data should be stored and retrieved efficiently, scaling up to 50 recipes for up to 50000 users  
+    - **Justification**: Since users are sharing to social media, being able to store large quantities of data for potentially tens of thousands of clients may be required. 
 
 
 ## 4. Designs Specification
@@ -229,8 +229,8 @@ Not necessary to explain our requirements.
 ### **4.7. Non-Functional Requirements Design**
 1. [Efficient performance](#nfr1)
     - **Validation**: The system will use caching and asynchronous processing to improve response times. Frequently accessed data will be cached to reduce redundant computations, and background tasks will handle complex operations without blocking user interactions.
-2. ...
-
+2. [Scalability](#nfr1)
+    - **Cloud Computing**: The system will be hosted on AWS Cloud services and thus be able to dynamically scale to meet the needs of users. Recipes will be stored by name or ID on a MongoDB database, thus reducing their overall size from the entire recipe to just a list of strings, thus drastically reducing the size of recipes
 
 ### **4.8. Main Project Complexity Design**
 **[Convert_Virtual_Trip]**
