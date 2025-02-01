@@ -4,6 +4,7 @@
 <!-- Leave blank for M3 -->
 
 ## 2. Project Description
+FoodTrip is an android app that helps users explore global cuisines by planning a virtual food trip. Users can choose a starting and ending country, and the app will generate a travel route with recipes from different locations along the way. It also creates a smart grocery list which can be used to optimize ingredient reuse and allow users to see local store discounts. Additionally, FoodTrip allows dietary preference customization and social media sharing, so users can tailor their meals to their needs and share their journeys with friends.
 
 
 ## 3. Requirements Specification
