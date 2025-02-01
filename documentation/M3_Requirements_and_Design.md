@@ -184,9 +184,11 @@ Not necessary to explain our requirements.
             - **Output**: Whether or not a given operation was successful
 
 ### **4.2. Databases**
-1. **[Trips]**
+1. **[Users]**
+    - **Purpose**: Stores user account information, including authentication details, dietary preferences, saved trips, and any personalized settings
+2. **[Trips]**
     - **Purpose**: Stores all trips for a given user and the recipes used in that trip
-2. **[Groceries]**
+3. **[Groceries]**
     - **Purpose**: Stores all grocery lists for a given user
 
 ### **4.3. External Modules**
@@ -203,7 +205,7 @@ Not necessary to explain our requirements.
     - **Purpose**: EC2 Instance
     - **Reason**: All team members have prior experience with AWS from M1. We are also familiar with setting up CI/CD pipelines using GitHub Actions to automatically deploy the backend whenever changes are made to the main branch.
 2. **MongoDB**
-    - **Purpose**: User Database
+    - **Purpose**: Databases
     - **Reason**: All team members have experience working with MongoDB, and it is an approved framework for the project. We also have hands-on experience from tutorials on setting up the database and integrating it with our backend.
 3. **Node.js & Express**
     - **Purpose**: Backend API
