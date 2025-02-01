@@ -148,43 +148,40 @@ Not necessary to explain our requirements.
             - **Input**: userlocation, the users' location, which should be the start and end point
                         groceries, the list of ingredients required for the selected recipes
             - **Output**: GroceryTrip, a sequence of coordinates as specified by the polyline class in the GoogleMaps API documentation
-        1. Add_ingredient
-            - **Purpose**: ...
-            - **Input**:
-            - **Output**:
-        1. Remove_Ingredient
-            - **Purpose**: ...
-            - **Input**:
-            - **Output**:
-        1. Change_quantity
+        3. Add_ingredient
+            - **Purpose**: AJAX PUT request to add an ingredient to a shopping list
+            - **Input**: ingredient, the name of the ingredient to add
+                        number, the amount of the ingredient to add
+            - **Output**: status, whether or not the operation succeeded
+        4. Remove_Ingredient
+            - **Purpose**: AJAX DELETE request to remove an ingredient from a shopping list
+            - **Input**: ingredient, the name of the ingredient to remove
+                        number, the amount of the ingredient to remove
+            - **Output**: status, whether or not the operation succeeded
+        5. Change_quantity
             - **Purpose**: An AJAX PUT request to change the quantity of an ingredient 
-            - **Input**:
-            - **Output**:
+            - **Input**: ingredient, the name of the ingredient to remove
+                        number, the amount of the ingredient to remove
+            - **Output**: status, whether or not the operation succeeded
 3. **[Frontend]**
     - **Purpose**: Allows users to interact with all other components. Users should be able to select important information such as starting and end points for virtual trips, as well as which trip they may want to share on social media
     - **Interfaces**: 
-        1. 
-            - **Purpose**: ...
-            - **Input**:
-            - **Output**:
-        1. ...
-            - **Purpose**: ...
-            - **Input**:
-            - **Output**:
-        1. ...
-            - **Purpose**: ...
-            - **Input**:
-            - **Output**:
-        
-4. **[WRITE_NAME_HERE]**
-    - **Purpose**: ...
-    - **Interfaces**: 
-        1. ...
-            - **Purpose**: ...
-            - **Input**:
-            - **Output**:
-        2. ...
-
+        1. Begin Virtual Trip
+            - **Purpose**: Allows the user to begin planning a virtual trip
+            - **Input**: A Google Maps interface and popup to enter virtual trip settings and dietary preferences
+            - **Output**: A sequence of routes and the list of recipes associated with those routes
+        2. Share_Trip
+            - **Purpose**: Allows users to create a social media post using Meta API and their list of trips from the Trips database
+            - **Input**: An interface asking which social media platform the user would like to post to, as well as which of their virtual trips they would like to post
+            - **Output**: Redirect to login of the platform of choice, which would then lead to the "create post" interface for that given platform 
+        3. Manage_Grocery_Trip
+            - **Purpose**: Allows the user to use Google Maps API to plan a trip to local grocery stores to guy ingredients 
+            - **Input**: Asks for location permissions if they are not already given. An interface selecting which grocery list the user would like to plan a trip for. 
+            - **Output**: A Google Maps route starting at the users' location and passing through local grocery stores. The user has a button to generate a different route if needed
+        4. Manage_Grocery_List
+            - **Purpose**: Allows the user to issue AJAX requests to change the ingredients on a given grocery list, retrieved and updating the groceries database
+            - **Input**: A screen displaying a list of ingredients and their quantity, with buttons to adjust the quantity, add or remove ingredients
+            - **Output**: Whether or not a given operation was successful
 
 ### **4.2. Databases**
 1. **[Trips]**
