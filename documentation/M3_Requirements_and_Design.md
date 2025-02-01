@@ -215,8 +215,10 @@ Not necessary to explain our requirements.
 
 ### **4.6. Functional Requirements Sequence Diagram**
 1. [**[WRITE_NAME_HERE]**](#fr1)\
-[SEQUENCE_DIAGRAM_HERE](images/sequenceManageTrip.png)
-2. ...
+![SEQUENCE_DIAGRAM_HERE](images/sequenceManageTrip.png)
+![SEQUENCE_DIAGRAM](images/ManageGrocerySequence.png)
+![SEQUENCE_DIAGRAM](images/SharingSequence.png)
+3. ...
 
 
 ### **4.7. Non-Functional Requirements Design**
