@@ -211,6 +211,7 @@ Not necessary to explain our requirements.
 
 
 ### **4.5. Dependencies Diagram**
+![DEPENDENCIES_DIAGRAM_HERE](images/dependencyDiagram.png)
 
 
 ### **4.6. Functional Requirements Sequence Diagram**
