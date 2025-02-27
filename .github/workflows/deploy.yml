@@ -33,6 +33,7 @@ jobs:
             # Write secrets in .env
             cat > .env <<EOF
             PORT=${{ secrets.PROD_PORT }}
+            DB_URI=${{ secrets.PROD_DB_URI }}
             EOF
 
             # Give .env permissions
