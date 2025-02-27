@@ -17,6 +17,7 @@ services:
     restart: always
     container_name: cpen321_app
     environment:
+      - DB_URI=${DB_URI}
       - PORT=${PORT}
     ports:
       - "${PORT}:${PORT}"
