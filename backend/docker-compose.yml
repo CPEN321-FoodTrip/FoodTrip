@@ -1,0 +1,28 @@
+version: '3'
+services:
+  mongo:
+    image: mongo:latest
+    container_name: cpen321_mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - PORT=${PORT}
+    restart: always
+    container_name: cpen321_app
+    environment:
+      - PORT=${PORT}
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      - mongo
+    command: npm start
+
+volumes:
+  mongo_data:

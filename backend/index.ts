@@ -9,15 +9,17 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Hello World!");
 });
 
-const client = new MongoClient("mongodb://localhost:27017");
+const client = new MongoClient(
+  process.env.DB_URI ?? "mongodb://localhost:27017"
+);
 
 client
   .connect()
   .then(() => {
     console.log("Connected to MongoDB");
 
-    app.listen(3000, () => {
-      console.log("Server is running on port 3000");
+    app.listen(process.env.PORT, () => {
+      console.log("Server is running on port " + process.env.PORT);
     });
   })
   .catch((err) => {
