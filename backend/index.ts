@@ -1,17 +1,33 @@
-import express, { Request, Response } from "express";
-import { MongoClient } from "mongodb";
+import express, { NextFunction, Request, Response } from "express";
+import { client } from "./services";
+import { TripRoutes } from "./routes/TripRoutes";
+import { validationResult } from "express-validator";
+import morgan from "morgan";
 
 const app = express();
 
 app.use(express.json());
+app.use(morgan("tiny"));
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello World!");
+TripRoutes.forEach((route) => {
+  (app as any)[route.method](
+    route.route,
+    route.validation,
+    async (req: Request, res: Response, next: NextFunction) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      try {
+        await route.action(req, res, next);
+      } catch (err) {
+        console.log(err);
+        res.status(500);
+      }
+    }
+  );
 });
-
-const client = new MongoClient(
-  process.env.DB_URI ?? "mongodb://localhost:27017"
-);
 
 client
   .connect()
