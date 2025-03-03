@@ -1,9 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import {
-  Location,
-  generateRouteStops,
-  calculateDistance,
-} from "../helpers/TripHelpers";
+import { Location, generateRouteStops } from "../helpers/TripHelpers";
 
 export class TripController {
   sayHello(req: Request, res: Response) {

@@ -5,6 +5,8 @@ import { client } from "../services";
 const DB_NAME = "geonames";
 const COLLECTION_NAME = "cities";
 const GEONAMES_FILE = "data/cities15000.txt";
+const MIN_POPULATION = 50000;
+const MAX_DISTANCE_FROM_ROUTE = 50000; // meters
 
 interface GeoNameCity {
   geonameId: number;
@@ -26,6 +28,7 @@ interface GeoNameCity {
   dem: number;
   timezone: string;
   modificationDate: string;
+  // added for geospace lookups
   location: {
     type: string;
     coordinates: [number, number]; // [longitude, latitude]
@@ -52,34 +55,18 @@ export async function initializeDatabase() {
   const count = await collection.countDocuments();
 
   if (count === 0) {
-    console.log("No data found in the database. Importing cities...");
-    await importGeoNamesToMongoDB(GEONAMES_FILE, DB_NAME, COLLECTION_NAME);
+    console.log("No data in database, importing cities");
+    await importGeoNamesToMongoDB();
   } else {
     console.log(`Database already contains ${count} cities`);
   }
 }
 
 // function to import GeoNames data into MongoDB
-async function importGeoNamesToMongoDB(
-  filePath: string,
-  dbName: string,
-  collectionName: string
-): Promise<void> {
-  const db = client.db(dbName);
-  const collection = db.collection<GeoNameCity>(collectionName);
-
-  // check if collection already has data
-  const count = await collection.countDocuments();
-  if (count > 0) {
-    console.log(
-      `Collection already contains ${count} documents. Skipping import`
-    );
-    return;
-  }
-
-  console.log("Starting import of GeoNames data...");
-
-  const fileStream = fs.createReadStream(filePath);
+async function importGeoNamesToMongoDB(): Promise<void> {
+  const db = client.db(DB_NAME);
+  const collection = db.collection<GeoNameCity>(COLLECTION_NAME);
+  const fileStream = fs.createReadStream(GEONAMES_FILE);
   const rl = readline.createInterface({
     input: fileStream,
     crlfDelay: Infinity,
@@ -113,7 +100,7 @@ async function importGeoNamesToMongoDB(
       dem: fields[16] ? parseInt(fields[16]) : 0,
       timezone: fields[17],
       modificationDate: fields[18],
-      // add GeoJSON point for geospatial queries
+      // add GeoJSON point for geospace lookup
       location: {
         type: "Point",
         coordinates: [parseFloat(fields[5]), parseFloat(fields[4])], // [longitude, latitude]
@@ -126,38 +113,29 @@ async function importGeoNamesToMongoDB(
     // insert in batches of 1000
     if (cities.length >= 1000) {
       await collection.insertMany(cities);
-      cities.length = 0; // clear array
-      console.log(`Imported ${lineCount} cities`);
+      cities.length = 0;
     }
   }
 
-  // insert any remaining cities
+  // insert remaining cities
   if (cities.length > 0) {
     await collection.insertMany(cities);
-    console.log(`Imported ${lineCount} cities`);
   }
 
   await collection.createIndex({ location: "2dsphere" }); // geospatial index for closest cities
   await collection.createIndex({ population: -1 }); // allow filtering by population
   await collection.createIndex({ countryCode: 1 }); // allow filtering by country code
-
-  console.log("Import completed successfully");
-  console.log(
-    "Created indexes for geospatial queries and population filtering"
-  );
 }
 
-// find cities along a route between two locations
+// find all cities along a route between two locations that are within a certain distance
 async function findCitiesNearRoute(
   start: Location,
-  end: Location,
-  minPopulation: number = 50000,
-  maxDistanceFromRoute: number = 50000 // meters
+  end: Location
 ): Promise<Location[]> {
   const db = client.db(DB_NAME);
   const collection = db.collection<GeoNameCity>(COLLECTION_NAME);
 
-  // generate waypoints along the route (can improve this with interpolation)
+  // generate waypoints along the route (TODO: improve this with interpolation)
   const waypoints = [
     [start.longitude, start.latitude],
     [end.longitude, end.latitude],
@@ -174,17 +152,16 @@ async function findCitiesNearRoute(
         location: {
           $near: {
             $geometry: point,
-            $maxDistance: maxDistanceFromRoute, // meters
+            $maxDistance: MAX_DISTANCE_FROM_ROUTE, // meters
           },
         },
-        population: { $gte: minPopulation },
+        population: { $gte: MIN_POPULATION },
       })
       .toArray();
 
     for (const city of cities) {
-      const cityKey = `${city.name}-${city.countryCode}`;
-      if (!allCities.has(cityKey)) {
-        allCities.add(cityKey);
+      if (!allCities.has(city.name)) {
+        allCities.add(city.name);
         uniqueCities.push({
           name: city.name,
           latitude: city.latitude,
@@ -202,6 +179,7 @@ async function findCitiesNearRoute(
 }
 
 // calculate distance between two points using Haversine formula
+// https://en.wikipedia.org/wiki/Haversine_formula
 export function calculateDistance(point1: Location, point2: Location): number {
   const R = 6371; // Earth radius in km
   const dLat = toRadians(point2.latitude - point1.latitude);
@@ -226,19 +204,9 @@ function toRadians(degrees: number): number {
 export async function generateRouteStops(
   start: Location,
   end: Location,
-  numberOfStops: number,
-  minCityPopulation: number = 50000,
-  maxDistanceFromRoute: number = 50 // km
+  numberOfStops: number
 ): Promise<RouteStop[]> {
-  // convert km to meters for mongoDB
-  const maxDistanceMeters = maxDistanceFromRoute * 1000;
-
-  const eligibleCities = await findCitiesNearRoute(
-    start,
-    end,
-    minCityPopulation,
-    maxDistanceMeters
-  );
+  const eligibleCities = await findCitiesNearRoute(start, end);
 
   const totalDistance = calculateDistance(start, end);
 
@@ -270,7 +238,6 @@ export async function generateRouteStops(
       }
     }
 
-    // add best city a stop if found
     if (bestCity) {
       const distanceFromStart = calculateDistance(start, bestCity);
 
