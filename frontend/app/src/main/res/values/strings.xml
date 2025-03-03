@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">My Application</string>
+    <string name="grocery_title_text">Grocery</string>
+    <string name="back_button_text">Back</string>
 </resources>
