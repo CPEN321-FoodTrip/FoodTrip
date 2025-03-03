@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import {
   Location,
-  fetchCitiesFromGeoNames,
   generateRouteStops,
   calculateDistance,
 } from "../helpers/TripHelpers";
@@ -16,20 +15,6 @@ export class TripController {
 
     if (!origin || !destination || !numStops || numStops < 1) {
       res.status(400).json({ error: "Invalid request parameters" });
-      return;
-    }
-
-    // Option 1: Load from downloaded file
-    // const cities = await loadGeoNamesData('./cities15000.txt');
-
-    // Option 2: Fetch from GeoNames API
-    const cities = await fetchCitiesFromGeoNames(
-      process.env.GEONAMES_USERNAME || "",
-      50000
-    );
-
-    if (cities.length === 0) {
-      console.error("No cities data available");
       return;
     }
 
@@ -50,7 +35,7 @@ export class TripController {
     };
 
     try {
-      const stops = await generateRouteStops(start, end, 3, cities);
+      const stops = await generateRouteStops(start, end, 3);
 
       console.log(
         `Route from ${start.name} to ${end.name} with ${stops.length} stops:`

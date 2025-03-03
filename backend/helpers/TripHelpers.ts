@@ -1,11 +1,16 @@
-import axios from "axios";
 import fs from "fs";
+import readline from "readline";
+import { client } from "../services";
+
+const DB_NAME = "geonames";
+const COLLECTION_NAME = "cities";
+const GEONAMES_FILE = "./cities15000.txt";
 
 interface GeoNameCity {
   geonameId: number;
   name: string;
   asciiName: string;
-  alternateNames: string;
+  alternateNames: string[];
   latitude: number;
   longitude: number;
   featureClass: string;
@@ -21,6 +26,10 @@ interface GeoNameCity {
   dem: number;
   timezone: string;
   modificationDate: string;
+  location: {
+    type: string;
+    coordinates: [number, number]; // [longitude, latitude]
+  };
 }
 
 export interface Location {
@@ -37,74 +46,168 @@ interface RouteStop {
   cumulativeDistance: number;
 }
 
-// Function to load GeoNames data from file
-async function loadGeoNamesData(filePath: string): Promise<Location[]> {
-  // You can either parse a downloaded GeoNames file or use their API
-  try {
-    const data = await fs.promises.readFile(filePath, "utf-8");
-    const lines = data.split("\n").filter((line) => line.trim() !== "");
+// import data when server starts (if needed)
+export async function initializeDatabase() {
+  const db = client.db(DB_NAME);
+  const collection = db.collection(COLLECTION_NAME);
+  const count = await collection.countDocuments();
 
-    return lines.map((line) => {
-      const fields = line.split("\t");
-      return {
-        name: fields[1],
-        countryCode: fields[8],
-        latitude: parseFloat(fields[4]),
-        longitude: parseFloat(fields[5]),
-        population: parseInt(fields[14]) || 0,
-      };
-    });
-  } catch (error) {
-    console.error("Failed to load GeoNames data:", error);
-    return [];
+  if (count === 0) {
+    console.log("No data found in the database. Importing cities...");
+    await importGeoNamesToMongoDB(GEONAMES_FILE, DB_NAME, COLLECTION_NAME);
+  } else {
+    console.log(`Database already contains ${count} cities`);
   }
 }
 
-// Alternative: Load data from GeoNames API
-export async function fetchCitiesFromGeoNames(
-  username: string,
-  minPopulation: number = 100000
-): Promise<Location[]> {
-  try {
-    // GeoNames free API requires a username
-    const response = await axios.get(`http://api.geonames.org/citiesJSON`, {
-      params: {
-        north: 90,
-        south: -90,
-        east: 180,
-        west: -180,
-        maxRows: 1000, // Adjust based on your needs
-        username: username,
-        cities: "cities1000", // Cities with population > 1000
-        orderby: "population", // Sort by population
+// function to import GeoNames data into MongoDB
+async function importGeoNamesToMongoDB(
+  filePath: string,
+  dbName: string,
+  collectionName: string
+): Promise<void> {
+  const db = client.db(dbName);
+  const collection = db.collection<GeoNameCity>(collectionName);
+
+  // check if collection already has data
+  const count = await collection.countDocuments();
+  if (count > 0) {
+    console.log(
+      `Collection already contains ${count} documents. Skipping import`
+    );
+    return;
+  }
+
+  console.log("Starting import of GeoNames data...");
+
+  const fileStream = fs.createReadStream(filePath);
+  const rl = readline.createInterface({
+    input: fileStream,
+    crlfDelay: Infinity,
+  });
+
+  const cities: GeoNameCity[] = [];
+  let lineCount = 0;
+
+  for await (const line of rl) {
+    if (line.trim() === "") continue;
+
+    const fields = line.split("\t");
+
+    const city: GeoNameCity = {
+      geonameId: parseInt(fields[0]),
+      name: fields[1],
+      asciiName: fields[2],
+      alternateNames: fields[3] ? fields[3].split(",") : [],
+      latitude: parseFloat(fields[4]),
+      longitude: parseFloat(fields[5]),
+      featureClass: fields[6],
+      featureCode: fields[7],
+      countryCode: fields[8],
+      cc2: fields[9],
+      admin1Code: fields[10],
+      admin2Code: fields[11],
+      admin3Code: fields[12],
+      admin4Code: fields[13],
+      population: parseInt(fields[14]),
+      elevation: fields[15] ? parseInt(fields[15]) : 0,
+      dem: fields[16] ? parseInt(fields[16]) : 0,
+      timezone: fields[17],
+      modificationDate: fields[18],
+      // add GeoJSON point for geospatial queries
+      location: {
+        type: "Point",
+        coordinates: [parseFloat(fields[5]), parseFloat(fields[4])], // [longitude, latitude]
       },
-    });
+    };
 
-    console.log("GeoNames API Response:", response.data);
+    cities.push(city);
+    lineCount++;
 
-    if (!response.data || !response.data.geonames) {
-      console.error("Unexpected API response structure:", response.data);
-      return [];
+    // insert in batches of 1000
+    if (cities.length >= 1000) {
+      await collection.insertMany(cities);
+      cities.length = 0; // clear array
+      console.log(`Imported ${lineCount} cities`);
     }
-
-    return response.data.geonames
-      .filter((city: any) => city.population >= minPopulation)
-      .map((city: any) => ({
-        name: city.name,
-        countryCode: city.countryCode,
-        latitude: city.lat,
-        longitude: city.lng,
-        population: city.population,
-      }));
-  } catch (error) {
-    console.error("Failed to fetch from GeoNames API:", error);
-    return [];
   }
+
+  // insert any remaining cities
+  if (cities.length > 0) {
+    await collection.insertMany(cities);
+    console.log(`Imported ${lineCount} cities`);
+  }
+
+  await collection.createIndex({ location: "2dsphere" }); // geospatial index for closest cities
+  await collection.createIndex({ population: -1 }); // allow filtering by population
+  await collection.createIndex({ countryCode: 1 }); // allow filtering by country code
+
+  console.log("Import completed successfully");
+  console.log(
+    "Created indexes for geospatial queries and population filtering"
+  );
 }
 
-// Calculate distance between two points using the Haversine formula
+// find cities along a route between two locations
+async function findCitiesNearRoute(
+  start: Location,
+  end: Location,
+  minPopulation: number = 50000,
+  maxDistanceFromRoute: number = 50000 // meters
+): Promise<Location[]> {
+  const db = client.db(DB_NAME);
+  const collection = db.collection<GeoNameCity>(COLLECTION_NAME);
+
+  // generate waypoints along the route (can improve this with interpolation)
+  const waypoints = [
+    [start.longitude, start.latitude],
+    [end.longitude, end.latitude],
+  ];
+
+  const allCities = new Set<string>();
+  const uniqueCities: Location[] = [];
+
+  for (const coords of waypoints) {
+    const point = { type: "Point", coordinates: coords };
+
+    const cities = await collection
+      .find({
+        location: {
+          $near: {
+            $geometry: point,
+            $maxDistance: maxDistanceFromRoute, // meters
+          },
+        },
+        population: { $gte: minPopulation },
+      })
+      .toArray();
+
+    for (const city of cities) {
+      const cityKey = `${city.name}-${city.countryCode}`;
+      if (!allCities.has(cityKey)) {
+        allCities.add(cityKey);
+        uniqueCities.push({
+          name: city.name,
+          countryCode: city.countryCode,
+          latitude: city.latitude,
+          longitude: city.longitude,
+          population: city.population,
+        });
+      }
+    }
+  }
+
+  // remove start and end cities
+  return uniqueCities.filter(
+    (city) =>
+      !(city.name === start.name && city.countryCode === start.countryCode) &&
+      !(city.name === end.name && city.countryCode === end.countryCode)
+  );
+}
+
+// calculate distance between two points using Haversine formula
 export function calculateDistance(point1: Location, point2: Location): number {
-  const R = 6371; // Earth's radius in km
+  const R = 6371; // Earth radius in km
   const dLat = toRadians(point2.latitude - point1.latitude);
   const dLon = toRadians(point2.longitude - point1.longitude);
 
@@ -123,107 +226,41 @@ function toRadians(degrees: number): number {
   return degrees * (Math.PI / 180);
 }
 
-// Calculate bearing between two points
-function calculateBearing(start: Location, end: Location): number {
-  const startLat = toRadians(start.latitude);
-  const startLng = toRadians(start.longitude);
-  const endLat = toRadians(end.latitude);
-  const endLng = toRadians(end.longitude);
-
-  const y = Math.sin(endLng - startLng) * Math.cos(endLat);
-  const x =
-    Math.cos(startLat) * Math.sin(endLat) -
-    Math.sin(startLat) * Math.cos(endLat) * Math.cos(endLng - startLng);
-
-  let bearing = Math.atan2(y, x);
-  bearing = ((bearing * 180) / Math.PI + 360) % 360; // Convert to degrees
-  return bearing;
-}
-
-// Calculate if a point is close to the route (within a certain corridor width)
-function isPointNearRoute(
-  point: Location,
-  start: Location,
-  end: Location,
-  maxDistance: number
-): boolean {
-  // Create a bounding box for quick filtering
-  const minLat = Math.min(start.latitude, end.latitude) - maxDistance / 111; // rough conversion to degrees
-  const maxLat = Math.max(start.latitude, end.latitude) + maxDistance / 111;
-  const minLng =
-    Math.min(start.longitude, end.longitude) -
-    maxDistance /
-      (111 * Math.cos(toRadians((start.latitude + end.latitude) / 2)));
-  const maxLng =
-    Math.max(start.longitude, end.longitude) +
-    maxDistance /
-      (111 * Math.cos(toRadians((start.latitude + end.latitude) / 2)));
-
-  // Quick check if point is outside the extended bounding box
-  if (
-    point.latitude < minLat ||
-    point.latitude > maxLat ||
-    point.longitude < minLng ||
-    point.longitude > maxLng
-  ) {
-    return false;
-  }
-
-  // For more precise check, calculate the cross-track distance
-  const distanceStartToPoint = calculateDistance(start, point);
-  const bearingStartToPoint = calculateBearing(start, point);
-  const bearingStartToEnd = calculateBearing(start, end);
-
-  // Calculate the angular distance in radians
-  const angularDistance = toRadians(distanceStartToPoint / 6371);
-
-  // Calculate the cross-track distance
-  const crossTrackDistance =
-    Math.asin(
-      Math.sin(angularDistance) *
-        Math.sin(toRadians(bearingStartToPoint - bearingStartToEnd))
-    ) * 6371;
-
-  return Math.abs(crossTrackDistance) <= maxDistance;
-}
-
-// Generate stops along a route between start and end locations
+// generate stops along route between start and end locations
 export async function generateRouteStops(
   start: Location,
   end: Location,
   numberOfStops: number,
-  cities: Location[],
   minCityPopulation: number = 50000,
-  maxDistanceFromRoute: number = 50 // in km
+  maxDistanceFromRoute: number = 50 // km
 ): Promise<RouteStop[]> {
-  const totalDistance = calculateDistance(start, end);
+  // convert km to meters for mongoDB
+  const maxDistanceMeters = maxDistanceFromRoute * 1000;
 
-  // Filter cities to only include those near the route and with sufficient population
-  const eligibleCities = cities.filter(
-    (city) =>
-      city.population >= minCityPopulation &&
-      isPointNearRoute(city, start, end, maxDistanceFromRoute) &&
-      // Exclude the start and end cities
-      !(city.name === start.name && city.countryCode === start.countryCode) &&
-      !(city.name === end.name && city.countryCode === end.countryCode)
+  const eligibleCities = await findCitiesNearRoute(
+    start,
+    end,
+    minCityPopulation,
+    maxDistanceMeters
   );
 
-  // Sort cities by their distance from the start
+  const totalDistance = calculateDistance(start, end);
+
+  // sort cities by distance from start
   const sortedCities = [...eligibleCities].sort((a, b) => {
     const distanceA = calculateDistance(start, a);
     const distanceB = calculateDistance(start, b);
     return distanceA - distanceB;
   });
 
-  // Ideal segment length between stops
+  // ideal length between stops
   const segmentLength = totalDistance / (numberOfStops + 1);
 
-  // Generate stops
   const stops: RouteStop[] = [];
   for (let i = 1; i <= numberOfStops; i++) {
     const idealDistance = i * segmentLength;
 
-    // Find the city closest to the ideal distance
+    // find city closest to ideal distance
     let bestCity: Location | null = null;
     let minDiff = Infinity;
 
@@ -237,11 +274,11 @@ export async function generateRouteStops(
       }
     }
 
-    // Add the best city as a stop if found
+    // add best city a stop if found
     if (bestCity) {
       const distanceFromStart = calculateDistance(start, bestCity);
 
-      // Remove the selected city to avoid duplicates
+      // remove selected city to prevent duplicates
       const index = sortedCities.findIndex(
         (city) =>
           city.name === bestCity!.name &&
@@ -259,6 +296,6 @@ export async function generateRouteStops(
     }
   }
 
-  // Sort stops by distance from start
+  // sort stops by distance from start
   return stops.sort((a, b) => a.distanceFromStart - b.distanceFromStart);
 }
