@@ -18,24 +18,50 @@ export class TripController {
       return;
     }
 
+    const originURL = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(
+      origin
+    )}&format=json&limit=1`;
+
+    const originResponse = await fetch(originURL);
+    const originData = await originResponse.json();
+
+    if (originData.length === 0) {
+      res.status(400).json({ error: "Could not locate start city" });
+      return;
+    }
+
+    const originCity = originData[0];
+
     const start: Location = {
-      name: "London",
-      countryCode: "UK",
-      latitude: 51.5072,
-      longitude: 0.1276,
-      population: 8600000,
+      name: originCity.name,
+      latitude: parseFloat(originCity.lat),
+      longitude: parseFloat(originCity.lon),
+      population: 0, // not used for start location
     };
 
+    const destinationURL = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(
+      origin
+    )}&format=json&limit=1`;
+
+    const destinationResponse = await fetch(destinationURL);
+    const destinationData = await destinationResponse.json();
+
+    if (destinationData.length === 0) {
+      res.status(400).json({ error: "Could not locate end city" });
+      return;
+    }
+
+    const destinationCity = destinationData[0];
+
     const end: Location = {
-      name: "Warsaw",
-      countryCode: "PL",
-      latitude: 52.2297,
-      longitude: 21.0122,
-      population: 1800000,
+      name: destinationCity.name,
+      latitude: parseFloat(destinationCity.lat),
+      longitude: parseFloat(destinationCity.lon),
+      population: 0, // not used for end location
     };
 
     try {
-      const stops = await generateRouteStops(start, end, 3);
+      const stops = await generateRouteStops(start, end, numStops);
 
       console.log(
         `Route from ${start.name} to ${end.name} with ${stops.length} stops:`
@@ -44,15 +70,15 @@ export class TripController {
         `Total distance: ${calculateDistance(start, end).toFixed(2)} km`
       );
 
-      console.log(`Start: ${start.name}, ${start.countryCode}`);
+      console.log(`Start: ${start.name}`);
       stops.forEach((stop, index) => {
         console.log(
-          `Stop ${index + 1}: ${stop.location.name}, ${
-            stop.location.countryCode
+          `Stop ${index + 1}: ${
+            stop.location.name
           } - ${stop.distanceFromStart.toFixed(2)} km from start`
         );
       });
-      console.log(`End: ${end.name}, ${end.countryCode}`);
+      console.log(`End: ${end.name}`);
       res.json({
         start_location: start.name,
         end_location: end.name,
@@ -60,6 +86,7 @@ export class TripController {
       });
     } catch (error) {
       console.error("Error generating route:", error);
+      res.status(500).json({ error: "Error generating route" });
     }
   }
 }

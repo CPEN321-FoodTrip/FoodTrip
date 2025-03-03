@@ -34,7 +34,6 @@ interface GeoNameCity {
 
 export interface Location {
   name: string;
-  countryCode: string;
   latitude: number;
   longitude: number;
   population: number;
@@ -188,7 +187,6 @@ async function findCitiesNearRoute(
         allCities.add(cityKey);
         uniqueCities.push({
           name: city.name,
-          countryCode: city.countryCode,
           latitude: city.latitude,
           longitude: city.longitude,
           population: city.population,
@@ -199,9 +197,7 @@ async function findCitiesNearRoute(
 
   // remove start and end cities
   return uniqueCities.filter(
-    (city) =>
-      !(city.name === start.name && city.countryCode === start.countryCode) &&
-      !(city.name === end.name && city.countryCode === end.countryCode)
+    (city) => !(city.name === start.name) && !(city.name === end.name)
   );
 }
 
@@ -280,9 +276,7 @@ export async function generateRouteStops(
 
       // remove selected city to prevent duplicates
       const index = sortedCities.findIndex(
-        (city) =>
-          city.name === bestCity!.name &&
-          city.countryCode === bestCity!.countryCode
+        (city) => city.name === bestCity!.name
       );
       if (index !== -1) {
         sortedCities.splice(index, 1);
