@@ -63,25 +63,17 @@ export class TripController {
     try {
       const stops = await generateRouteStops(start, end, numStops);
 
-      console.log(
-        `Route from ${start.name} to ${end.name} with ${stops.length} stops:`
-      );
-      console.log(
-        `Total distance: ${calculateDistance(start, end).toFixed(2)} km`
-      );
-
-      console.log(`Start: ${start.name}`);
-      stops.forEach((stop, index) => {
-        console.log(
-          `Stop ${index + 1}: ${
-            stop.location.name
-          } - ${stop.distanceFromStart.toFixed(2)} km from start`
-        );
-      });
-      console.log(`End: ${end.name}`);
       res.json({
-        start_location: start.name,
-        end_location: end.name,
+        start_location: {
+          name: start.name,
+          latitude: start.latitude,
+          longitude: start.longitude,
+        },
+        end_location: {
+          name: end.name,
+          latitude: end.latitude,
+          longitude: end.longitude,
+        },
         stops: stops,
       });
     } catch (error) {
