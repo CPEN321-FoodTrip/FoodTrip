@@ -36,7 +36,7 @@ export class TripController {
     };
 
     const destinationURL = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(
-      origin
+      destination
     )}&format=json&limit=1`;
 
     const destinationResponse = await fetch(destinationURL);
