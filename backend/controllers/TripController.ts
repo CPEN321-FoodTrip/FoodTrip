@@ -1,6 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import axios from "axios";
-import polyline from "@mapbox/polyline";
+import {
+  Location,
+  fetchCitiesFromGeoNames,
+  generateRouteStops,
+  calculateDistance,
+} from "../helpers/TripHelpers";
 
 export class TripController {
   sayHello(req: Request, res: Response) {
@@ -15,53 +19,62 @@ export class TripController {
       return;
     }
 
-    // Get main route between two locations
-    const directionsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(
-      origin
-    )}&destination=${encodeURIComponent(destination)}&key=${
-      process.env.GOOGLE_MAPS_API_KEY
-    }`;
-    const directionsResponse = await axios.get(directionsUrl);
+    // Option 1: Load from downloaded file
+    // const cities = await loadGeoNamesData('./cities15000.txt');
 
-    if (directionsResponse.data.status !== "OK") {
-      res.status(400).json({ error: directionsResponse.data.error_message });
+    // Option 2: Fetch from GeoNames API
+    const cities = await fetchCitiesFromGeoNames(
+      process.env.GEONAMES_USERNAME || "",
+      50000
+    );
+
+    if (cities.length === 0) {
+      console.error("No cities data available");
       return;
     }
 
-    const route = directionsResponse.data.routes[0];
-    const pathCoordinates = polyline.decode(route.overview_polyline.points);
+    const start: Location = {
+      name: "London",
+      countryCode: "UK",
+      latitude: 51.5072,
+      longitude: 0.1276,
+      population: 8600000,
+    };
 
-    // Determine evenly spaced stop locations
-    const stepSize = Math.floor(pathCoordinates.length / (numStops + 1));
-    const stopCandidates = [];
+    const end: Location = {
+      name: "Warsaw",
+      countryCode: "PL",
+      latitude: 52.2297,
+      longitude: 21.0122,
+      population: 1800000,
+    };
 
-    for (let i = 1; i <= numStops; i++) {
-      stopCandidates.push(pathCoordinates[i * stepSize]);
+    try {
+      const stops = await generateRouteStops(start, end, 3, cities);
+
+      console.log(
+        `Route from ${start.name} to ${end.name} with ${stops.length} stops:`
+      );
+      console.log(
+        `Total distance: ${calculateDistance(start, end).toFixed(2)} km`
+      );
+
+      console.log(`Start: ${start.name}, ${start.countryCode}`);
+      stops.forEach((stop, index) => {
+        console.log(
+          `Stop ${index + 1}: ${stop.location.name}, ${
+            stop.location.countryCode
+          } - ${stop.distanceFromStart.toFixed(2)} km from start`
+        );
+      });
+      console.log(`End: ${end.name}, ${end.countryCode}`);
+      res.json({
+        start_location: start.name,
+        end_location: end.name,
+        stops: stops,
+      });
+    } catch (error) {
+      console.error("Error generating route:", error);
     }
-
-    // Find places near those stop candidates
-    const stops = [];
-    for (const [lat, lng] of stopCandidates) {
-      const placesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=10000&key=${process.env.GOOGLE_MAPS_API_KEY}`;
-      const placesResponse = await axios.get(placesUrl);
-
-      if (
-        placesResponse.data.status === "OK" &&
-        placesResponse.data.results.length > 0
-      ) {
-        const place = placesResponse.data.results[0]; // Pick first place found
-        stops.push({
-          name: place.name,
-          location: place.geometry.location,
-        });
-      }
-    }
-
-    res.json({
-      start_location: route.legs[0].start_location,
-      end_location: route.legs[route.legs.length - 1].end_location,
-      stops,
-      path: pathCoordinates.map(([lat, lng]) => ({ lat, lng })),
-    });
   }
 }
