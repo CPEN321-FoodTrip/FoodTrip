@@ -1,15 +1,9 @@
 import { body } from "express-validator";
-import { TripController } from "../controllers/TripController";
+import { RouteController } from "../controllers/RouteController";
 
-const controller = new TripController();
+const controller = new RouteController();
 
-export const TripRoutes = [
-  {
-    method: "get",
-    route: "/",
-    action: controller.sayHello,
-    validation: [],
-  },
+export const RouteRoutes = [
   {
     method: "post",
     route: "/generate-route",
