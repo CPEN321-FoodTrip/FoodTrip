@@ -48,8 +48,8 @@ interface RouteStop {
   cumulativeDistance: number;
 }
 
-// import data when server starts (if needed)
-export async function initializeDatabase() {
+// import geonames data when server starts (if needed)
+export async function initializeGeoNamesDatabase() {
   const db = client.db(DB_NAME);
   const collection = db.collection(COLLECTION_NAME);
   const count = await collection.countDocuments();
