@@ -4,7 +4,7 @@ import { client } from "../services";
 
 const DB_NAME = "geonames";
 const COLLECTION_NAME = "cities";
-const GEONAMES_FILE = "./cities15000.txt";
+const GEONAMES_FILE = "data/cities15000.txt";
 
 interface GeoNameCity {
   geonameId: number;
