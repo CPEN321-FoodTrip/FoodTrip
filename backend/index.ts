@@ -3,6 +3,7 @@ import { client } from "./services";
 import { TripRoutes } from "./routes/TripRoutes";
 import { validationResult } from "express-validator";
 import morgan from "morgan";
+import { initializeDatabase } from "./helpers/TripHelpers";
 
 const app = express();
 
@@ -31,8 +32,10 @@ TripRoutes.forEach((route) => {
 
 client
   .connect()
-  .then(() => {
+  .then(async () => {
     console.log("Connected to MongoDB");
+
+    await initializeDatabase();
 
     app.listen(process.env.PORT, () => {
       console.log("Server is running on port " + process.env.PORT);
