@@ -22,13 +22,15 @@
         </activity>
         <activity
             android:name=".PastTripActivity"
-            android:exported="false" />
+            android:exported="false">
+        </activity>
         <activity
             android:name=".TripActivity"
             android:exported="false" />
         <activity
             android:name=".AccountActivity"
-            android:exported="false" />
+            android:exported="false">
+        </activity>
         <activity
             android:name=".LoginActivity"
             android:exported="false" />
