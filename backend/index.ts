@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from "express";
 import { client } from "./services";
 import { TripRoutes } from "./routes/TripRoutes";
+import { DiscountRoutes } from "./routes/DiscountRoutes";
 import { validationResult } from "express-validator";
 import morgan from "morgan";
 import { initializeDatabase } from "./helpers/TripHelpers";
@@ -10,7 +11,9 @@ const app = express();
 app.use(express.json());
 app.use(morgan("tiny"));
 
-TripRoutes.forEach((route) => {
+const Routes = [...TripRoutes, ...DiscountRoutes];
+
+Routes.forEach((route) => {
   (app as any)[route.method](
     route.route,
     route.validation,
