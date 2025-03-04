@@ -206,7 +206,6 @@ function interpolatePoint(
   };
 }
 
-// find all cities along a route between two locations that are within a certain distance
 // generate stops along route between start and end locations
 export async function generateRouteStops(
   start: Location,
@@ -233,7 +232,7 @@ export async function generateRouteStops(
           },
         },
         population: { $gte: MIN_POPULATION },
-        // ignore start and end cities
+        // ignore start/end cities and any existing stops
         $nor: [
           {
             name: start.name,
@@ -241,6 +240,7 @@ export async function generateRouteStops(
           {
             name: end.name,
           },
+          ...stops.map((stop) => ({ name: stop.location.name })),
         ],
       })
       .sort({ population: -1 }) // sort based on population
@@ -286,9 +286,7 @@ export async function generateRouteStops(
       });
     } else {
       console.log(
-        `No cities found for segment ${i} at ${
-          segmentPercentage * 100
-        }% of the route`
+        `No cities found for segment ${i} at ${segmentPercentage * 100}`
       );
     }
   }
