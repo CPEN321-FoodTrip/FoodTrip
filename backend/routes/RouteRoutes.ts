@@ -26,4 +26,10 @@ export const RouteRoutes = [
     action: controller.getRoutes,
     validation: [],
   },
+  {
+    method: "delete",
+    route: "/delete-route",
+    action: controller.deleteRoute,
+    validation: [],
+  },
 ];

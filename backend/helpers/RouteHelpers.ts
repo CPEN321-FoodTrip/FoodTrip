@@ -326,3 +326,13 @@ export async function getRoutesFromDatabase(userID: string): Promise<{}[]> {
   // add tripID to each route and remove _id and stops
   return routes.map(({ _id, stops, ...rest }) => ({ ...rest, tripID: _id }));
 }
+
+// delete route from MongoDB by ID
+export async function deleteRouteFromDatabase(tripID: string): Promise<number> {
+  const db = client.db(ROUTES_DB_NAME);
+  const collection = db.collection(ROUTES_COLLECTION_NAME);
+
+  const result = await collection.deleteOne({ _id: new ObjectId(tripID) });
+
+  return result.deletedCount;
+}
