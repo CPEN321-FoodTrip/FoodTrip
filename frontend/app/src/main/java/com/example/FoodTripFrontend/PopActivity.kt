@@ -28,8 +28,24 @@ class PopActivity : Activity() {
 
         window.setLayout((width*.8).toInt(), (height*.7).toInt())
 
+        val names = intent.getStringArrayListExtra("names")
+        val prices = intent.getIntegerArrayListExtra("prices")
+
         val discountList = findViewById<LinearLayout>(R.id.discount_list_layout)
-        val sampleStr = "discount"
+
+        if (names != null && prices != null) {
+            if (prices.count() == names.count()) {
+                for (i in 0..(names.count()-1)) {
+                    val newTextView = TextView(this)
+                    newTextView.textSize = 25f
+                    newTextView.text = "${names[i]} $${prices[i]}"
+
+                    discountList.addView(newTextView);
+                }
+            }
+        }
+
+        /*val sampleStr = "discount"
 
         for (num in 1..30) {
             val newTextView = TextView(this)
@@ -38,6 +54,6 @@ class PopActivity : Activity() {
             newTextView.text = str
 
             discountList.addView(newTextView);
-        }
+        }*/
     }
 }
