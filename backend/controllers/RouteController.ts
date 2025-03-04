@@ -31,7 +31,7 @@ export class RouteController {
     const originCity = originData[0];
 
     const start: Location = {
-      name: originCity.name,
+      name: origin,
       latitude: parseFloat(originCity.lat),
       longitude: parseFloat(originCity.lon),
       population: 0, // not used for start location
@@ -52,7 +52,7 @@ export class RouteController {
     const destinationCity = destinationData[0];
 
     const end: Location = {
-      name: destinationCity.name,
+      name: destination,
       latitude: parseFloat(destinationCity.lat),
       longitude: parseFloat(destinationCity.lon),
       population: 0, // not used for end location
