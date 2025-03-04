@@ -16,7 +16,7 @@ export const DiscountRoutes = [
     action: controller.addDiscount,
     validation: [
       body("storeID").exists().isString(),
-      body("groceryStore").exists().isString(),
+      body("storeName").exists().isString(),
       body("ingredient").exists().isString(),
       body("price").exists().isNumeric(),
     ],
