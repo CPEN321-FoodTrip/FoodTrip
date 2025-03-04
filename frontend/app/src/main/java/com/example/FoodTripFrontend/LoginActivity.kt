@@ -45,14 +45,10 @@ class LoginActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.sign_in_button_user).setOnClickListener() {
             signInUsers("user")
-            val intent =Intent(this, MainActivity::class.java)
-            startActivity(intent)
         }
 
         findViewById<Button>(R.id.sign_in_button_admin).setOnClickListener() {
             signInUsers("admin")
-            val intent =Intent(this, MainActivity::class.java)
-            startActivity(intent)
         }
 
     }
@@ -84,7 +80,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    fun handleSignIn(result: GetCredentialResponse, accountType: String) {
+    private fun handleSignIn(result: GetCredentialResponse, accountType: String) {
         // Handle the successfully returned credential.
         val credential = result.credential
 
@@ -131,9 +127,12 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun updateWelcomeMessage(name: String) {
-        val intent = Intent(this, LoginActivity::class.java)
+        Toast.makeText(this, "Welcome $name", Toast.LENGTH_SHORT).show()
+
+        val intent = Intent(this, MainActivity::class.java)
         intent.putExtra("USER_NAME", name)
         startActivity(intent)
+        finish()
     }
 
     private fun generateHashedNonce(): String {
