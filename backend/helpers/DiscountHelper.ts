@@ -37,7 +37,7 @@ export async function addDiscountToDatabase(
 // delete a discount from the database
 export async function deleteDiscountFromDatabase(
   discountID: string
-): Promise<{}> {
+): Promise<number> {
   const result = await client
     .db(DB_NAME)
     .collection(COLLECTION_NAME)

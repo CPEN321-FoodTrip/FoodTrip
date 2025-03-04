@@ -5,6 +5,7 @@ import {
   getRouteFromDatabase,
   saveRouteToDatabase,
   getRoutesFromDatabase,
+  deleteRouteFromDatabase,
 } from "../helpers/RouteHelpers";
 
 export class RouteController {
@@ -93,7 +94,6 @@ export class RouteController {
       return;
     }
 
-    // get route information from database
     const route = await getRouteFromDatabase(tripID);
     if (!route) {
       res.status(404).json({ error: "Route not found" });
@@ -114,5 +114,23 @@ export class RouteController {
 
     const routes = await getRoutesFromDatabase(userID);
     res.json(routes);
+  }
+
+  // delete route
+  async deleteRoute(req: Request, res: Response, next: NextFunction) {
+    const tripID = req.query.tripID as string;
+
+    if (!tripID) {
+      res.status(400).json({ error: "Invalid request parameters" });
+      return;
+    }
+
+    const result = await deleteRouteFromDatabase(tripID);
+    if (!result) {
+      res.status(404).json({ error: "Route not found" });
+      return;
+    }
+
+    res.json({ success: true });
   }
 }
