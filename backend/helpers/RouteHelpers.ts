@@ -10,7 +10,7 @@ const GEONAMES_FILE = "data/cities15000.txt";
 
 // constants for route generation
 const MIN_POPULATION = 50000;
-const MAX_DISTANCE_FROM_ROUTE = 50000; // meters
+const SEARCH_RADIUS = 1000 * 1000; // meters
 
 // constants for routes saved in MongoDB
 const ROUTES_DB_NAME = "route_data";
@@ -54,6 +54,7 @@ interface RouteStop {
   location: Location;
   distanceFromStart: number;
   cumulativeDistance: number;
+  segmentPercentage: number;
 }
 
 // import geonames data when server starts (if needed)
@@ -135,57 +136,6 @@ async function importGeoNamesToMongoDB(): Promise<void> {
   await collection.createIndex({ countryCode: 1 }); // allow filtering by country code
 }
 
-// find all cities along a route between two locations that are within a certain distance
-async function findCitiesNearRoute(
-  start: Location,
-  end: Location
-): Promise<Location[]> {
-  const db = client.db(CITIES_DB_NAME);
-  const collection = db.collection<GeoNameCity>(CITIES_COLLECTION_NAME);
-
-  // generate waypoints along the route (TODO: improve this with interpolation)
-  const waypoints = [
-    [start.longitude, start.latitude],
-    [end.longitude, end.latitude],
-  ];
-
-  const allCities = new Set<string>();
-  const uniqueCities: Location[] = [];
-
-  for (const coords of waypoints) {
-    const point = { type: "Point", coordinates: coords };
-
-    const cities = await collection
-      .find({
-        location: {
-          $near: {
-            $geometry: point,
-            $maxDistance: MAX_DISTANCE_FROM_ROUTE, // meters
-          },
-        },
-        population: { $gte: MIN_POPULATION },
-      })
-      .toArray();
-
-    for (const city of cities) {
-      if (!allCities.has(city.name)) {
-        allCities.add(city.name);
-        uniqueCities.push({
-          name: city.name,
-          latitude: city.latitude,
-          longitude: city.longitude,
-          population: city.population,
-        });
-      }
-    }
-  }
-
-  // remove start and end cities
-  return uniqueCities.filter(
-    (city) => !(city.name === start.name) && !(city.name === end.name)
-  );
-}
-
 // calculate distance between two points using Haversine formula
 // https://en.wikipedia.org/wiki/Haversine_formula
 export function calculateDistance(point1: Location, point2: Location): number {
@@ -208,64 +158,140 @@ function toRadians(degrees: number): number {
   return degrees * (Math.PI / 180);
 }
 
+// calculate a point at a given percentage along the path
+// based on great-circle interpolation: https://en.wikipedia.org/wiki/Great-circle_distance
+function interpolatePoint(
+  start: Location,
+  end: Location,
+  fraction: number
+): { latitude: number; longitude: number } {
+  const lat1 = toRadians(start.latitude);
+  const lon1 = toRadians(start.longitude);
+  const lat2 = toRadians(end.latitude);
+  const lon2 = toRadians(end.longitude);
+
+  // angular distance between points (using haversine formula: https://en.wikipedia.org/wiki/Haversine_formula)
+  const d =
+    2 *
+    Math.asin(
+      Math.sqrt(
+        Math.pow(Math.sin((lat2 - lat1) / 2), 2) +
+          Math.cos(lat1) *
+            Math.cos(lat2) *
+            Math.pow(Math.sin((lon2 - lon1) / 2), 2)
+      )
+    );
+
+  // if distance is zero, return start point
+  if (Math.abs(d) < 1e-10) {
+    return { latitude: start.latitude, longitude: start.longitude };
+  }
+
+  // calculate stop point
+  const A = Math.sin((1 - fraction) * d) / Math.sin(d);
+  const B = Math.sin(fraction * d) / Math.sin(d);
+
+  const x =
+    A * Math.cos(lat1) * Math.cos(lon1) + B * Math.cos(lat2) * Math.cos(lon2);
+  const y =
+    A * Math.cos(lat1) * Math.sin(lon1) + B * Math.cos(lat2) * Math.sin(lon2);
+  const z = A * Math.sin(lat1) + B * Math.sin(lat2);
+
+  const lat = Math.atan2(z, Math.sqrt(x * x + y * y));
+  const lon = Math.atan2(y, x);
+
+  return {
+    latitude: (lat * 180) / Math.PI,
+    longitude: (lon * 180) / Math.PI,
+  };
+}
+
 // generate stops along route between start and end locations
 export async function generateRouteStops(
   start: Location,
   end: Location,
   numberOfStops: number
 ): Promise<RouteStop[]> {
-  const eligibleCities = await findCitiesNearRoute(start, end);
-
-  const totalDistance = calculateDistance(start, end);
-
-  // sort cities by distance from start
-  const sortedCities = [...eligibleCities].sort((a, b) => {
-    const distanceA = calculateDistance(start, a);
-    const distanceB = calculateDistance(start, b);
-    return distanceA - distanceB;
-  });
-
-  // ideal length between stops
-  const segmentLength = totalDistance / (numberOfStops + 1);
-
   const stops: RouteStop[] = [];
+  const db = client.db(CITIES_DB_NAME);
+  const collection = db.collection(CITIES_COLLECTION_NAME);
+
   for (let i = 1; i <= numberOfStops; i++) {
-    const idealDistance = i * segmentLength;
+    const segmentPercentage = i / (numberOfStops + 1);
+    const idealPoint = interpolatePoint(start, end, segmentPercentage);
 
-    // find city closest to ideal distance
-    let bestCity: Location | null = null;
-    let minDiff = Infinity;
+    const nearbyCities = await collection
+      .find({
+        location: {
+          $nearSphere: {
+            $geometry: {
+              type: "Point",
+              coordinates: [idealPoint.longitude, idealPoint.latitude],
+            },
+            $maxDistance: SEARCH_RADIUS,
+          },
+        },
+        population: { $gte: MIN_POPULATION },
+        // ignore start/end cities and any existing stops
+        $nor: [
+          {
+            name: start.name,
+          },
+          {
+            name: end.name,
+          },
+          ...stops.map((stop) => ({ name: stop.location.name })),
+        ],
+      })
+      .sort({ population: -1 }) // sort based on population
+      .limit(10)
+      .toArray();
 
-    for (const city of sortedCities) {
-      const cityDistance = calculateDistance(start, city);
-      const diff = Math.abs(cityDistance - idealDistance);
+    // choose city closest to ideal point
+    if (nearbyCities.length > 0) {
+      const citiesWithDistance = nearbyCities.map((city) => {
+        const location: Location = {
+          name: city.name,
+          latitude: city.latitude,
+          longitude: city.longitude,
+          population: city.population,
+        };
 
-      if (diff < minDiff) {
-        minDiff = diff;
-        bestCity = city;
-      }
-    }
+        const distanceFromIdealPoint = calculateDistance(
+          { ...location, name: "", population: 0 },
+          { ...idealPoint, name: "", population: 0 }
+        );
 
-    if (bestCity) {
-      const distanceFromStart = calculateDistance(start, bestCity);
+        const distanceFromStart = calculateDistance(start, location);
 
-      // remove selected city to prevent duplicates
-      const index = sortedCities.findIndex(
-        (city) => city.name === bestCity!.name
+        return {
+          location,
+          distanceFromIdealPoint,
+          distanceFromStart,
+        };
+      });
+
+      citiesWithDistance.sort(
+        (a, b) => a.distanceFromIdealPoint - b.distanceFromIdealPoint
       );
-      if (index !== -1) {
-        sortedCities.splice(index, 1);
-      }
+
+      // closest city to ideal point
+      const bestCity = citiesWithDistance[0];
 
       stops.push({
-        location: bestCity,
-        distanceFromStart,
-        cumulativeDistance: distanceFromStart,
+        location: bestCity.location,
+        distanceFromStart: bestCity.distanceFromStart,
+        cumulativeDistance: bestCity.distanceFromStart,
+        segmentPercentage: segmentPercentage * 100,
       });
+    } else {
+      console.log(
+        `No cities found for segment ${i} at ${segmentPercentage * 100}`
+      );
     }
   }
 
-  // sort stops by distance from start
+  // sort by distance from start
   return stops.sort((a, b) => a.distanceFromStart - b.distanceFromStart);
 }
 

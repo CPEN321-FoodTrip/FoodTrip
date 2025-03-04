@@ -31,7 +31,7 @@ export class RouteController {
     const originCity = originData[0];
 
     const start: Location = {
-      name: originCity.name,
+      name: origin,
       latitude: parseFloat(originCity.lat),
       longitude: parseFloat(originCity.lon),
       population: 0, // not used for start location
@@ -52,7 +52,7 @@ export class RouteController {
     const destinationCity = destinationData[0];
 
     const end: Location = {
-      name: destinationCity.name,
+      name: destination,
       latitude: parseFloat(destinationCity.lat),
       longitude: parseFloat(destinationCity.lon),
       population: 0, // not used for end location
@@ -62,12 +62,12 @@ export class RouteController {
       const stops = await generateRouteStops(start, end, numStops);
       const route = {
         start_location: {
-          name: start.name,
+          name: origin,
           latitude: start.latitude,
           longitude: start.longitude,
         },
         end_location: {
-          name: end.name,
+          name: destination,
           latitude: end.latitude,
           longitude: end.longitude,
         },
@@ -75,7 +75,7 @@ export class RouteController {
       };
 
       const tripID = await saveRouteToDatabase(userID, route);
-      const response = { ...route, tripID };
+      const response = { tripID, ...route };
 
       res.json(response);
     } catch (error) {
