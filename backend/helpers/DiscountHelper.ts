@@ -1,22 +1,54 @@
+import { ObjectId } from "mongodb";
 import { client } from "../services";
 
 const DB_NAME = "discounts";
 const COLLECTION_NAME = "discounts";
 
-interface Discount {
+export interface Discount {
+  storeID: string;
   groceryStore: string;
   ingredient: string;
   price: number;
 }
 
-export class DiscountHelper {
-  public static async getDiscounts() {
-    const db = client.db(DB_NAME);
-    return await db.collection(COLLECTION_NAME).find().toArray();
-  }
+export async function getDiscountsFromDatabase(storeID: string): Promise<{}> {
+  const discounts = await client
+    .db(DB_NAME)
+    .collection(COLLECTION_NAME)
+    .find({ storeID: storeID })
+    .toArray();
 
-  public static async storeDiscount(discount: Discount) {
-    const db = client.db(DB_NAME);
-    return await db.collection(COLLECTION_NAME).insertOne(discount);
-  }
+  return discounts;
+}
+
+export async function addDiscountToDatabase(
+  discount: Discount
+): Promise<string> {
+  const result = await client
+    .db(DB_NAME)
+    .collection(COLLECTION_NAME)
+    .insertOne(discount);
+
+  return result.insertedId.toString();
+}
+
+export async function deleteDiscountFromDatabase(
+  discountID: string
+): Promise<{}> {
+  const result = await client
+    .db(DB_NAME)
+    .collection(COLLECTION_NAME)
+    .deleteOne({ _id: new ObjectId(discountID) });
+
+  return result.deletedCount;
+}
+
+export async function getAllDiscountsFromDatabase(): Promise<{}> {
+  const discounts = await client
+    .db(DB_NAME)
+    .collection(COLLECTION_NAME)
+    .find({})
+    .toArray();
+
+  return discounts;
 }
