@@ -33,8 +33,8 @@
         android:id="@+id/ManageAccount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="28dp"
-        android:layout_marginTop="564dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="544dp"
         android:text="Manage Account"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ManageTrip" />
