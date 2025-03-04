@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -7,6 +9,10 @@ android {
     namespace = "com.example.FoodTripFrontend"
     compileSdk = 35
 
+    val file = rootProject.file("local.properties")
+    val properties = Properties()
+    properties.load(file.inputStream())
+
     defaultConfig {
         applicationId = "com.example.FoodTripFrontend"
         minSdk = 31
@@ -15,6 +21,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "WEB_CLIENT_ID", "\"${properties.getProperty("WEB_CLIENT_ID")}\"")
+        buildConfigField("String", "SERVER_URL", "\"${properties.getProperty("SERVER_URL")}\"")
     }
 
     buildTypes {
@@ -32,6 +40,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+    }
+    buildFeatures {
+        buildConfig = true
     }
 }
 
