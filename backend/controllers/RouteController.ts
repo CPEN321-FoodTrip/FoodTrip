@@ -62,12 +62,12 @@ export class RouteController {
       const stops = await generateRouteStops(start, end, numStops);
       const route = {
         start_location: {
-          name: start.name,
+          name: origin,
           latitude: start.latitude,
           longitude: start.longitude,
         },
         end_location: {
-          name: end.name,
+          name: destination,
           latitude: end.latitude,
           longitude: end.longitude,
         },
@@ -75,7 +75,7 @@ export class RouteController {
       };
 
       const tripID = await saveRouteToDatabase(userID, route);
-      const response = { ...route, tripID };
+      const response = { tripID, ...route };
 
       res.json(response);
     } catch (error) {
