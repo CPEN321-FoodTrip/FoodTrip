@@ -49,8 +49,11 @@ class TripActivity : AppCompatActivity() {
 
         var isValid = true
 
+        //Checks if each input is given a valid response, will only make a call to create a route
+        //if all fields are valid, otherwise it leave a Toast message and allows user to resubmit
         GlobalScope.launch(Dispatchers.Main) {
 
+            //Check if starting city is valid
             if (userStartInput.isNotEmpty() && !checkExistence(userStartInput)) {
                 isValid = false
                 Toast.makeText(this@TripActivity, "Invalid Start City", Toast.LENGTH_SHORT).show()
@@ -70,6 +73,8 @@ class TripActivity : AppCompatActivity() {
 
             // If all fields are valid, proceed to the next activity
             if (isValid) {
+
+
                 val intent = Intent(this@TripActivity, MainActivity::class.java)
                 startActivity(intent)
             }
@@ -77,6 +82,10 @@ class TripActivity : AppCompatActivity() {
 
     }
 
+
+    //Asynchronous function that uses an external api to check if the given city name is valid
+    //The city name is given to a call to the api, where it then returns a string for valid cities
+    //and an empty string for invalid cities.
     private suspend fun checkExistence(cityName: String): Boolean {
         return withContext(Dispatchers.IO) {
             try {

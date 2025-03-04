@@ -8,4 +8,5 @@
     <string name="change_button_text">Change</string>
     <string name="account_str_1_1">Name:</string>
     <string name="account_str_example">(something)</string>
+    <string name="maps_api_key">(something)</string>
 </resources>
