@@ -6,6 +6,7 @@ import {
   getAllDiscountsFromDatabase,
   getDiscountsFromDatabase,
 } from "../helpers/DiscountHelper";
+import admin from "../firebase";
 
 export class DiscountController {
   // store can access all its discounts
@@ -29,6 +30,16 @@ export class DiscountController {
       res.status(400).json({ error: "Invalid request parameters" });
       return;
     }
+
+    // firebase notification for new discount
+    const message = {
+      notification: {
+        title: "New Discount Available!",
+        body: `Get ${discount.ingredient} for only $${discount.price}% at ${discount.storeName}!`,
+      },
+      topic: "discounts",
+    };
+    await admin.messaging().send(message);
 
     const discountID = await addDiscountToDatabase(discount);
     res.json({ discountID: discountID });
