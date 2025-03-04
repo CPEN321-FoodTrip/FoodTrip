@@ -1,11 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { Location, generateRouteStops } from "../helpers/TripHelpers";
+import { Location, generateRouteStops } from "../helpers/RouteHelpers";
 
-export class TripController {
-  sayHello(req: Request, res: Response) {
-    res.send("Hello World!");
-  }
-
+export class RouteController {
   async generateRoute(req: Request, res: Response, next: NextFunction) {
     const { origin, destination, numStops } = req.body;
 
