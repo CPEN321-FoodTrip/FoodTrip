@@ -58,7 +58,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.googleid)
     implementation(libs.androidx.credentials)
     implementation(libs.googleid)
     implementation(libs.play.services.maps)
