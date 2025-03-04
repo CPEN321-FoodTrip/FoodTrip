@@ -14,4 +14,16 @@ export const RouteRoutes = [
       body("numStops").exists().isInt(),
     ],
   },
+  {
+    method: "get",
+    route: "/get-route",
+    action: controller.getRoute,
+    validation: [],
+  },
+  {
+    method: "get",
+    route: "/get-routes",
+    action: controller.getRoutes,
+    validation: [],
+  },
 ];

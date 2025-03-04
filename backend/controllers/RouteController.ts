@@ -1,11 +1,17 @@
 import { NextFunction, Request, Response } from "express";
-import { Location, generateRouteStops } from "../helpers/RouteHelpers";
+import {
+  Location,
+  generateRouteStops,
+  getRouteFromDatabase,
+  saveRouteToDatabase,
+  getRoutesFromDatabase,
+} from "../helpers/RouteHelpers";
 
 export class RouteController {
   async generateRoute(req: Request, res: Response, next: NextFunction) {
-    const { origin, destination, numStops } = req.body;
+    const { userID, origin, destination, numStops } = req.body;
 
-    if (!origin || !destination || !numStops || numStops < 1) {
+    if (!userID || !origin || !destination || !numStops || numStops < 1) {
       res.status(400).json({ error: "Invalid request parameters" });
       return;
     }
@@ -54,8 +60,7 @@ export class RouteController {
 
     try {
       const stops = await generateRouteStops(start, end, numStops);
-
-      res.json({
+      const route = {
         start_location: {
           name: start.name,
           latitude: start.latitude,
@@ -67,10 +72,47 @@ export class RouteController {
           longitude: end.longitude,
         },
         stops: stops,
-      });
+      };
+
+      const tripID = await saveRouteToDatabase(userID, route);
+      const response = { ...route, tripID };
+
+      res.json(response);
     } catch (error) {
       console.error("Error generating route:", error);
       res.status(500).json({ error: "Error generating route" });
     }
+  }
+
+  // get route information
+  async getRoute(req: Request, res: Response, next: NextFunction) {
+    const tripID = req.query.tripID as string;
+
+    if (!tripID) {
+      res.status(400).json({ error: "Invalid request parameters" });
+      return;
+    }
+
+    // get route information from database
+    const route = await getRouteFromDatabase(tripID);
+    if (!route) {
+      res.status(404).json({ error: "Route not found" });
+      return;
+    }
+
+    res.json(route);
+  }
+
+  // get all routes for user
+  async getRoutes(req: Request, res: Response, next: NextFunction) {
+    const userID = req.query.userID as string;
+
+    if (!userID) {
+      res.status(400).json({ error: "Invalid request parameters" });
+      return;
+    }
+
+    const routes = await getRoutesFromDatabase(userID);
+    res.json(routes);
   }
 }
