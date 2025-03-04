@@ -145,6 +145,10 @@ class GroceryStoreActivity : AppCompatActivity() {
         })
     }
 
+    private fun deleteDiscount(discountID: String) {
+
+    }
+
     private fun processDiscount(discounts: List<DiscountItem>) {
         if (discounts.isEmpty()) {
             // TODO: indicate no discounts posted
@@ -159,20 +163,18 @@ class GroceryStoreActivity : AppCompatActivity() {
     private fun showDiscount(discounts: List<DiscountItem>) {
         discountList.removeAllViews()
 
-        val names = arrayListOf<String>()
-        val prices = arrayListOf<Int>()
+        for (i in 0..(discounts.count()-1)) {
+            val itemView = TextView(this)
 
-        for (discount in discounts) {
-            names.add(discount.ingredient)
-            prices.add(discount.price)
-        }
+            val discount = discounts[i]
+            itemView.textSize = 25f
+            itemView.text = "${discount.ingredient}: $${discount.price}"
 
-        for (i in 0..(names.count()-1)) {
-            val newTextView = TextView(this)
-            newTextView.textSize = 25f
-            newTextView.text = "${names[i]} $${prices[i]}"
+            itemView.setOnClickListener {
+                Log.d(TAG, "item $i (ID:${discount.discountID}) is clicked")
+            }
 
-            discountList.addView(newTextView)
+            discountList.addView(itemView)
         }
     }
 }
