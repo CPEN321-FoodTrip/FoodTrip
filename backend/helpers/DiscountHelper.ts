@@ -6,11 +6,12 @@ const COLLECTION_NAME = "discounts";
 
 export interface Discount {
   storeID: string;
-  groceryStore: string;
+  groceryStore: string; // store name
   ingredient: string;
   price: number;
 }
 
+// get all discounts for a store
 export async function getDiscountsFromDatabase(storeID: string): Promise<{}> {
   const discounts = await client
     .db(DB_NAME)
@@ -21,6 +22,7 @@ export async function getDiscountsFromDatabase(storeID: string): Promise<{}> {
   return discounts.map(({ _id, ...rest }) => ({ discountID: _id, ...rest }));
 }
 
+// add a discount to the database
 export async function addDiscountToDatabase(
   discount: Discount
 ): Promise<string> {
@@ -32,6 +34,7 @@ export async function addDiscountToDatabase(
   return result.insertedId.toString();
 }
 
+// delete a discount from the database
 export async function deleteDiscountFromDatabase(
   discountID: string
 ): Promise<{}> {
@@ -43,6 +46,7 @@ export async function deleteDiscountFromDatabase(
   return result.deletedCount;
 }
 
+// get all discounts from the database
 export async function getAllDiscountsFromDatabase(): Promise<{}> {
   const discounts = await client
     .db(DB_NAME)
