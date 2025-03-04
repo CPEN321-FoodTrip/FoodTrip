@@ -1,5 +1,11 @@
 <resources>
     <string name="app_name">My Application</string>
     <string name="grocery_title_text">Grocery</string>
+    <string name="past_title_text">Past Trip</string>
+    <string name="account_title_text">Account</string>
     <string name="back_button_text">Back</string>
+    <string name="save_button_text">Save</string>
+    <string name="change_button_text">Change</string>
+    <string name="account_str_1_1">Name:</string>
+    <string name="account_str_example">(something)</string>
 </resources>
