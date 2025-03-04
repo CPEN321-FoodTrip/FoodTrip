@@ -18,7 +18,7 @@ export async function getDiscountsFromDatabase(storeID: string): Promise<{}> {
     .find({ storeID: storeID })
     .toArray();
 
-  return discounts;
+  return discounts.map(({ _id, ...rest }) => ({ discountID: _id, ...rest }));
 }
 
 export async function addDiscountToDatabase(
