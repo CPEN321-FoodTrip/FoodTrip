@@ -1,3 +1,4 @@
+import { body } from "express-validator";
 import { DiscountController } from "../controllers/DiscountController";
 
 const controller = new DiscountController();
@@ -5,25 +6,30 @@ const controller = new DiscountController();
 export const DiscountRoutes = [
   {
     method: "get",
-    route: "/discounts",
+    route: "/discount",
     action: controller.getDiscounts,
     validation: [],
   },
   {
     method: "post",
-    route: "/discounts",
+    route: "/discount",
     action: controller.addDiscount,
-    validation: [],
+    validation: [
+      body("storeID").exists().isString(),
+      body("groceryStore").exists().isString(),
+      body("ingredient").exists().isString(),
+      body("price").exists().isNumeric(),
+    ],
   },
   {
     method: "delete",
-    route: "/discounts",
+    route: "/discount",
     action: controller.deleteDiscount,
     validation: [],
   },
   {
     method: "get",
-    route: "/discounts/all",
+    route: "/discount/all",
     action: controller.getAllDiscounts,
     validation: [],
   },
