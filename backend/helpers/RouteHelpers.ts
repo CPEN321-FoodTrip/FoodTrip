@@ -136,8 +136,79 @@ async function importGeoNamesToMongoDB(): Promise<void> {
   await collection.createIndex({ countryCode: 1 }); // allow filtering by country code
 }
 
+// calculate distance between two points using Haversine formula
+// https://en.wikipedia.org/wiki/Haversine_formula
+export function calculateDistance(point1: Location, point2: Location): number {
+  const R = 6371; // Earth radius in km
+  const dLat = toRadians(point2.latitude - point1.latitude);
+  const dLon = toRadians(point2.longitude - point1.longitude);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(point1.latitude)) *
+      Math.cos(toRadians(point2.latitude)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function toRadians(degrees: number): number {
+  return degrees * (Math.PI / 180);
+}
+
+// calculate a point at a given percentage along the path
+// based on great-circle interpolation: https://en.wikipedia.org/wiki/Great-circle_distance
+function interpolatePoint(
+  start: Location,
+  end: Location,
+  fraction: number
+): { latitude: number; longitude: number } {
+  const lat1 = toRadians(start.latitude);
+  const lon1 = toRadians(start.longitude);
+  const lat2 = toRadians(end.latitude);
+  const lon2 = toRadians(end.longitude);
+
+  // angular distance between points (using haversine formula: https://en.wikipedia.org/wiki/Haversine_formula)
+  const d =
+    2 *
+    Math.asin(
+      Math.sqrt(
+        Math.pow(Math.sin((lat2 - lat1) / 2), 2) +
+          Math.cos(lat1) *
+            Math.cos(lat2) *
+            Math.pow(Math.sin((lon2 - lon1) / 2), 2)
+      )
+    );
+
+  // if distance is zero, return start point
+  if (Math.abs(d) < 1e-10) {
+    return { latitude: start.latitude, longitude: start.longitude };
+  }
+
+  // calculate stop point
+  const A = Math.sin((1 - fraction) * d) / Math.sin(d);
+  const B = Math.sin(fraction * d) / Math.sin(d);
+
+  const x =
+    A * Math.cos(lat1) * Math.cos(lon1) + B * Math.cos(lat2) * Math.cos(lon2);
+  const y =
+    A * Math.cos(lat1) * Math.sin(lon1) + B * Math.cos(lat2) * Math.sin(lon2);
+  const z = A * Math.sin(lat1) + B * Math.sin(lat2);
+
+  const lat = Math.atan2(z, Math.sqrt(x * x + y * y));
+  const lon = Math.atan2(y, x);
+
+  return {
+    latitude: (lat * 180) / Math.PI,
+    longitude: (lon * 180) / Math.PI,
+  };
+}
+
 // find all cities along a route between two locations that are within a certain distance
-async function findEvenlySpacedCities(
+// generate stops along route between start and end locations
+export async function generateRouteStops(
   start: Location,
   end: Location,
   numberOfStops: number
@@ -224,85 +295,6 @@ async function findEvenlySpacedCities(
 
   // sort by distance from start
   return stops.sort((a, b) => a.distanceFromStart - b.distanceFromStart);
-}
-
-// calculate distance between two points using Haversine formula
-// https://en.wikipedia.org/wiki/Haversine_formula
-export function calculateDistance(point1: Location, point2: Location): number {
-  const R = 6371; // Earth radius in km
-  const dLat = toRadians(point2.latitude - point1.latitude);
-  const dLon = toRadians(point2.longitude - point1.longitude);
-
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRadians(point1.latitude)) *
-      Math.cos(toRadians(point2.latitude)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
-function toRadians(degrees: number): number {
-  return degrees * (Math.PI / 180);
-}
-
-// calculate a point at a given percentage along the path
-// based on great-circle interpolation: https://en.wikipedia.org/wiki/Great-circle_distance
-function interpolatePoint(
-  start: Location,
-  end: Location,
-  fraction: number
-): { latitude: number; longitude: number } {
-  const lat1 = toRadians(start.latitude);
-  const lon1 = toRadians(start.longitude);
-  const lat2 = toRadians(end.latitude);
-  const lon2 = toRadians(end.longitude);
-
-  // angular distance between points (using haversine formula: https://en.wikipedia.org/wiki/Haversine_formula)
-  const d =
-    2 *
-    Math.asin(
-      Math.sqrt(
-        Math.pow(Math.sin((lat2 - lat1) / 2), 2) +
-          Math.cos(lat1) *
-            Math.cos(lat2) *
-            Math.pow(Math.sin((lon2 - lon1) / 2), 2)
-      )
-    );
-
-  // if distance is zero, return start point
-  if (Math.abs(d) < 1e-10) {
-    return { latitude: start.latitude, longitude: start.longitude };
-  }
-
-  // calculate stop point
-  const A = Math.sin((1 - fraction) * d) / Math.sin(d);
-  const B = Math.sin(fraction * d) / Math.sin(d);
-
-  const x =
-    A * Math.cos(lat1) * Math.cos(lon1) + B * Math.cos(lat2) * Math.cos(lon2);
-  const y =
-    A * Math.cos(lat1) * Math.sin(lon1) + B * Math.cos(lat2) * Math.sin(lon2);
-  const z = A * Math.sin(lat1) + B * Math.sin(lat2);
-
-  const lat = Math.atan2(z, Math.sqrt(x * x + y * y));
-  const lon = Math.atan2(y, x);
-
-  return {
-    latitude: (lat * 180) / Math.PI,
-    longitude: (lon * 180) / Math.PI,
-  };
-}
-
-// generate stops along route between start and end locations
-export async function generateRouteStops(
-  start: Location,
-  end: Location,
-  numberOfStops: number
-): Promise<RouteStop[]> {
-  return await findEvenlySpacedCities(start, end, numberOfStops);
 }
 
 // save route to MongoDB and return ID
