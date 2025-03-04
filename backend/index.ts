@@ -1,17 +1,17 @@
 import express, { NextFunction, Request, Response } from "express";
 import { client } from "./services";
-import { TripRoutes } from "./routes/TripRoutes";
+import { RouteRoutes } from "./routes/RouteRoutes";
 import { DiscountRoutes } from "./routes/DiscountRoutes";
 import { validationResult } from "express-validator";
 import morgan from "morgan";
-import { initializeDatabase } from "./helpers/TripHelpers";
+import { initializeGeoNamesDatabase } from "./helpers/RouteHelpers";
 
 const app = express();
 
 app.use(express.json());
 app.use(morgan("tiny"));
 
-const Routes = [...TripRoutes, ...DiscountRoutes];
+const Routes = [...RouteRoutes, ...DiscountRoutes];
 
 Routes.forEach((route) => {
   (app as any)[route.method](
@@ -38,7 +38,7 @@ client
   .then(async () => {
     console.log("Connected to MongoDB");
 
-    await initializeDatabase();
+    await initializeGeoNamesDatabase();
 
     app.listen(process.env.PORT, () => {
       console.log("Server is running on port " + process.env.PORT);
