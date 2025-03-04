@@ -54,5 +54,5 @@ export async function getAllDiscountsFromDatabase(): Promise<{}> {
     .find({})
     .toArray();
 
-  return discounts;
+  return discounts.map(({ _id, ...rest }) => ({ discountID: _id, ...rest }));
 }
