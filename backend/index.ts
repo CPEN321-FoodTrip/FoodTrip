@@ -16,7 +16,7 @@ const Routes = [...RouteRoutes, ...DiscountRoutes];
 Routes.forEach((route) => {
   (app as any)[route.method](
     route.route,
-    route.validation,
+    route.validation || [],
     async (req: Request, res: Response, next: NextFunction) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
