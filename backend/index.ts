@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from "express";
 import { client } from "./services";
 import { RouteRoutes } from "./routes/RouteRoutes";
+import { DiscountRoutes } from "./routes/DiscountRoutes";
 import { validationResult } from "express-validator";
 import morgan from "morgan";
 import { initializeGeoNamesDatabase } from "./helpers/RouteHelpers";
@@ -10,10 +11,12 @@ const app = express();
 app.use(express.json());
 app.use(morgan("tiny"));
 
-RouteRoutes.forEach((route) => {
+const Routes = [...RouteRoutes, ...DiscountRoutes];
+
+Routes.forEach((route) => {
   (app as any)[route.method](
     route.route,
-    route.validation,
+    route.validation || [],
     async (req: Request, res: Response, next: NextFunction) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
