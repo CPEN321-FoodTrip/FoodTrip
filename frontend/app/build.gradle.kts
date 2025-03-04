@@ -22,6 +22,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "WEB_CLIENT_ID", "\"${properties.getProperty("WEB_CLIENT_ID")}\"")
+        buildConfigField("String", "SERVER_URL", "\"${properties.getProperty("SERVER_URL")}\"")
     }
 
     buildTypes {

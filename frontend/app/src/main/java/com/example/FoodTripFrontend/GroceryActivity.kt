@@ -12,6 +12,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 class GroceryActivity : AppCompatActivity() {
 
@@ -51,7 +53,7 @@ class GroceryActivity : AppCompatActivity() {
                 startActivity(intent)
             }
 
-            recipeList.addView(newTextView);
+            recipeList.addView(newTextView)
         }
     }
 }
