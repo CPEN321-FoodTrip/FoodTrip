@@ -46,12 +46,16 @@ export async function deleteDiscountFromDatabase(
   return result.deletedCount;
 }
 
-// get all discounts from the database
-export async function getAllDiscountsFromDatabase(): Promise<{}> {
+// get all discounts from the database, with optional ingredient filter
+export async function getAllDiscountsFromDatabase(
+  ingredient: string = ""
+): Promise<{}> {
+  const query = ingredient ? { ingredient: ingredient } : {};
+
   const discounts = await client
     .db(DB_NAME)
     .collection(COLLECTION_NAME)
-    .find({})
+    .find(query)
     .toArray();
 
   return discounts.map(({ _id, ...rest }) => ({ discountID: _id, ...rest }));

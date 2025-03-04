@@ -52,9 +52,11 @@ export class DiscountController {
     res.json({ success: true });
   }
 
-  // for users, access all discounts
+  // for users, access all discounts, with optional ingredient filter
   async getAllDiscounts(req: Request, res: Response, next: NextFunction) {
-    const discounts = await getAllDiscountsFromDatabase();
+    const ingredient = (req.query.ingredient as string) || "";
+
+    const discounts = await getAllDiscountsFromDatabase(ingredient);
     res.json(discounts);
   }
 }
