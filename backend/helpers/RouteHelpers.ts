@@ -1,12 +1,20 @@
 import fs from "fs";
 import readline from "readline";
 import { client } from "../services";
+import { ObjectId } from "mongodb";
 
-const DB_NAME = "geonames";
-const COLLECTION_NAME = "cities";
+// constants for GeoNames data
+const CITIES_DB_NAME = "geonames";
+const CITIES_COLLECTION_NAME = "cities";
 const GEONAMES_FILE = "data/cities15000.txt";
+
+// constants for route generation
 const MIN_POPULATION = 50000;
 const MAX_DISTANCE_FROM_ROUTE = 50000; // meters
+
+// constants for routes saved in MongoDB
+const ROUTES_DB_NAME = "route_data";
+const ROUTES_COLLECTION_NAME = "routes";
 
 interface GeoNameCity {
   geonameId: number;
@@ -48,10 +56,10 @@ interface RouteStop {
   cumulativeDistance: number;
 }
 
-// import data when server starts (if needed)
-export async function initializeDatabase() {
-  const db = client.db(DB_NAME);
-  const collection = db.collection(COLLECTION_NAME);
+// import geonames data when server starts (if needed)
+export async function initializeGeoNamesDatabase() {
+  const db = client.db(CITIES_DB_NAME);
+  const collection = db.collection(CITIES_COLLECTION_NAME);
   const count = await collection.countDocuments();
 
   if (count === 0) {
@@ -64,8 +72,8 @@ export async function initializeDatabase() {
 
 // function to import GeoNames data into MongoDB
 async function importGeoNamesToMongoDB(): Promise<void> {
-  const db = client.db(DB_NAME);
-  const collection = db.collection<GeoNameCity>(COLLECTION_NAME);
+  const db = client.db(CITIES_DB_NAME);
+  const collection = db.collection<GeoNameCity>(CITIES_COLLECTION_NAME);
   const fileStream = fs.createReadStream(GEONAMES_FILE);
   const rl = readline.createInterface({
     input: fileStream,
@@ -132,8 +140,8 @@ async function findCitiesNearRoute(
   start: Location,
   end: Location
 ): Promise<Location[]> {
-  const db = client.db(DB_NAME);
-  const collection = db.collection<GeoNameCity>(COLLECTION_NAME);
+  const db = client.db(CITIES_DB_NAME);
+  const collection = db.collection<GeoNameCity>(CITIES_COLLECTION_NAME);
 
   // generate waypoints along the route (TODO: improve this with interpolation)
   const waypoints = [
@@ -259,4 +267,36 @@ export async function generateRouteStops(
 
   // sort stops by distance from start
   return stops.sort((a, b) => a.distanceFromStart - b.distanceFromStart);
+}
+
+// save route to MongoDB and return ID
+export async function saveRouteToDatabase(
+  userID: string,
+  route: {}
+): Promise<ObjectId> {
+  const db = client.db(ROUTES_DB_NAME);
+  const collection = db.collection(ROUTES_COLLECTION_NAME);
+
+  const result = await collection.insertOne({ userID, ...route });
+  return result.insertedId;
+}
+
+// get route from MongoDB by ID (or null if not found)
+export async function getRouteFromDatabase(tripID: string): Promise<{} | null> {
+  const db = client.db(ROUTES_DB_NAME);
+  const collection = db.collection(ROUTES_COLLECTION_NAME);
+
+  const result = await collection.findOne({ _id: new ObjectId(tripID) });
+  return result ? result : null;
+}
+
+// get all routes from MongoDB for user
+export async function getRoutesFromDatabase(userID: string): Promise<{}[]> {
+  const db = client.db(ROUTES_DB_NAME);
+  const collection = db.collection(ROUTES_COLLECTION_NAME);
+
+  const routes = await collection.find({ userID: userID }).toArray();
+
+  // add tripID to each route and remove _id and stops
+  return routes.map(({ _id, stops, ...rest }) => ({ ...rest, tripID: _id }));
 }
