@@ -6,7 +6,7 @@ const COLLECTION_NAME = "discounts";
 
 export interface Discount {
   storeID: string;
-  groceryStore: string; // store name
+  storeName: string;
   ingredient: string;
   price: number;
 }
