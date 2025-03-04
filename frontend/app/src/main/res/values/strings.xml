@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">My Application</string>
     <string name="grocery_title_text">Grocery</string>
+    <string name="_grocery_store_title_text">Grocery - store 0</string>
     <string name="past_title_text">Past Trip</string>
     <string name="account_title_text">Account</string>
     <string name="back_button_text">Back</string>
@@ -9,4 +10,5 @@
     <string name="account_str_1_1">Name:</string>
     <string name="account_str_example">(something)</string>
     <string name="maps_api_key">(something)</string>
+    <string name="post_button_text">Post</string>
 </resources>
