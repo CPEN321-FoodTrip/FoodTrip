@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { 
-    fetchRecipes,
+    fetchRecipe,
     Recipe,
  } from '../helpers/RecipeHelper';
 
@@ -17,7 +17,7 @@ import {
       }
       
       try {
-        const recipes = await fetchRecipes(query);
+        const recipes = await fetchRecipe(query);
         
         // Consider adding more metadata
         res.json({ 
