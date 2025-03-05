@@ -24,12 +24,6 @@
             </intent-filter>
         </service>
         <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_notification" />
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/color_primary" />
-        <meta-data
         android:name="com.google.android.geo.API_KEY"
         android:value="@string/maps_api_key" />
         <activity
