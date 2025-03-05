@@ -1,0 +1,29 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node index.ts",
+    "dev": "dotenv -e .env -- npx nodemon -e .ts index.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@mapbox/polyline": "^1.2.1",
+    "@types/express": "^5.0.0",
+    "axios": "^1.8.1",
+    "express": "^4.21.2",
+    "express-validator": "^7.2.1",
+    "mongodb": "^6.13.1",
+    "morgan": "^1.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.5.32",
+    "@types/mapbox__polyline": "^1.0.5",
+    "@types/mongodb": "^4.0.6",
+    "@types/morgan": "^1.9.9"
+  }
+}
