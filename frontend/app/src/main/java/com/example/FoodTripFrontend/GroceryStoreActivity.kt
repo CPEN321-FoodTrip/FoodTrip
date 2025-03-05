@@ -2,6 +2,7 @@ package com.example.FoodTripFrontend
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -44,8 +45,13 @@ class GroceryStoreActivity : AppCompatActivity() {
     val sampleID = "1"
     val sampleName = "store 0"
 
+    val unselectedColor = "#FFFFFF"
+    val selectedColor = "#A5E6D9"
+
     lateinit var client: OkHttpClient
     lateinit var discountList: LinearLayout
+    private lateinit var selectedDiscountID: String
+    private lateinit var selectedDiscountView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,6 +68,7 @@ class GroceryStoreActivity : AppCompatActivity() {
         val backBtn = findViewById<Button>(R.id.back_button_grocery_store)
         discountList = findViewById<LinearLayout>(R.id.discount_list_layout_store)
         val postBtn = findViewById<Button>(R.id.post_button_grocery_store)
+        val deleteBtn = findViewById<Button>(R.id.delete_button_grocery_store)
         val inputIngredient = findViewById<TextInputEditText>(R.id.ingredient_input)
         val inputPrice = findViewById<TextInputEditText>(R.id.price_input)
 
@@ -79,13 +86,24 @@ class GroceryStoreActivity : AppCompatActivity() {
             postDiscount(sampleID, sampleName, ingredient, price)
         }
 
+        deleteBtn.setOnClickListener {
+            if (selectedDiscountID == "") {
+                // TODO: indicate no discounts are selected or "please select something"
+                return@setOnClickListener
+            }
+
+            deleteDiscount(selectedDiscountID)
+        }
+
+        selectedDiscountID = ""
+
         // TODO: get store ID from login (use "1" as for developing)
         getDiscount(sampleID) {discounts -> processDiscount(discounts)}
     }
 
     private fun getDiscount(storeID : String, callback: (List<DiscountItem>) -> Unit) {
-        val url = "${BuildConfig.SERVER_URL}discount?storeID=${storeID}"
-        Log.d(TAG, url)
+        val url = "${BuildConfig.SERVER_URL}discount?storeID=$storeID"
+//        Log.d(TAG, url)
 
         val request = Request.Builder()
             .url(url)
@@ -112,7 +130,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
     private fun postDiscount(storeID: String, storeName: String, ingredient: String, price: String) {
         val url = "${BuildConfig.SERVER_URL}discount"
-        Log.d(TAG, url)
+//        Log.d(TAG, url)
 
         val jsonBody = """
                 {
@@ -146,7 +164,26 @@ class GroceryStoreActivity : AppCompatActivity() {
     }
 
     private fun deleteDiscount(discountID: String) {
+        val url = "${BuildConfig.SERVER_URL}discount?discountID=$selectedDiscountID"
 
+        val request = Request.Builder()
+            .url(url)
+            .delete()
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.use {
+                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                    getDiscount(sampleID) {discountList -> processDiscount(discountList)}
+                }
+            }
+        })
     }
 
     private fun processDiscount(discounts: List<DiscountItem>) {
@@ -171,7 +208,19 @@ class GroceryStoreActivity : AppCompatActivity() {
             itemView.text = "${discount.ingredient}: $${discount.price}"
 
             itemView.setOnClickListener {
-                Log.d(TAG, "item $i (ID:${discount.discountID}) is clicked")
+//                Log.d(TAG, "item $i (ID:${discount.discountID}) is clicked")
+                if (selectedDiscountID == discount.discountID) {
+                    selectedDiscountID = ""
+                    itemView.setBackgroundColor(Color.parseColor(unselectedColor))
+                } else {
+                    if (selectedDiscountID != "") {
+                        selectedDiscountView.setBackgroundColor(Color.parseColor(unselectedColor))
+                    }
+
+                    selectedDiscountID = discount.discountID
+                    itemView.setBackgroundColor(Color.parseColor(selectedColor))
+                    selectedDiscountView = itemView
+                }
             }
 
             discountList.addView(itemView)

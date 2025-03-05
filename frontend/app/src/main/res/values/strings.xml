@@ -11,4 +11,5 @@
     <string name="account_str_example">(something)</string>
     <string name="maps_api_key">(something)</string>
     <string name="post_button_text">Post</string>
+    <string name="delete_button_text">Delete</string>
 </resources>
