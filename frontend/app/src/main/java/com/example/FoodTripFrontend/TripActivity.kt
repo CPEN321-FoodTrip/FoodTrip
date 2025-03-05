@@ -143,7 +143,7 @@ class TripActivity : AppCompatActivity() {
             val requestBody = json.toString().toRequestBody("application/json".toMediaType())
 
             val request = Request.Builder()
-                .url("${SERVER_URL}/generate-route")
+                .url("${SERVER_URL}generate-route")
                 .post(requestBody)
                 .addHeader("Content-Type", "application/json")
                 .build()
