@@ -152,5 +152,4 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onDestroy()
         activityScope.cancel()
     }
-
 }

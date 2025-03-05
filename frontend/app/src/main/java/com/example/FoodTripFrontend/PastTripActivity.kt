@@ -1,7 +1,9 @@
 package com.example.FoodTripFrontend
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -10,12 +12,39 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.FoodTripFrontend.GroceryStoreActivity.DiscountItem
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okio.IOException
 
 class PastTripActivity : AppCompatActivity() {
 
     companion object {
-        private const val TAG = "GroceryActivity"
+        private const val TAG = "PastTripActivity"
     }
+
+    data class LocationItem(
+        val name: String,
+        val latitude: Float,
+        val longitude: Float
+    )
+
+    data class TripItem(
+        val userID: String,
+        val start_location: LocationItem,
+        val end_location: LocationItem,
+        val tripID: String
+    )
+
+    val sampleID = "test_person"
+
+    lateinit var client: OkHttpClient
+    lateinit var pastTripList: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,28 +56,76 @@ class PastTripActivity : AppCompatActivity() {
             insets
         }
 
+        client = OkHttpClient()
+
         val backBtn = findViewById<Button>(R.id.back_button_past)
-        val pastTripList = findViewById<LinearLayout>(R.id.past_trip_list_layout)
+        pastTripList = findViewById<LinearLayout>(R.id.past_trip_list_layout)
 
         backBtn.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
 
-        val _sampleStr = "trip"
+        // TODO: get user ID from login (use "test_person" as for developing)
+        getTrip(sampleID) {trips -> processTrip(trips)}
+    }
 
-        for (num in 1..30) {
-            val newTextView = TextView(this)
-            newTextView.textSize = 25f
-            val str = _sampleStr + num
-            newTextView.text = str
+    private fun getTrip(userID : String, callback: (List<TripItem>) -> Unit) {
+        val url = "${BuildConfig.SERVER_URL}get-routes?userID=$userID"
+//        Log.d(TAG, url)
 
-            newTextView.setOnClickListener {
-                val _text = "show past trip route and details $num"
-                Toast.makeText(this, _text, Toast.LENGTH_SHORT).show()
+        val request = Request.Builder()
+            .url(url)
+            .get()
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
             }
 
-            pastTripList.addView(newTextView);
+            override fun onResponse(call: Call, response: Response) {
+                response.use {
+                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                    val json = response.body!!.string()
+                    val listType = object : TypeToken<List<TripItem>>() {}.type
+                    var trips:List<TripItem> = Gson().fromJson(json, listType)
+                    callback(trips)
+                }
+            }
+        })
+    }
+
+    private fun processTrip(trips: List<TripItem>) {
+        if (trips.isEmpty()) {
+            // TODO: indicate no discounts posted
+            return
+        }
+
+        runOnUiThread {
+            showTrip(trips)
+        }
+    }
+
+    private fun showTrip(trips: List<TripItem>) {
+        pastTripList.removeAllViews()
+
+        for (i in 0..(trips.count()-1)) {
+            val itemView = TextView(this)
+
+            val trip = trips[i]
+            itemView.textSize = 25f
+            itemView.text = "${trip.start_location.name} -> ${trip.end_location.name}"
+
+            itemView.setOnClickListener {
+                val intent = Intent(applicationContext, PopTripActivity::class.java)
+                Log.d(TAG, "${trip.tripID} is clicked")
+                intent.putExtra("tripID", trip.tripID)
+                startActivity(intent)
+            }
+
+            pastTripList.addView(itemView)
         }
     }
 }
