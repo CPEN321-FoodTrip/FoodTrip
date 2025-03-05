@@ -2,6 +2,7 @@ package com.example.FoodTripFrontend
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -9,18 +10,32 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
+import java.io.IOException
 import org.json.JSONArray
+import org.json.JSONObject
+import com.google.android.gms.maps.model.LatLng
+import java.util.ArrayList
+
 
 class TripActivity : AppCompatActivity() {
 
     private val client = OkHttpClient()
 
+    companion object {
+        private const val TAG = "TripActivity"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,9 +89,13 @@ class TripActivity : AppCompatActivity() {
             // If all fields are valid, proceed to the next activity
             if (isValid) {
 
+                val json = JSONObject()
+                json.put("userID", "test_person")
+                json.put("origin", userStartInput)
+                json.put("destination", userEndInput)
+                json.put("numStops", userNumStops)
 
-                val intent = Intent(this@TripActivity, MainActivity::class.java)
-                startActivity(intent)
+                getRoute(json)
             }
         }
 
@@ -102,6 +121,86 @@ class TripActivity : AppCompatActivity() {
                 e.printStackTrace()
                 false
             }
+        }
+    }
+
+    private fun getRoute(json: JSONObject){
+        CoroutineScope(Dispatchers.IO).launch{
+
+            val requestBody = json.toString().toRequestBody("application/json".toMediaType())
+
+            val request = Request.Builder()
+                .url("https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/generate-route")
+                .post(requestBody)
+                .addHeader("Content-Type", "application/json")
+                .build()
+
+            try {
+                val response = client.newCall(request).execute()
+
+                if (response.isSuccessful) {
+                    val responseBody = response.body?.string()
+                    Log.d(TAG, "Response: $responseBody")
+                    collectRoute(responseBody)
+                } else {
+                    Log.e(TAG, "Error: ${response.code}")
+                }
+
+
+            } catch (e: IOException) {
+                Log.e(TAG, "Exception: ${e.message}")
+            }
+
+        }
+    }
+
+    private fun collectRoute(response : String?) {
+        if (response != null) {
+            try {
+                val jsonObject = JSONObject(response)
+                val coordsList = mutableListOf<LatLng>()
+
+
+                val startLocation = jsonObject.getJSONObject("start_location")
+                val startName = startLocation.getString("name")
+                val startLat = startLocation.getDouble("latitude")
+                val startLong = startLocation.getDouble("longitude")
+                Log.d(TAG, "Start Location: $startLat, $startLong")
+
+                coordsList.add(LatLng(startLat, startLong))
+
+                val endLocation = jsonObject.getJSONObject("end_location")
+                val endName = endLocation.getString("name")
+                val endLat = endLocation.getDouble("latitude")
+                val endLong = endLocation.getDouble("longitude")
+
+                val arrayOfStops: JSONArray = jsonObject.getJSONArray("stops")
+
+                for (i in 0 until arrayOfStops.length()) {
+                    val stop = arrayOfStops.getJSONObject(i)
+                    val location = stop.getJSONObject("location")
+                    val city = location.getString("name")
+                    val lat = location.getDouble("latitude")
+                    val long = location.getDouble("longitude")
+
+                    coordsList.add(LatLng(lat, long))
+
+                    Log.d(TAG, "Stop $i: $lat, $long")
+
+                }
+
+                coordsList.add(LatLng(endLat, endLong))
+
+                val intent = Intent(this@TripActivity, MainActivity::class.java)
+                val bundle = Bundle()
+                bundle.putParcelableArrayList("coordinates", ArrayList(coordsList))
+                intent.putExtras(bundle)
+                startActivity(intent)
+            } catch (e : Exception) {
+                Log.e(TAG, "Error parsing JSON response: ${e.message}")
+            }
+        } else {
+            Log.e(TAG, "Response is null")
         }
     }
 }
