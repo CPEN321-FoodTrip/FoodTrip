@@ -36,7 +36,6 @@ class GroceryActivity : AppCompatActivity() {
         val price: Int
     )
 
-    lateinit var context: Context
     lateinit var client: OkHttpClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +48,6 @@ class GroceryActivity : AppCompatActivity() {
             insets
         }
 
-        context = this
         client = OkHttpClient()
 
         val backBtn = findViewById<Button>(R.id.back_button);
