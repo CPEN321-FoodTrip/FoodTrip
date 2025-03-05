@@ -10,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.FoodTripFrontend.BuildConfig.SERVER_URL
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -95,6 +96,7 @@ class TripActivity : AppCompatActivity() {
 
                 val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
                 val userEmail = sharedPref.getString("userEmail", "No email found")
+
                 Log.d(TAG, "User Email: $userEmail")
 
                 val json = JSONObject()
@@ -141,7 +143,7 @@ class TripActivity : AppCompatActivity() {
             val requestBody = json.toString().toRequestBody("application/json".toMediaType())
 
             val request = Request.Builder()
-                .url("https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/generate-route")
+                .url("${SERVER_URL}generate-route")
                 .post(requestBody)
                 .addHeader("Content-Type", "application/json")
                 .build()

@@ -74,7 +74,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
         // Switch back to home page
         backBtn.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, MainActivityAdmin::class.java)
             startActivity(intent)
         }
 
