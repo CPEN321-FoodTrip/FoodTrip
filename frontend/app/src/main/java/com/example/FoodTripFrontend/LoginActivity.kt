@@ -98,8 +98,15 @@ class LoginActivity : AppCompatActivity() {
                         )
 
                         val displayName = googleIdTokenCredential.displayName.toString()
+                        val email = googleIdTokenCredential.id
 
-                        updateWelcomeMessage("$displayName - $accountType")
+
+                        val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
+                        val editor = sharedPref.edit()
+                        editor.putString("userEmail", email)
+                        editor.apply()
+
+                        updateWelcomeMessage("$displayName - $accountType", accountType)
                     } catch (e: GoogleIdTokenParsingException) {
                         Log.e(TAG, "Received an invalid google id token response", e)
                     }
@@ -126,13 +133,23 @@ class LoginActivity : AppCompatActivity() {
         Toast.makeText(this, "Error getting Credential", Toast.LENGTH_SHORT).show()
     }
 
-    private fun updateWelcomeMessage(name: String) {
+    private fun updateWelcomeMessage(name: String, accountType: String) {
         Toast.makeText(this, "Welcome $name", Toast.LENGTH_SHORT).show()
 
-        val intent = Intent(this, MainActivity::class.java)
-        intent.putExtra("USER_NAME", name)
-        startActivity(intent)
-        finish()
+        if (accountType == "user") {
+            val intent = Intent(this, MainActivity::class.java)
+            intent.putExtra("USER_NAME", name)
+            startActivity(intent)
+            finish()
+        } else if (accountType == "admin") {
+            val intent = Intent(this, MainActivityAdmin::class.java)
+            intent.putExtra("USER_NAME", name)
+            startActivity(intent)
+            finish()
+        } else {
+            Log.e(TAG, "Error getting account type")
+            Toast.makeText(this, "Error getting account type", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun generateHashedNonce(): String {

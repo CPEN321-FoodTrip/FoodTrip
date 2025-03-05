@@ -11,17 +11,20 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import androidx.fragment.app.FragmentContainerView
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -30,6 +33,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
         private const val TAG = "MainActivity"
     }
+
     private val activityScope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,20 +46,22 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             insets
         }
 
+        //Map fragment instead of Map activity to maintain functionality of a "main page" and the
+        //ability to turn the map on and off as needed
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
-
-
 
         findViewById<Button>(R.id.PastTrips).setOnClickListener() {
             val intent = Intent(this, PastTripActivity::class.java)
             startActivity(intent)
         }
+
         findViewById<Button>(R.id.ManageTrip).setOnClickListener() {
             val intent = Intent(this, TripActivity::class.java)
             startActivity(intent)
         }
+
         findViewById<Button>(R.id.ManageAccount).setOnClickListener() {
             val intent = Intent(this, AccountActivity::class.java)
             startActivity(intent)
@@ -64,6 +70,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         findViewById<Button>(R.id.sign_out_button).setOnClickListener() {
             Log.d(TAG, "Sign Out Button Clicked")
 
+            //Signs out the user and returns them to the login page
             val credentialManager = CredentialManager.create(this)
             activityScope.launch {
                 try {
@@ -86,26 +93,54 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         findViewById<Button>(R.id.viewRecipes).setOnClickListener() {
-
+            val intent = Intent(this, GroceryActivity::class.java)
+            startActivity(intent)
         }
-
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
+
         mMap = googleMap
 
-        val coords = listOf(
-            LatLng(37.7749, -122.4194), // San Francisco
-            LatLng(34.0522, -118.2437), // Los Angeles
-            LatLng(36.1699, -115.1398)  // Las Vegas
-        )
+        //Gets a coordinate list passed from Trip Activities which is then displayed with a polyline
+        //Only shows the map when a route and coordinates are entered
+        //coordsList and nameList are sent as bundles from other activities
+        val coordsList = intent.extras?.getParcelableArrayList<LatLng>("coordinates")
+        val nameList = intent.extras?.getStringArrayList("cities")
 
-        val polylineOptions = PolylineOptions()
-            .addAll(coords)
-            .width(5f)
-            .color(0xFF0000FF.toInt())
+        if (coordsList != null && nameList != null) {
+            val mapFragment = findViewById<FragmentContainerView>(R.id.map)
 
-        val polyline: Polyline = mMap.addPolyline(polylineOptions)
+            if (mapFragment.visibility == android.view.View.GONE) {
+                mapFragment.visibility = android.view.View.VISIBLE
+            }
+
+            //polyline only draws straight lines, ideally in release this should change to
+            //actual routes (ie. roads, highways)
+            val polylineOptions = PolylineOptions()
+                .addAll(coordsList)
+                .width(5f)
+                .color(0xFF0000FF.toInt())
+
+            mMap.addPolyline(polylineOptions)
+
+            for (i in coordsList.indices) {
+                val marker = mMap.addMarker(MarkerOptions().position(coordsList[i]).title(nameList[i]))
+                marker?.showInfoWindow()
+            }
+
+            Log.d(TAG, "Map is ready and displayed")
+
+            val builder = LatLngBounds.Builder()
+            coordsList.forEach { builder.include(it) }
+            val bounds = builder.build()
+            val padding = 100
+            val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding)
+            mMap.moveCamera(cameraUpdate)
+
+        } else {
+            Log.e(TAG, "No coordinates/cities received!")
+        }
     }
 
     private fun gotologin() {
