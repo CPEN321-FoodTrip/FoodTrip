@@ -93,7 +93,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         findViewById<Button>(R.id.viewRecipes).setOnClickListener() {
-
+            val intent = Intent(this, GroceryActivity::class.java)
+            startActivity(intent)
         }
     }
 
