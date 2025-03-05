@@ -5,6 +5,7 @@ import {
   getRouteFromDatabase,
   saveRouteToDatabase,
   getRoutesFromDatabase,
+  deleteRouteFromDatabase,
 } from "../helpers/RouteHelpers";
 
 export class RouteController {
@@ -31,7 +32,7 @@ export class RouteController {
     const originCity = originData[0];
 
     const start: Location = {
-      name: originCity.name,
+      name: origin,
       latitude: parseFloat(originCity.lat),
       longitude: parseFloat(originCity.lon),
       population: 0, // not used for start location
@@ -52,7 +53,7 @@ export class RouteController {
     const destinationCity = destinationData[0];
 
     const end: Location = {
-      name: destinationCity.name,
+      name: destination,
       latitude: parseFloat(destinationCity.lat),
       longitude: parseFloat(destinationCity.lon),
       population: 0, // not used for end location
@@ -62,12 +63,12 @@ export class RouteController {
       const stops = await generateRouteStops(start, end, numStops);
       const route = {
         start_location: {
-          name: start.name,
+          name: origin,
           latitude: start.latitude,
           longitude: start.longitude,
         },
         end_location: {
-          name: end.name,
+          name: destination,
           latitude: end.latitude,
           longitude: end.longitude,
         },
@@ -75,7 +76,7 @@ export class RouteController {
       };
 
       const tripID = await saveRouteToDatabase(userID, route);
-      const response = { ...route, tripID };
+      const response = { tripID, ...route };
 
       res.json(response);
     } catch (error) {
@@ -93,7 +94,6 @@ export class RouteController {
       return;
     }
 
-    // get route information from database
     const route = await getRouteFromDatabase(tripID);
     if (!route) {
       res.status(404).json({ error: "Route not found" });
@@ -114,5 +114,23 @@ export class RouteController {
 
     const routes = await getRoutesFromDatabase(userID);
     res.json(routes);
+  }
+
+  // delete route
+  async deleteRoute(req: Request, res: Response, next: NextFunction) {
+    const tripID = req.query.tripID as string;
+
+    if (!tripID) {
+      res.status(400).json({ error: "Invalid request parameters" });
+      return;
+    }
+
+    const result = await deleteRouteFromDatabase(tripID);
+    if (!result) {
+      res.status(404).json({ error: "Route not found" });
+      return;
+    }
+
+    res.json({ success: true });
   }
 }
