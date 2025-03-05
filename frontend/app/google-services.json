@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "308832928136",
+    "project_id": "cpen-321-foodtrip-b4caf",
+    "storage_bucket": "cpen-321-foodtrip-b4caf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:308832928136:android:b24253a05efc759830ba3d",
+        "android_client_info": {
+          "package_name": "com.example.FoodTripFrontend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6mKDWjVoZ8a6yMEbWxuS2FTC31PJ5K2A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
