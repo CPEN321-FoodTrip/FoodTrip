@@ -50,7 +50,7 @@ export interface Location {
   population: number;
 }
 
-interface RouteStop {
+export interface RouteStop {
   location: Location;
   distanceFromStart: number;
   cumulativeDistance: number;
