@@ -109,7 +109,7 @@ class TripActivity : AppCompatActivity() {
 
     }
 
-    
+
     //Asynchronous function that uses an external api to check if the given city name is valid
     //The city name is given to a call to the api, where it then returns a string for valid cities
     //and an empty string for invalid cities.
@@ -132,6 +132,9 @@ class TripActivity : AppCompatActivity() {
         }
     }
 
+    //Calls the backend to provide a "route" in the form of a set of coordinates
+    //Provides to the back end the userID (google sign in email), the start location, end location
+    //and number of stops (stored in requestBody as a json)
     private fun getRoute(json: JSONObject){
         CoroutineScope(Dispatchers.IO).launch{
 
@@ -146,6 +149,7 @@ class TripActivity : AppCompatActivity() {
             try {
                 val response = client.newCall(request).execute()
 
+                //if a route is successfully returned, the data for the route is collected
                 if (response.isSuccessful) {
                     val responseBody = response.body?.string()
                     Log.d(TAG, "Response: $responseBody")
@@ -162,6 +166,9 @@ class TripActivity : AppCompatActivity() {
         }
     }
 
+    //Takes the response from the back end and creates a list of the route coordinates and
+    //corresponding city names. Puts them into an arraylist and sends them to the main activity
+    //to be displayed on the map in MainActivity. Then returns back to main activity.
     private fun collectRoute(response : String?) {
         if (response != null) {
             try {
