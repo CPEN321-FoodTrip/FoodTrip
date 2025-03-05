@@ -1,11 +1,12 @@
 # M3 - Requirements and Design
 
 ## 1. Change History
-- February 12, 2025: We modified our use cases to the following: Manage Trip, View Past Trips, View Recipes, View Groceries, Manage Account, Manage Discounts. The updated use-case diagram is:  
+- February 12, 2025: We modified our use cases to the following: Manage Trip, View Past Trips, View Recipes, View Groceries, Manage Account and Manage Discounts. The updated use-case diagram is:  
 ![Use-Case Diagram](images/use-case-diagram-v2.png)  
-The reason for changing our diagram is due comments on our M3. We also removed the share on social media use case for the MVP since we didn't think we would have enough time, however, we will try to add this functionality in the final version of the app.
-- February 12, 2025: Based on comments from our M3, we added live updates through push notifications with firebase. Everytime a new discount is pushed by a grocery store, users subscribed to discount updates will receive a push notification about the discount.
-- February 26, 2025: Another change was to the preferences option for "Manage Trip". This has to be de-scoped for the MVP so it is not included, however we will try to add this functionality in the final version of the app.
+The reason for changing our diagram is based on comments from our M3. We also removed the "Share on Social Media" use case for the MVP since we didn’t think we would have enough time, however, we will try to add this functionality in the final version of the app.
+- February 12, 2025: Based on feedback from our M3, we added live updates through push notifications with Firebase. Every time a new discount is pushed by a grocery store, users subscribed to discount updates will receive a push notification about the discount.
+- February 26, 2025: Another change was made to the preferences option for "Manage Trip." This feature has been de-scoped for the MVP, so it is not included, however, we will try to add this functionality in the final version of the app.
+- February 27, 2025: Several changes were made to the databases. The new databases we now have are: geonames, route_data, food_data and discounts. The purpose of the geonames database is to store all cities with a population greater than 15,000 people in order to generate routes to these cities. We switched to this approach instead of using an API, as the API was unreliable and the server was often down. We also decided to remove the users database since we de-scoped preferences. It seemed better to separate routes and recipes for portability. Additionally, we got rid of the groceries database and now use the recipes database for ingredients.
 
 ## 2. Project Description
 FoodTrip is an android app that helps users explore global cuisines by planning a virtual food trip. Users can choose a starting and ending country, and the app will generate a travel route with recipes from different locations along the way. It also creates a smart grocery list which can be used to optimize ingredient reuse and allow users to see local store discounts. Additionally, FoodTrip allows dietary preference customization and social media sharing, so users can tailor their meals to their needs and share their journeys with friends.
