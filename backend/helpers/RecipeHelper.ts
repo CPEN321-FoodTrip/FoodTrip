@@ -39,6 +39,12 @@ export async function fetchRecipes(query: string): Promise<Recipe[]> {
       });
   
       const response = await fetch(`${BASE_URL}?${params.toString()}`);
+    // const response = await fetch(
+    //     ${BASE_URL}?type=public&q=${encodeURIComponent(
+    //       query
+    //     )}&app_id=${appId}&app_key=${apikey}
+    //   );
+      
   
       if (!response.ok) {
         const errorBody = await response.text();
