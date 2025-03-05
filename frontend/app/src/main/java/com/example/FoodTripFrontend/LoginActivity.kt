@@ -98,6 +98,13 @@ class LoginActivity : AppCompatActivity() {
                         )
 
                         val displayName = googleIdTokenCredential.displayName.toString()
+                        val email = googleIdTokenCredential.id
+
+
+                        val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
+                        val editor = sharedPref.edit()
+                        editor.putString("userEmail", email)
+                        editor.apply()
 
                         updateWelcomeMessage("$displayName - $accountType")
                     } catch (e: GoogleIdTokenParsingException) {

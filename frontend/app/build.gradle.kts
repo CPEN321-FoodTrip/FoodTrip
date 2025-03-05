@@ -59,6 +59,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.credentials)
     implementation(libs.play.services.maps)
+    implementation(libs.googleid)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

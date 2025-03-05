@@ -28,7 +28,6 @@ import org.json.JSONObject
 import com.google.android.gms.maps.model.LatLng
 import java.util.ArrayList
 
-
 class TripActivity : AppCompatActivity() {
 
     private val client = OkHttpClient()
@@ -53,6 +52,9 @@ class TripActivity : AppCompatActivity() {
     }
 
     private fun collectParameters() {
+
+        //Gets the user submitted input for start and end locations, as well as number of desired
+        //stops
         val startTextbox = findViewById<EditText>(R.id.startLocation)
         val userStartInput = startTextbox.text.toString()
 
@@ -62,10 +64,12 @@ class TripActivity : AppCompatActivity() {
         val stopsTextbox = findViewById<EditText>(R.id.numstops)
         val userNumStops = stopsTextbox.text.toString().toIntOrNull()
 
+
         var isValid = true
 
         //Checks if each input is given a valid response, will only make a call to create a route
-        //if all fields are valid, otherwise it leave a Toast message and allows user to resubmit
+        //if all fields are valid, otherwise it leave a Toast message telling
+        //the user which fields are invalid and allows them to resubmit
         GlobalScope.launch(Dispatchers.Main) {
 
             //Check if starting city is valid
@@ -89,8 +93,12 @@ class TripActivity : AppCompatActivity() {
             // If all fields are valid, proceed to the next activity
             if (isValid) {
 
+                val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
+                val userEmail = sharedPref.getString("userEmail", "No email found")
+                Log.d(TAG, "User Email: $userEmail")
+
                 val json = JSONObject()
-                json.put("userID", "test_person")
+                json.put("userID", userEmail)
                 json.put("origin", userStartInput)
                 json.put("destination", userEndInput)
                 json.put("numStops", userNumStops)
@@ -101,7 +109,7 @@ class TripActivity : AppCompatActivity() {
 
     }
 
-
+    
     //Asynchronous function that uses an external api to check if the given city name is valid
     //The city name is given to a call to the api, where it then returns a string for valid cities
     //and an empty string for invalid cities.
@@ -159,6 +167,7 @@ class TripActivity : AppCompatActivity() {
             try {
                 val jsonObject = JSONObject(response)
                 val coordsList = mutableListOf<LatLng>()
+                val nameList = mutableListOf<String>()
 
 
                 val startLocation = jsonObject.getJSONObject("start_location")
@@ -168,6 +177,7 @@ class TripActivity : AppCompatActivity() {
                 Log.d(TAG, "Start Location: $startLat, $startLong")
 
                 coordsList.add(LatLng(startLat, startLong))
+                nameList.add(startName)
 
                 val endLocation = jsonObject.getJSONObject("end_location")
                 val endName = endLocation.getString("name")
@@ -184,18 +194,21 @@ class TripActivity : AppCompatActivity() {
                     val long = location.getDouble("longitude")
 
                     coordsList.add(LatLng(lat, long))
+                    nameList.add(city)
 
                     Log.d(TAG, "Stop $i: $lat, $long")
-
                 }
 
                 coordsList.add(LatLng(endLat, endLong))
+                nameList.add(endName)
 
                 val intent = Intent(this@TripActivity, MainActivity::class.java)
                 val bundle = Bundle()
                 bundle.putParcelableArrayList("coordinates", ArrayList(coordsList))
+                bundle.putStringArrayList("cities", ArrayList(nameList))
                 intent.putExtras(bundle)
                 startActivity(intent)
+
             } catch (e : Exception) {
                 Log.e(TAG, "Error parsing JSON response: ${e.message}")
             }
