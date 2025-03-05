@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
@@ -16,33 +16,34 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication"
         tools:targetApi="31">
+        <activity
+            android:name=".MainActivityAdmin"
+            android:exported="false"
+            android:theme="@style/Theme.MyApplication" />
+
         <meta-data
-        android:name="com.google.android.geo.API_KEY"
+            android:name="com.google.android.geo.API_KEY"
             android:value="@string/maps_api_key" />
 
         <activity
             android:name=".PopActivity"
             android:exported="false"
-            android:theme="@style/Theme.MyApplication.PopUp"/>
+            android:theme="@style/Theme.MyApplication.PopUp" />
         <activity
             android:name=".GroceryActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".GroceryStoreActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".PastTripActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".TripActivity"
             android:exported="false" />
         <activity
             android:name=".AccountActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -54,8 +55,7 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true" />
     </application>
 
 </manifest>
