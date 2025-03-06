@@ -26,6 +26,15 @@ export interface Recipe {
   ingredients:string[];
 }
 
+export interface SingleRecipe {
+  recipe: {
+    label: string;
+    uri: string;
+    url: string;
+    ingredientLines: string[];
+  };
+}
+
 interface EdamamResponse {
     hits: Array<{ 
       recipe: {
@@ -42,6 +51,10 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
       if (!appId || !apikey) {
         throw new Error("Edamam App ID or API Key is missing");
       }
+
+      // if (appId) {
+      //   throw new Error("test, appId and apikey exist"); //remove
+      // }
   
       const params = new URLSearchParams({
         type: 'public',
@@ -51,6 +64,10 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
       });
   
       const response = await fetch(`${BASE_URL}?${params.toString()}`);     
+
+      // if(response.ok){
+      //   throw new Error("test, response was ok"); //remove
+      // }
   
       if (!response.ok) {
         const errorBody = await response.text();
@@ -71,14 +88,53 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
       console.error('Detailed recipe fetch error:', error);
       throw error;
     }
+}
+
+  export async function getSingle(query: string): Promise<SingleRecipe> {
+    try {
+      if (!appId || !apikey) {
+        throw new Error("Edamam App ID or API Key is missing");
+      }
+
+      // if (appId) {
+      //   throw new Error("test, appId and apikey exist"); //remove
+      // }
+  
+      const params = new URLSearchParams({
+        type: 'public',
+        q: query,
+        app_id: appId,
+        app_key: apikey,
+      });
+  
+      const response = await fetch(`${BASE_URL}?${params.toString()}`);     
+
+      // if(response.ok){
+      //   throw new Error("test, response was ok"); //remove
+      // }
+  
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`Edamam API Error: ${response.status} - ${errorBody}`);
+      }
+  
+      const data: EdamamResponse = await response.json();
+      
+      return data.hits[0];
+  
+    } catch (error) {
+      console.error('Detailed recipe fetch error:', error);
+      throw error;
+    }
   }
+
 
 // export async function getRecipesfromRoute(tripID: string,userID:string): Promise<Recipe[]> {
 export async function getRecipesfromRoute(tripID: string): Promise<Recipe[]> { //currently all tripIDs are unique
-  const db = client.db(ROUTES_DB_NAME);
-  const collection = db.collection(ROUTES_COLLECTION_NAME);
+  const route_db = client.db(ROUTES_DB_NAME);
+  const route_collection = route_db.collection(ROUTES_COLLECTION_NAME);
   try{
-    const route = await collection.findOne({ _id: new ObjectId(tripID) });
+    const route = await route_collection.findOne({ _id: new ObjectId(tripID) });
     const result: Recipe[] = [];
 
     if (!route){
@@ -90,11 +146,14 @@ export async function getRecipesfromRoute(tripID: string): Promise<Recipe[]> { /
         const stopName = stop.location.name;
         stopNames.push(stopName);
     });
-    if (stopNames){
-        for (const name of stopNames){
-            const recipe = await fetchRecipe(name);
-            result.push(recipe[0]);
-        }
+
+    if (!stopNames){
+      throw new Error("No trip found under that ID");
+    }
+
+    for (const name of stopNames){
+      const recipe = await fetchRecipe(name);
+      result.push(recipe[0]);
     }
     return result;
   }
@@ -115,6 +174,33 @@ export async function getRecipesfromRoute(tripID: string): Promise<Recipe[]> { /
     const result = await collection.insertOne({ userID, ...recipeName });
     return result.insertedId;
   }
+
+
+  // export async function getRecipeFromDatabase(recipeID: string): Promise<{} | null> {
+  //   const db = client.db(DB_NAME);
+  //   const collection = db.collection(ROUTES_COLLECTION_NAME);
+
+  //   if (!ObjectId.isValid(recipeID)) {
+  //     throw new Error("Invalid recipe ID format"); 
+  //   }
+
+  //   const objectId = new ObjectId(recipeID);
+  //   try{
+  //     const result = await collection.findOne({ _id: objectId });
+  //     return result;
+  //   }
+  //   catch{
+  //     throw new Error("Recipe not found");
+  //   }
+  // }
+
+  export async function getRecipeFromDatabase(RecipeID: string): Promise<{} | null> {
+    const db = client.db(DB_NAME);
+    const collection = db.collection(COLLECTION_NAME);
   
+    const result = await collection.findOne({ _id: new ObjectId(RecipeID) });
+    return result ? result : null;
+  }
+
 
 
