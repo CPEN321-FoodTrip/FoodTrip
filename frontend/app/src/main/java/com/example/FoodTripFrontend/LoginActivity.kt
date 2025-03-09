@@ -144,6 +144,7 @@ class LoginActivity : AppCompatActivity() {
         } else if (accountType == "admin") {
             val intent = Intent(this, MainActivityAdmin::class.java)
             intent.putExtra("USER_NAME", name)
+            Log.d(TAG, "Starting")
             startActivity(intent)
             finish()
         } else {
