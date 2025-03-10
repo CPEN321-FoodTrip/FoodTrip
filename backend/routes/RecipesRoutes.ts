@@ -11,12 +11,12 @@ export const RecipeRoutes = [
     validation: [],
   },
 
-  {
-    method: "get",
-    route: "/single-recipe",
-    action: controller.getSingle,  
-    validation: [],
-  },
+  // {
+  //   method: "get",
+  //   route: "/single-recipe",
+  //   action: controller.getSingle,  
+  //   validation: [],
+  // },
 
   {
     method: "get",

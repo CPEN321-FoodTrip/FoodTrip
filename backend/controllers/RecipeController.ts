@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { 
     fetchRecipe,
-    getSingle,
     saveRecipeToDatabase,
     getRecipeFromDatabase,
     Recipe,
@@ -32,36 +31,32 @@ export class RecipeController {
     }
   }
 
-  async getSingle(req: Request, res: Response, next: NextFunction) {
-    const recipeName = req.query.name as string;
-    if (!recipeName){
-      throw new Error("Recipe name is required");
-    }
+  // async getSingle(req: Request, res: Response, next: NextFunction) {
+  //   const recipeName = req.query.name as string;
+  //   if (!recipeName){
+  //     throw new Error("Recipe name is required");
+  //   }
 
-    try {
-      const recipe = await getSingle(recipeName);
+  //   try {
+  //     const recipe = await getSingle(recipeName);
 
-    }
-    catch(error){
-      console.error("Error getting recipe:", error);
-    res.status(500).json({ error: "Error getting recipe" });
-    }
-  }
-
-
-  async saveRecipe(req: Request, res: Response, next: NextFunction) {
-    
-  }
+  //   }
+  //   catch(error){
+  //     console.error("Error getting recipe:", error);
+  //   res.status(500).json({ error: "Error getting recipe" });
+  //   }
+  // }
 
   async getRecipe(req: Request, res: Response, next: NextFunction) {
-    const recipeName = req.query.recipeName as string;
+    // const recipeName = req.query.recipeName as string;
+    const recipeID = req.query.recipeID as string;
 
-    if (!recipeName) {
+    if (!recipeID) {
       res.status(400).json({ error: "Invalid request parameters" });
       return;
     }
 
-    const recipe = await getRecipeFromDatabase(recipeName);
+    const recipe = await getRecipeFromDatabase(recipeID);
     if (!recipe) {
       res.status(404).json({ error: "Recipe not found" });
       return;

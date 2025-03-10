@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "test": "jest",
+    "test:coverage": "jest --coverage",
     "start": "ts-node index.ts",
     "dev": "dotenv -e .env -- npx nodemon -e .ts index.ts"
   },
@@ -21,9 +23,12 @@
     "typescript": "^5.7.3"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.14",
     "@types/jquery": "^3.5.32",
     "@types/mapbox__polyline": "^1.0.5",
     "@types/mongodb": "^4.0.6",
-    "@types/morgan": "^1.9.9"
+    "@types/morgan": "^1.9.9",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.6"
   }
 }
