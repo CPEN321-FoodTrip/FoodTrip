@@ -12,16 +12,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@main
 
-      - name: Install Trivy
+      - name: Install and Run Trivy
         run: |
           sudo apt-get update
           sudo apt-get install -y curl
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
-          echo "$PWD/bin" >> $GITHUB_PATH
+          export PATH=$PWD/bin:$PATH
           trivy --version
-
-      - name: Run Trivy to generate CycloneDX report
-        run: |
           trivy fs --format cyclonedx --output results.cdx /src
 
       - name: Print CycloneDX output
