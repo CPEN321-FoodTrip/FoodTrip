@@ -9,6 +9,7 @@ export const RecipeRoutes = [
     route: "/search",
     action: controller.getRecipes,  
     validation: [],
+
   },
 
   // {
@@ -24,5 +25,6 @@ export const RecipeRoutes = [
     action: controller.getRecipe,  
     validation: [],
   }
+
 
 ];

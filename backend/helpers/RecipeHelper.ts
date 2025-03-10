@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { client } from "../services";
+
 // import { RecipeSearchParams, EdamamApiResponse } from '../recipe.types';
 import { RouteStop } from './RouteHelpers';
 
@@ -38,14 +39,17 @@ interface EdamamResponse {
   
 
 export async function fetchRecipe(query: string): Promise<Recipe[]> {
+
     try {
       if (!appId || !apikey) {
         throw new Error("Edamam App ID or API Key is missing");
       }
 
+
       // if (appId) {
       //   throw new Error("test, appId and apikey exist"); //remove
       // }
+
   
       const params = new URLSearchParams({
         type: 'public',
@@ -59,6 +63,7 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
       // if(response.ok){
       //   throw new Error("test, response was ok"); //remove
       // }
+
   
       if (!response.ok) {
         const errorBody = await response.text();
@@ -79,6 +84,7 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
       console.error('Detailed recipe fetch error:', error);
       throw error;
     }
+
 }
 
 
@@ -117,6 +123,7 @@ export async function getRecipesfromRoute(tripID: string): Promise<Recipe[]> { /
 }
   
   // save recipe to MongoDB and return ID
+
   export async function saveRecipeToDatabase(
     userID: string,
     recipeName: {}
@@ -127,6 +134,7 @@ export async function getRecipesfromRoute(tripID: string): Promise<Recipe[]> { /
     const result = await collection.insertOne({ userID, ...recipeName });
     return result.insertedId;
   }
+
 
 
   // export async function getRecipeFromDatabase(recipeID: string): Promise<{} | null> {
@@ -157,5 +165,6 @@ export async function getRecipesfromRoute(tripID: string): Promise<Recipe[]> { /
     return result ? result : null;
   }
 
+]
 
 

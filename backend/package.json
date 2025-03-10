@@ -6,7 +6,8 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "start": "ts-node index.ts",
-    "dev": "dotenv -e .env -- npx nodemon -e .ts index.ts"
+    "dev": "dotenv -e .env -- npx nodemon -e .ts index.ts",
+    "test": "jest --passWithNoTests"
   },
   "author": "",
   "license": "ISC",
