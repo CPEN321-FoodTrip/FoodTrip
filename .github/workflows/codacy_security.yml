@@ -60,7 +60,7 @@ jobs:
         run: |
           cd backend
           npm install
-          npx eslint -c .eslintrc.json -f eslint-formatter-sarif -o eslint-results.sarif .
+          npx eslint -c ../.eslintrc.json -f eslint-formatter-sarif -o eslint-results.sarif .
 
       # Upload ESLint SARIF results
       - name: Upload ESLint SARIF results file
