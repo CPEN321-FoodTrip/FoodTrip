@@ -57,6 +57,7 @@ jobs:
       # Run ESLint and generate SARIF output
       - name: Run ESLint
         run: |
+          cd backend
           npm install
           npx eslint -c .eslintrc.json -f eslint-formatter-sarif -o eslint-results.sarif .
 
