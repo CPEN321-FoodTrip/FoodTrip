@@ -16,8 +16,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y curl
-          curl -Lo trivy.deb https://github.com/aquasecurity/trivy/releases/download/v0.39.2/trivy_0.39.2_Linux-64bit.deb
-          sudo dpkg -i trivy.deb
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
           trivy --version
 
       - name: Run Trivy to generate CycloneDX report
