@@ -36,24 +36,46 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Execute Codacy Analysis CLI and generate a SARIF output with the security issues identified during the analysis
+      # Run Codacy Analysis CLI and generate SARIF output
       - name: Run Codacy Analysis CLI
         uses: codacy/codacy-analysis-cli-action@d840f886c4bd4edc059706d09c6a1586111c540b
         with:
-          # Check https://github.com/codacy/codacy-analysis-cli#project-token to get your project token from your Codacy repository
-          # You can also omit the token and run the tools that support default configurations
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           verbose: true
           output: results.sarif
           format: sarif
-          # Adjust severity of non-security issues
           gh-code-scanning-compat: true
-          # Force 0 exit code to allow SARIF file generation
-          # This will handover control about PR rejection to the GitHub side
+          # Setting a large value for max-allowed-issues to prevent job failure on a large number of issues
           max-allowed-issues: 2147483647
 
-      # Upload the SARIF file generated in the previous step
-      - name: Upload SARIF results file
+      # Upload Codacy SARIF results
+      - name: Upload Codacy SARIF results file
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
+
+      # Run ESLint and generate SARIF output
+      - name: Run ESLint
+        run: |
+          npm install
+          npx eslint -c .eslintrc.json -f eslint-formatter-sarif -o eslint-results.sarif .
+
+      # Upload ESLint SARIF results
+      - name: Upload ESLint SARIF results file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: eslint-results.sarif
+
+      # Run Trivy and generate SARIF output
+      - name: Run Trivy scan
+        uses: aquasecurity/trivy-action@v0.0.10
+        with:
+          image-ref: "./"
+          format: sarif
+          output: trivy-results.sarif
+
+      # Upload Trivy SARIF results
+      - name: Upload Trivy SARIF results file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
