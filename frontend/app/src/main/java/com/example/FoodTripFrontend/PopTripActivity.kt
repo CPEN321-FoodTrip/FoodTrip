@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -13,6 +14,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.FoodTripFrontend.GroceryStoreActivity.DiscountItem
 import com.example.FoodTripFrontend.PastTripActivity.Companion
 import com.example.FoodTripFrontend.PastTripActivity.TripItem
+import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import okhttp3.Call
@@ -21,6 +23,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okio.IOException
+import java.util.ArrayList
 
 class PopTripActivity : Activity() {
 
@@ -130,5 +133,39 @@ class PopTripActivity : Activity() {
         endItemView.textSize = 25f
         endItemView.text = "-> ${route.end_location.name}"
         stopList.addView(endItemView)
+
+        val showRouteButton = findViewById<Button>(R.id.show_past_route_button)
+        showRouteButton.setOnClickListener {
+            val coordsList = mutableListOf<LatLng>()
+            val nameList = mutableListOf<String>()
+
+            // add start location
+            coordsList.add(LatLng(route.start_location.latitude.toDouble()
+                , route.start_location.longitude.toDouble()))
+            nameList.add(route.start_location.name)
+
+            // add stops
+            for (i in 0..<stops.count()) {
+                val stop = stops[i]
+
+                coordsList.add(LatLng(stop.location.latitude.toDouble(),
+                    stop.location.longitude.toDouble()))
+                nameList.add(stop.location.name)
+
+                Log.d(TAG, "Stop $i: ${stop.location.latitude}, ${stop.location.longitude}")
+            }
+
+            // add end location
+            coordsList.add(LatLng(route.end_location.latitude.toDouble()
+                , route.end_location.longitude.toDouble()))
+            nameList.add(route.end_location.name)
+
+            val intent = Intent(this, MainActivity::class.java)
+            val bundle = Bundle()
+            bundle.putParcelableArrayList("coordinates", ArrayList(coordsList))
+            bundle.putStringArrayList("cities", ArrayList(nameList))
+            intent.putExtras(bundle)
+            startActivity(intent)
+        }
     }
 }
