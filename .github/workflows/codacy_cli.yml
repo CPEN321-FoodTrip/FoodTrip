@@ -12,9 +12,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@main
 
-      - name: Run Trivy
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.39.2/trivy_0.39.2_Linux-64bit.deb
+          sudo dpkg -i trivy_0.39.2_Linux-64bit.deb
+
+      - name: Run Trivy to generate CycloneDX report
         run: |
           trivy fs --format cyclonedx --output results.cdx /src
+
+      - name: Print CycloneDX output
+        run: cat results.cdx
 
       - name: Run Codacy Analysis CLI
         uses: codacy/codacy-analysis-cli-action@master
