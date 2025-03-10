@@ -165,6 +165,6 @@ export async function getRecipesfromRoute(tripID: string): Promise<Recipe[]> { /
     return result ? result : null;
   }
 
-]
+
 
 
