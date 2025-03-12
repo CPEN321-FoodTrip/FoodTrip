@@ -12,7 +12,7 @@ const app = express();
 app.use(express.json());
 app.use(morgan("tiny"));
 
-const Routes = [...RouteRoutes, ...DiscountRoutes,...RecipeRoutes];
+const Routes = [...RouteRoutes, ...DiscountRoutes, ...RecipeRoutes];
 
 Routes.forEach((route) => {
   (app as any)[route.method](
@@ -55,3 +55,5 @@ const errorHandle = (req: Request, res: Response) => {
 };
 
 app.use(errorHandle);
+
+export default app; // needed for testing
