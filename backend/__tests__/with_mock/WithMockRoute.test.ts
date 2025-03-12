@@ -113,6 +113,16 @@ describe("Mocked: GET /get-route", () => {
 
     expect(response.body).toMatchObject(mockRoute);
   });
+
+  test("Try to get deleted route", async () => {
+    const tripID = new ObjectId(123);
+    jest.spyOn(RouteHelpers, "getRouteFromDatabase").mockResolvedValue(null);
+
+    await request(app)
+      .get("/get-route")
+      .query({ tripID: tripID.toHexString() })
+      .expect(404);
+  });
 });
 
 describe("Mocked: GET /get-routes", () => {
