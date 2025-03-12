@@ -9,6 +9,7 @@ export const RouteRoutes = [
     route: "/generate-route",
     action: controller.generateRoute,
     validation: [
+      body("userID").exists().isString(),
       body("origin").exists().isString(),
       body("destination").exists().isString(),
       body("numStops").exists().isInt(),
