@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -53,6 +54,17 @@ class PopTripActivity : Activity() {
         val stops: List<Stop>
     )
 
+    data class Recipe(
+        val recipeName: String,
+        val recipeID: String,
+        val url: String,
+        val ingredients: List<String>,
+    )
+
+    data class EdamamResponse (
+        val hits: List<Recipe>
+    )
+
     lateinit var client: OkHttpClient
     lateinit var stopList: LinearLayout
 
@@ -70,10 +82,15 @@ class PopTripActivity : Activity() {
         client = OkHttpClient()
         stopList = findViewById<LinearLayout>(R.id.trip_list_layout)
 
+        // TODO: change processRecipes -> getRecipes
         val tripID = intent.getStringExtra("tripID")
         Log.d(TAG, "$tripID is passed into here")
         if (tripID != null) {
-            getTrip(tripID) {route -> processTrip(route)}
+            getTrip(tripID) {route ->
+                processTrip(route)
+                // getRecipe(tripID) {recipes -> processRecipes(recipes)}
+                processRecipes(EdamamResponse(emptyList()))
+            }
         }
     }
 
@@ -119,7 +136,7 @@ class PopTripActivity : Activity() {
         stopList.addView(startItemView)
 
         val stops = route.stops
-        for (i in 0..(stops.count()-1)) {
+        for (i in 0..<stops.count()) {
             val itemView = TextView(this)
 
             val stop = stops[i]
@@ -166,6 +183,77 @@ class PopTripActivity : Activity() {
             bundle.putStringArrayList("cities", ArrayList(nameList))
             intent.putExtras(bundle)
             startActivity(intent)
+        }
+    }
+
+    // TODO: fix the url
+    // TODO: fix the data structure for reading JSON of EdamameResponse
+    private fun getRecipes(tripID: String, callback: (EdamamResponse) -> Unit) {
+        val url = "${BuildConfig.SERVER_URL}get-recipe-from-route?tripID=$tripID"
+        Log.d(TAG, url)
+
+        val request = Request.Builder()
+            .url(url)
+            .get()
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.use {
+                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                    val json = response.body!!.string()
+                    val listType = object : TypeToken<Route>() {}.type
+                    var recipes:EdamamResponse = Gson().fromJson(json, listType)
+                    callback(recipes)
+                }
+            }
+        })
+    }
+
+    private fun processRecipes(recipes: EdamamResponse) {
+        runOnUiThread {
+            showRecipes(recipes)
+        }
+    }
+
+    private fun showRecipes(response: EdamamResponse) {
+        val stopsCount = stopList.getChildCount() - 2
+        val recipesCount = response.hits.count()
+
+        val recipes = response.hits
+
+        // TODO: change stopsCount to recipesCount
+        // TODO: change the itemView.text
+        for (i in 0..<stopsCount) {
+            val index = 2 + i * 2
+            val itemView = TextView(this)
+
+            // val recipe = recipes[i]
+            itemView.textSize = 25f
+            itemView.text = "    recipe ${i+1}: something"
+
+            // TODO: implement parameters to PopRecipeActivity
+            itemView.setOnClickListener {
+                Log.d(TAG, "${itemView.text} is clicked")
+
+                val sample_ingredients = ArrayList<String>()
+                sample_ingredients.add("ingred 1")
+                sample_ingredients.add("ingred 2")
+                sample_ingredients.add("ingred 3")
+
+                val intent = Intent(this, PopRecipeActivity::class.java)
+                intent.putExtra("recipeName", "recipe ${i+1}")
+                intent.putExtra("url", "https://www.edamam.com/results/recipe/?recipe=chicken-fried-steak-aa9d77c1664fe1b79ac35ea8228a48e8/search=steak")
+                intent.putStringArrayListExtra("ingredients", sample_ingredients)
+                startActivity(intent)
+            }
+
+            stopList.addView(itemView, index)
         }
     }
 }
