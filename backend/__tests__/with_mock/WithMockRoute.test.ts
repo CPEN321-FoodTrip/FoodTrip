@@ -138,3 +138,17 @@ describe("Mocked: GET /get-routes", () => {
     expect(response.body[0].tripID).toBe(tripID.toHexString());
   });
 });
+
+describe("Mocked: DELETE /delete-route", () => {
+  test("Successful route deletion", async () => {
+    const tripID = new ObjectId(123);
+    jest.spyOn(RouteHelpers, "deleteRouteFromDatabase").mockResolvedValue(1);
+
+    const response = await request(app)
+      .delete("/delete-route")
+      .query({ tripID: tripID.toHexString() })
+      .expect(200);
+
+    expect(response.body).toHaveProperty("success", true);
+  });
+});
