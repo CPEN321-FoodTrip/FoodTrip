@@ -72,7 +72,7 @@ describe("Mocked: POST /generate-route", () => {
       .expect(200);
 
     expect(response.body).toHaveProperty("tripID");
-    expect(String(response.body.tripID)).toBe(String(tripID));
+    expect(response.body.tripID).toBe(tripID.toHexString());
     expect(response.body.stops.length).toBeGreaterThan(0);
   });
 });
@@ -112,5 +112,29 @@ describe("Mocked: GET /get-route", () => {
       .expect(200);
 
     expect(response.body).toMatchObject(mockRoute);
+  });
+});
+
+describe("Mocked: GET /get-routes", () => {
+  test("Sucessful routes retrieved", async () => {
+    const tripID = new ObjectId(123);
+    const userID = "test-user";
+    const mockRoutes = [
+      { tripID, userID, start_location: "Vancouver", end_location: "Toronto" },
+    ];
+
+    jest
+      .spyOn(RouteHelpers, "getRoutesFromDatabase")
+      .mockResolvedValue(mockRoutes);
+
+    const response = await request(app)
+      .get("/get-routes")
+      .query({ userID: userID })
+      .expect(200);
+
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body.length).toBe(1);
+    expect(response.body[0]).toHaveProperty("tripID");
+    expect(response.body[0].tripID).toBe(tripID.toHexString());
   });
 });
