@@ -3,6 +3,7 @@ import type { Config } from "jest";
 const config: Config = {
   preset: "ts-jest", // DO NOT REMOVE
   testEnvironment: "node",
+  setupFilesAfterEnv: ["./jest.setup.ts"],
   testMatch: ["**/__tests__/**/*.test.ts"],
   moduleFileExtensions: ["ts", "js"],
   collectCoverage: false, // enable with flag --coverage
