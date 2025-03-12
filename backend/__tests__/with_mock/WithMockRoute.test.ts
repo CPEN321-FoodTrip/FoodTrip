@@ -76,3 +76,41 @@ describe("Mocked: POST /generate-route", () => {
     expect(response.body.stops.length).toBeGreaterThan(0);
   });
 });
+
+describe("Mocked: GET /get-route", () => {
+  test("Sucessful route retrieved", async () => {
+    const tripID = new ObjectId(123);
+    const mockRoute = {
+      tripID: tripID.toHexString(),
+      start_location: {
+        name: "Vancouver",
+        latitude: 49.2827,
+        longitude: -123.1207,
+      },
+      end_location: { name: "Toronto", latitude: 43.6532, longitude: -79.3832 },
+      stops: [
+        {
+          location: {
+            name: "Calgary",
+            latitude: 51.0447,
+            longitude: -114.0719,
+          },
+          distanceFromStart: 100,
+          cumulativeDistance: 100,
+          segmentPercentage: 50,
+        },
+      ],
+    };
+
+    jest
+      .spyOn(RouteHelpers, "getRouteFromDatabase")
+      .mockResolvedValue(mockRoute);
+
+    const response = await request(app)
+      .get("/get-route")
+      .query({ tripID: tripID.toHexString() })
+      .expect(200);
+
+    expect(response.body).toMatchObject(mockRoute);
+  });
+});
