@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.play.services.maps)
     implementation(libs.googleid)
+    implementation(libs.androidx.espresso.intents)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -73,6 +74,7 @@ dependencies {
     androidTestImplementation("androidx.test:runner:1.6.1")
     androidTestImplementation("androidx.test:rules:1.6.1")
     implementation("androidx.webkit:webkit:1.8.0")
+    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
     dependencies {
         implementation(libs.okhttp)
         implementation(libs.gson)
