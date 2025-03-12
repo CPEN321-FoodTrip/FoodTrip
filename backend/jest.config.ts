@@ -1,23 +1,21 @@
-import type { Config } from 'jest';
+import type { Config } from "jest";
 
 const config: Config = {
-  preset: 'ts-jest', // DO NOT REMOVE
-  testEnvironment: 'node',
-  testMatch: ['**/__tests__/**/*.test.ts'],
-  moduleFileExtensions: ['ts', 'js'],
-  collectCoverage: true,
+  preset: "ts-jest", // DO NOT REMOVE
+  testEnvironment: "node",
+  testMatch: ["**/__tests__/**/*.test.ts"],
+  moduleFileExtensions: ["ts", "js"],
+  collectCoverage: false, // enable with flag --coverage
   collectCoverageFrom: [
     // 'backend/helpers/*.ts',
     // 'backend/controllers/*.ts',
     // 'backend/routes/*.ts',
     // 'backend/example.ts',
-    '**/*.ts', //from everything
-    '!backend/**/*.test.ts'
+    "**/*.ts", //from everything
+    "!backend/**/*.test.ts",
   ],
-  coverageDirectory: 'coverage', // <-- Output folder for coverage reports
-  coverageReporters: ['text', 'lcov'], // <-- Formats: text summary + HTML report
+  coverageDirectory: "coverage", // <-- Output folder for coverage reports
+  coverageReporters: ["text", "lcov"], // <-- Formats: text summary + HTML report
 };
 
 export default config;
-
-  
