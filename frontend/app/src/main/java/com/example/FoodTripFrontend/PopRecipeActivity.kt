@@ -74,6 +74,7 @@ class PopRecipeActivity : Activity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (::webView.isInitialized && webView.parent != null) {
             findViewById<ConstraintLayout>(R.id.main).removeView(webView)
