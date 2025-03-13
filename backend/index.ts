@@ -56,8 +56,16 @@ client
     client.close();
   });
 
-const errorHandle = (req: Request, res: Response) => {
-  console.error(res.status);
+const errorHandle = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.error("Error:", err.message);
+  console.error("Stack trace:", err.stack);
+
+  res.status(500).json({ error: "Internal server error" });
 };
 
 app.use(errorHandle);
