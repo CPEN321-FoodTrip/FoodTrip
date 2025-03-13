@@ -291,21 +291,73 @@ describe("Unmocked: POST /routes", () => {
 });
 
 describe("Unmocked: GET /routes/:id", () => {
-  let tripID = "";
+  const SAMPLE_ROUTE = {
+    start_location: {
+      name: "Vancouver",
+      latitude: 49.2608724,
+      longitude: -123.113952,
+    },
+    end_location: {
+      name: "Toronto",
+      latitude: 43.6534817,
+      longitude: -79.3839347,
+    },
+    stops: [
+      {
+        location: {
+          name: "Regina",
+          latitude: 50.45008,
+          longitude: -104.6178,
+          population: 176183,
+        },
+        distanceFromStart: 1329.071074459746,
+        cumulativeDistance: 1329.071074459746,
+        segmentPercentage: 33.33333333333333,
+      },
+      {
+        location: {
+          name: "Minneapolis",
+          latitude: 44.97997,
+          longitude: -93.26384,
+          population: 410939,
+        },
+        distanceFromStart: 2292.312851021066,
+        cumulativeDistance: 2292.312851021066,
+        segmentPercentage: 66.66666666666666,
+      },
+    ],
+  };
 
   // Input:
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("Valid route", async () => {
+  test("Retreive valid route", async () => {
+    const db = client.db(ROUTES_DB_NAME);
+    const collection = db.collection(ROUTES_COLLECTION_NAME);
+    const result = await collection.insertOne(SAMPLE_ROUTE);
+    const tripID = result.insertedId;
+
     const response = await request(app).get(`/routes/${tripID}`).expect(200);
 
-    expect(response.body).toHaveProperty("start_location");
-    expect(response.body).toHaveProperty("end_location");
+    expect(response.body).toHaveProperty(
+      "start_location",
+      SAMPLE_ROUTE.start_location
+    );
+    expect(response.body).toHaveProperty(
+      "end_location",
+      SAMPLE_ROUTE.end_location
+    );
+    expect(response.body).toHaveProperty("stops", SAMPLE_ROUTE.stops);
   });
 
-  test("Invalid get deleted route", async () => {
-    await request(app).get("/get-route").query({ tripID }).expect(404);
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Attempt to get route that doesn't exist", async () => {
+    const tripID = new ObjectId().toHexString();
+    await request(app).get(`/routes/${tripID}`).expect(404);
   });
 });
 
