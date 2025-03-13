@@ -19,9 +19,6 @@ describe("Mocked: POST /routes", () => {
   // Expected behavior:
   // Expected output:
   test("Succesful route generated", async () => {
-    const tripID = new ObjectId(123);
-    const userID = "test-user";
-
     // mock coordinates for vancouver and toronto for response from openstreetmap api call
     global.fetch = jest
       .fn()
@@ -36,12 +33,10 @@ describe("Mocked: POST /routes", () => {
         json: async () => [{ lat: "43.6532", lon: "-79.3832" }],
       });
 
-    jest.spyOn(RouteHelpers, "saveRouteToDb").mockResolvedValue(tripID);
-
     const response = await request(app)
       .post("/routes")
       .send({
-        userID: userID,
+        userID: "test-user",
         origin: "Vancouver",
         destination: "Toronto",
         numStops: 1,
@@ -49,8 +44,121 @@ describe("Mocked: POST /routes", () => {
       .expect(200);
 
     expect(response.body).toHaveProperty("tripID");
-    expect(response.body.tripID).toBe(tripID.toHexString());
+    expect(response.body).toHaveProperty("start_location");
+    expect(response.body).toHaveProperty("end_location");
     expect(response.body).toHaveProperty("stops");
+    expect(response.body.stops).toHaveLength(1); // 1 stop
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Fail external api request", async () => {
+    // dont mock coordinates from openstreetmap api call, cause it to fail
+    global.fetch = jest.fn();
+
+    const response = await request(app)
+      .post("/routes")
+      .send({
+        userID: "test-user",
+        origin: "Vancouver",
+        destination: "Toronto",
+        numStops: 1,
+      })
+      .expect(500);
+
+    expect(response.body).toHaveProperty("error", "Internal server error");
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Invalid origin city", async () => {
+    // mock empty coordinates from openstreetmap api call
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => [] });
+
+    const response = await request(app)
+      .post("/routes")
+      .send({
+        userID: "test-user",
+        origin: ";;ee",
+        destination: "Toronto",
+        numStops: 1,
+      })
+      .expect(400);
+
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toContain("Origin"); // error should mention origin
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Invalid destination city", async () => {
+    // mock empty coordinates from openstreetmap api call
+    global.fetch = jest
+      .fn()
+      // vancover
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
+      })
+      // not found destination
+      .mockResolvedValueOnce({ ok: true, json: async () => [] });
+
+    const response = await request(app)
+      .post("/routes")
+      .send({
+        userID: "test-user",
+        origin: "Vancouver",
+        destination: "..;ea'",
+        numStops: 1,
+      })
+      .expect(400);
+
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toContain("Destination"); // error should mention destination
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Insert database failure", async () => {
+    global.fetch = jest
+      .fn()
+      // vancover
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
+      })
+      // toronto
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ lat: "43.6532", lon: "-79.3832" }],
+      });
+
+    // database failure
+    jest
+      .spyOn(RouteHelpers, "saveRouteToDb")
+      .mockRejectedValue(new Error("Database connection failed"));
+
+    const response = await request(app)
+      .post("/routes")
+      .send({
+        userID: "test-user",
+        origin: "Vancouver",
+        destination: "Toronto",
+        numStops: 1,
+      })
+      .expect(500);
+
+    expect(response.body).toHaveProperty("error", "Internal server error");
   });
 });
 
