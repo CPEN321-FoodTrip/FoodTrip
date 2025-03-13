@@ -4,63 +4,49 @@ import {
   generateRouteStops,
   getRouteFromDatabase,
   saveRouteToDatabase,
-  getRoutesFromDatabase,
   deleteRouteFromDatabase,
+  fetchCityData,
 } from "../helpers/RouteHelpers";
 
 export class RouteController {
-  async generateRoute(req: Request, res: Response, next: NextFunction) {
+  // create a new route
+  // POST /routes
+  async createRoute(req: Request, res: Response, next: NextFunction) {
     const { userID, origin, destination, numStops } = req.body;
 
-    if (!userID || !origin || !destination || !numStops || numStops < 1) {
-      res.status(400).json({ error: "Invalid request parameters" });
-      return;
+    if (!userID) {
+      return res.status(400).json({ error: "userID is required" });
     }
-
-    const originURL = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(
-      origin
-    )}&format=json&limit=1`;
-
-    const originResponse = await fetch(originURL);
-    const originData = await originResponse.json();
-
-    if (originData.length === 0) {
-      res.status(400).json({ error: "Could not locate start city" });
-      return;
+    if (!origin || !destination || !numStops) {
+      return res.status(400).json({
+        error: "Origin, destination and number of stops are required",
+      });
     }
-
-    const originCity = originData[0];
-
-    const start: Location = {
-      name: origin,
-      latitude: parseFloat(originCity.lat),
-      longitude: parseFloat(originCity.lon),
-      population: 0, // not used for start location
-    };
-
-    const destinationURL = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(
-      destination
-    )}&format=json&limit=1`;
-
-    const destinationResponse = await fetch(destinationURL);
-    const destinationData = await destinationResponse.json();
-
-    if (destinationData.length === 0) {
-      res.status(400).json({ error: "Could not locate end city" });
-      return;
+    if (numStops < 1) {
+      return res
+        .status(400)
+        .json({ error: "Number of stops must be at least 1" });
     }
-
-    const destinationCity = destinationData[0];
-
-    const end: Location = {
-      name: destination,
-      latitude: parseFloat(destinationCity.lat),
-      longitude: parseFloat(destinationCity.lon),
-      population: 0, // not used for end location
-    };
 
     try {
+      const originCityData = await fetchCityData(origin);
+      const start: Location = {
+        name: origin,
+        latitude: parseFloat(originCityData.lat),
+        longitude: parseFloat(originCityData.lon),
+        population: 0, // not used for start location
+      };
+
+      const destinationCityData = await fetchCityData(destination);
+      const end: Location = {
+        name: destination,
+        latitude: parseFloat(destinationCityData.lat),
+        longitude: parseFloat(destinationCityData.lon),
+        population: 0, // not used for end location
+      };
+
       const stops = await generateRouteStops(start, end, numStops);
+
       const route = {
         start_location: {
           name: origin,
@@ -80,57 +66,54 @@ export class RouteController {
 
       res.json(response);
     } catch (error) {
-      console.error("Error generating route:", error);
-      res.status(500).json({ error: "Error generating route" });
+      console.error("Error creating route:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      res.status(500).json({ error: errorMessage });
     }
   }
 
-  // get route information
+  // get information about a particular route
+  // GET /routes/:id
   async getRoute(req: Request, res: Response, next: NextFunction) {
-    const tripID = req.query.tripID as string;
+    try {
+      const tripID = req.params.id;
 
-    if (!tripID) {
-      res.status(400).json({ error: "Invalid request parameters" });
-      return;
+      if (!tripID) {
+        return res.status(400).json({ error: "tripID is required" });
+      }
+
+      const route = await getRouteFromDatabase(tripID);
+
+      if (!route) {
+        return res.status(404).json({ error: "Route not found" });
+      }
+
+      res.json(route);
+    } catch (error) {
+      next(error);
     }
-
-    const route = await getRouteFromDatabase(tripID);
-    if (!route) {
-      res.status(404).json({ error: "Route not found" });
-      return;
-    }
-
-    res.json(route);
   }
 
-  // get all routes for user
-  async getRoutes(req: Request, res: Response, next: NextFunction) {
-    const userID = req.query.userID as string;
-
-    if (!userID) {
-      res.status(400).json({ error: "Invalid request parameters" });
-      return;
-    }
-
-    const routes = await getRoutesFromDatabase(userID);
-    res.json(routes);
-  }
-
-  // delete route
+  // delete a route
+  // DELETE /routes/:id
   async deleteRoute(req: Request, res: Response, next: NextFunction) {
-    const tripID = req.query.tripID as string;
+    try {
+      const tripID = req.params.id;
 
-    if (!tripID) {
-      res.status(400).json({ error: "Invalid request parameters" });
-      return;
+      if (!tripID) {
+        return res.status(400).json({ error: "tripID is required" });
+      }
+
+      const result = await deleteRouteFromDatabase(tripID);
+
+      if (!result) {
+        return res.status(404).json({ error: "Route not found" });
+      }
+
+      res.json({ success: true, message: "Route deleted successfully" });
+    } catch (error) {
+      next(error);
     }
-
-    const result = await deleteRouteFromDatabase(tripID);
-    if (!result) {
-      res.status(404).json({ error: "Route not found" });
-      return;
-    }
-
-    res.json({ success: true });
   }
 }

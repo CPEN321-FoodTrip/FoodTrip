@@ -133,7 +133,29 @@ async function importGeoNamesToMongoDB(): Promise<void> {
 
   await collection.createIndex({ location: "2dsphere" }); // geospatial index for closest cities
   await collection.createIndex({ population: -1 }); // allow filtering by population
-  await collection.createIndex({ countryCode: 1 }); // allow filtering by country code
+}
+
+// helper function to fetch city data from OpenStreetMap API
+export async function fetchCityData(city: string) {
+  const url = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(
+    city
+  )}&format=json&limit=1`;
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.length === 0) {
+      throw new Error(`Could not locate city: ${city}`);
+    }
+
+    return data[0];
+  } catch (error) {
+    throw new Error(
+      `Error fetching city data: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
+  }
 }
 
 // calculate distance between two points using Haversine formula
@@ -314,17 +336,6 @@ export async function getRouteFromDatabase(tripID: string): Promise<{} | null> {
 
   const result = await collection.findOne({ _id: new ObjectId(tripID) });
   return result ? result : null;
-}
-
-// get all routes from MongoDB for user
-export async function getRoutesFromDatabase(userID: string): Promise<{}[]> {
-  const db = client.db(ROUTES_DB_NAME);
-  const collection = db.collection(ROUTES_COLLECTION_NAME);
-
-  const routes = await collection.find({ userID: userID }).toArray();
-
-  // add tripID to each route and remove _id and stops
-  return routes.map(({ _id, stops, ...rest }) => ({ ...rest, tripID: _id }));
 }
 
 // delete route from MongoDB by ID

@@ -6,8 +6,8 @@ const controller = new RouteController();
 export const RouteRoutes = [
   {
     method: "post",
-    route: "/generate-route",
-    action: controller.generateRoute,
+    route: "/routes",
+    action: controller.createRoute,
     validation: [
       body("origin").exists().isString(),
       body("destination").exists().isString(),
@@ -16,19 +16,13 @@ export const RouteRoutes = [
   },
   {
     method: "get",
-    route: "/get-route",
+    route: "/routes/:id",
     action: controller.getRoute,
     validation: [],
   },
   {
-    method: "get",
-    route: "/get-routes",
-    action: controller.getRoutes,
-    validation: [],
-  },
-  {
     method: "delete",
-    route: "/delete-route",
+    route: "/routes/:id",
     action: controller.deleteRoute,
     validation: [],
   },
