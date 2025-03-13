@@ -6,7 +6,7 @@ const DB_NAME = "discounts";
 const COLLECTION_NAME = "discounts";
 
 // get all discounts for a store
-export async function getDiscountsFromDatabase(storeID: string): Promise<{}> {
+export async function getDiscountsFromDb(storeID: string): Promise<{}> {
   const discounts = await client
     .db(DB_NAME)
     .collection(COLLECTION_NAME)
@@ -17,9 +17,7 @@ export async function getDiscountsFromDatabase(storeID: string): Promise<{}> {
 }
 
 // add a discount to the database
-export async function addDiscountToDatabase(
-  discount: Discount
-): Promise<string> {
+export async function addDiscountToDb(discount: Discount): Promise<string> {
   const result = await client
     .db(DB_NAME)
     .collection(COLLECTION_NAME)
@@ -28,20 +26,8 @@ export async function addDiscountToDatabase(
   return result.insertedId.toString();
 }
 
-// delete a discount from the database
-export async function deleteDiscountFromDatabase(
-  discountID: string
-): Promise<number> {
-  const result = await client
-    .db(DB_NAME)
-    .collection(COLLECTION_NAME)
-    .deleteOne({ _id: new ObjectId(discountID) });
-
-  return result.deletedCount;
-}
-
 // get all discounts from the database, with optional ingredient filter
-export async function getAllDiscountsFromDatabase(
+export async function getAllDiscountsFromDb(
   ingredient: string = ""
 ): Promise<{}> {
   const query = ingredient ? { ingredient: ingredient } : {};
@@ -53,4 +39,16 @@ export async function getAllDiscountsFromDatabase(
     .toArray();
 
   return discounts.map(({ _id, ...rest }) => ({ discountID: _id, ...rest }));
+}
+
+// delete a discount from the database
+export async function deleteDiscountFromDb(
+  discountID: string
+): Promise<number> {
+  const result = await client
+    .db(DB_NAME)
+    .collection(COLLECTION_NAME)
+    .deleteOne({ _id: new ObjectId(discountID) });
+
+  return result.deletedCount;
 }

@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import {
-  addDiscountToDatabase,
-  deleteDiscountFromDatabase,
-  getAllDiscountsFromDatabase,
-  getDiscountsFromDatabase,
+  addDiscountToDb,
+  deleteDiscountFromDb,
+  getAllDiscountsFromDb,
+  getDiscountsFromDb,
 } from "../helpers/DiscountHelper";
 import { validationResult } from "express-validator";
 import { ObjectId } from "mongodb";
@@ -28,7 +28,7 @@ export class DiscountController {
     };
 
     try {
-      const discountID = await addDiscountToDatabase(discount);
+      const discountID = await addDiscountToDb(discount);
 
       res
         .status(201)
@@ -48,7 +48,7 @@ export class DiscountController {
         return res.status(400).json({ error: "storeID is required" });
       }
 
-      const discounts = await getDiscountsFromDatabase(storeID);
+      const discounts = await getDiscountsFromDb(storeID);
 
       if (!Array.isArray(discounts) || discounts.length === 0) {
         return res
@@ -68,7 +68,7 @@ export class DiscountController {
     try {
       const ingredient = (req.query.ingredient as string) || "";
 
-      const discounts = await getAllDiscountsFromDatabase(ingredient);
+      const discounts = await getAllDiscountsFromDb(ingredient);
 
       if (!Array.isArray(discounts) || discounts.length === 0) {
         return res.status(404).json({ error: "No discounts found" });
@@ -90,7 +90,7 @@ export class DiscountController {
         return res.status(400).json({ error: "Invalid discountID format" });
       }
 
-      const result = await deleteDiscountFromDatabase(discountID);
+      const result = await deleteDiscountFromDb(discountID);
 
       if (!result) {
         return res.status(404).json({ error: "Discount not found" });
