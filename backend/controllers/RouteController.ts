@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import {
   generateRouteStops,
-  getRouteFromDatabase,
-  saveRouteToDatabase,
-  deleteRouteFromDatabase,
+  getRouteFromDb,
+  saveRouteToDb,
+  deleteRouteFromDb,
   fetchCityData,
 } from "../helpers/RouteHelpers";
 import { Location } from "../interfaces/RouteInterfaces";
@@ -59,7 +59,7 @@ export class RouteController {
         stops: stops,
       };
 
-      const tripID = await saveRouteToDatabase(userID, route);
+      const tripID = await saveRouteToDb(userID, route);
       const response = { tripID, ...route };
 
       res.json(response);
@@ -78,7 +78,7 @@ export class RouteController {
         return res.status(400).json({ error: "Invalid tripID format" });
       }
 
-      const route = await getRouteFromDatabase(tripID);
+      const route = await getRouteFromDb(tripID);
 
       if (!route) {
         return res.status(404).json({ error: "Route not found" });
@@ -100,7 +100,7 @@ export class RouteController {
         return res.status(400).json({ error: "tripID is required" });
       }
 
-      const result = await deleteRouteFromDatabase(tripID);
+      const result = await deleteRouteFromDb(tripID);
 
       if (!result) {
         return res.status(404).json({ error: "Route not found" });
