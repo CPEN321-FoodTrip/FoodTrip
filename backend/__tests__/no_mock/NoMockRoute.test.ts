@@ -8,7 +8,7 @@ import { ObjectId } from "mongodb";
 const ROUTES_DB_NAME = "route_data";
 const ROUTES_COLLECTION_NAME = "routes";
 
-describe("Unmocked: POST /generate-route", () => {
+describe("Unmocked: POST /routes", () => {
   beforeAll(async () => {
     await initializeGeoNamesDatabase();
   });
@@ -176,7 +176,73 @@ describe("Unmocked: POST /generate-route", () => {
       .expect(400);
 
     expect(response.body).toHaveProperty("error");
-    expect(response.body.error).toContain("Number of stops"); // error should mention number of stops
+    expect(response.body.error).toContain("Number of stops must be at least");
+
+    // verify db unchaged
+    const dbCountAfter = await client
+      .db(ROUTES_DB_NAME)
+      .collection(ROUTES_COLLECTION_NAME)
+      .countDocuments();
+
+    expect(dbCountBefore).toBe(dbCountAfter);
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Check same origin and destination city", async () => {
+    const dbCountBefore = await client
+      .db(ROUTES_DB_NAME)
+      .collection(ROUTES_COLLECTION_NAME)
+      .countDocuments();
+
+    const response = await request(app)
+      .post("/routes")
+      .send({
+        userID: "test-user",
+        origin: "Vancouver",
+        destination: "Vancouver",
+        numStops: 3,
+      })
+      .expect(400);
+
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toContain(
+      "Same start and end city not allowed"
+    );
+
+    // verify db unchaged
+    const dbCountAfter = await client
+      .db(ROUTES_DB_NAME)
+      .collection(ROUTES_COLLECTION_NAME)
+      .countDocuments();
+
+    expect(dbCountBefore).toBe(dbCountAfter);
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Extreme number of stops", async () => {
+    const dbCountBefore = await client
+      .db(ROUTES_DB_NAME)
+      .collection(ROUTES_COLLECTION_NAME)
+      .countDocuments();
+
+    const response = await request(app)
+      .post("/routes")
+      .send({
+        userID: "test-user",
+        origin: "Vancouver",
+        destination: "Toronto",
+        numStops: 999999999999999,
+      })
+      .expect(400);
+
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toContain("Number of stops must be at most");
 
     // verify db unchaged
     const dbCountAfter = await client
@@ -188,7 +254,7 @@ describe("Unmocked: POST /generate-route", () => {
   });
 });
 
-describe("Unmocked: GET /get-route", () => {
+describe("Unmocked: GET /routes/:id", () => {
   let tripID = "";
 
   // Input:
@@ -196,10 +262,7 @@ describe("Unmocked: GET /get-route", () => {
   // Expected behavior:
   // Expected output:
   test("Valid route", async () => {
-    const response = await request(app)
-      .get("/get-route")
-      .query({ tripID })
-      .expect(200);
+    const response = await request(app).get(`/routes/${tripID}`).expect(200);
 
     expect(response.body).toHaveProperty("start_location");
     expect(response.body).toHaveProperty("end_location");
@@ -210,24 +273,7 @@ describe("Unmocked: GET /get-route", () => {
   });
 });
 
-describe("Unmocked: GET /get-routes", () => {
-  const userID = "test-user";
-
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
-  test("Valid routes", async () => {
-    const response = await request(app)
-      .get("/get-routes")
-      .query({ userID })
-      .expect(200);
-
-    expect(Array.isArray(response.body)).toBe(true);
-  });
-});
-
-describe("Unmocked: DELETE /delete-route", () => {
+describe("Unmocked: DELETE /routes/:id", () => {
   const tripID = "";
 
   // Input:
@@ -235,10 +281,7 @@ describe("Unmocked: DELETE /delete-route", () => {
   // Expected behavior:
   // Expected output:
   test("Valid deletion", async () => {
-    const response = await request(app)
-      .delete("/delete-route")
-      .query({ tripID })
-      .expect(200);
+    const response = await request(app).delete(`/routes/${tripID}`).expect(200);
 
     expect(response.body).toHaveProperty("success", true);
   });
