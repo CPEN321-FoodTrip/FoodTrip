@@ -7,6 +7,7 @@ import {
   fetchCityData,
 } from "../helpers/RouteHelpers";
 import { Location } from "../interfaces/RouteInterfaces";
+import { ObjectId } from "mongodb";
 
 export class RouteController {
   // create a new route
@@ -73,8 +74,8 @@ export class RouteController {
     try {
       const tripID = req.params.id;
 
-      if (!tripID) {
-        return res.status(400).json({ error: "tripID is required" });
+      if (!ObjectId.isValid(tripID)) {
+        return res.status(400).json({ error: "Invalid tripID format" });
       }
 
       const route = await getRouteFromDatabase(tripID);
