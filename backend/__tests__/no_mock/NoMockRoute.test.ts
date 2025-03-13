@@ -58,7 +58,7 @@ describe("Unmocked: POST /generate-route", () => {
       .post("/routes")
       .send({
         userID: "test-user",
-        origin: "dofig;lkdflkgdfj",
+        origin: "InvalidCity",
         destination: "Toronto",
         numStops: 1,
       })
@@ -78,7 +78,7 @@ describe("Unmocked: POST /generate-route", () => {
       .send({
         userID: "test-user",
         origin: "Vancouver",
-        destination: "tlskhdka;;jshdkjash",
+        destination: "InvalidCity",
         numStops: 1,
       })
       .expect(400);
