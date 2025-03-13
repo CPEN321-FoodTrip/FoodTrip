@@ -53,7 +53,54 @@ describe("Unmocked: POST /generate-route", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
+  test("Missing body parameters", async () => {
+    const dbCountBefore = await client
+      .db(ROUTES_DB_NAME)
+      .collection(ROUTES_COLLECTION_NAME)
+      .countDocuments();
+
+    const response = await request(app).post("/routes").send({}).expect(400);
+    // error should mention parameters missing
+    expect(
+      response.body.errors.some((error: { msg: string }) =>
+        error.msg.includes("userID")
+      )
+    ).toBe(true);
+    expect(
+      response.body.errors.some((error: { msg: string }) =>
+        error.msg.includes("origin")
+      )
+    ).toBe(true);
+    expect(
+      response.body.errors.some((error: { msg: string }) =>
+        error.msg.includes("destination")
+      )
+    ).toBe(true);
+    expect(
+      response.body.errors.some((error: { msg: string }) =>
+        error.msg.includes("numStops")
+      )
+    ).toBe(true);
+
+    // verify db unchaged
+    const dbCountAfter = await client
+      .db(ROUTES_DB_NAME)
+      .collection(ROUTES_COLLECTION_NAME)
+      .countDocuments();
+
+    expect(dbCountBefore).toBe(dbCountAfter);
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
   test("Invalid origin city", async () => {
+    const dbCountBefore = await client
+      .db(ROUTES_DB_NAME)
+      .collection(ROUTES_COLLECTION_NAME)
+      .countDocuments();
+
     const response = await request(app)
       .post("/routes")
       .send({
@@ -66,6 +113,14 @@ describe("Unmocked: POST /generate-route", () => {
 
     expect(response.body).toHaveProperty("error");
     expect(response.body.error).toContain("Origin"); // error should mention origin
+
+    // verfify db unchaged
+    const dbCountAfter = await client
+      .db(ROUTES_DB_NAME)
+      .collection(ROUTES_COLLECTION_NAME)
+      .countDocuments();
+
+    expect(dbCountBefore).toBe(dbCountAfter);
   });
 
   // Input:
@@ -73,6 +128,11 @@ describe("Unmocked: POST /generate-route", () => {
   // Expected behavior:
   // Expected output:
   test("Invalid destination city", async () => {
+    const dbCountBefore = await client
+      .db(ROUTES_DB_NAME)
+      .collection(ROUTES_COLLECTION_NAME)
+      .countDocuments();
+
     const response = await request(app)
       .post("/routes")
       .send({
@@ -85,6 +145,46 @@ describe("Unmocked: POST /generate-route", () => {
 
     expect(response.body).toHaveProperty("error");
     expect(response.body.error).toContain("Destination"); // error should mention destination
+
+    // verify db unchaged
+    const dbCountAfter = await client
+      .db(ROUTES_DB_NAME)
+      .collection(ROUTES_COLLECTION_NAME)
+      .countDocuments();
+
+    expect(dbCountBefore).toBe(dbCountAfter);
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Invalid number of stops", async () => {
+    const dbCountBefore = await client
+      .db(ROUTES_DB_NAME)
+      .collection(ROUTES_COLLECTION_NAME)
+      .countDocuments();
+
+    const response = await request(app)
+      .post("/routes")
+      .send({
+        userID: "test-user",
+        origin: "Vancouver",
+        destination: "Toronto",
+        numStops: -1,
+      })
+      .expect(400);
+
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toContain("Number of stops"); // error should mention number of stops
+
+    // verify db unchaged
+    const dbCountAfter = await client
+      .db(ROUTES_DB_NAME)
+      .collection(ROUTES_COLLECTION_NAME)
+      .countDocuments();
+
+    expect(dbCountBefore).toBe(dbCountAfter);
   });
 });
 
