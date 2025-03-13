@@ -14,6 +14,10 @@ describe("Mocked: POST /routes", () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   // Input:
   // Expected status code:
   // Expected behavior:
@@ -163,6 +167,14 @@ describe("Mocked: POST /routes", () => {
 });
 
 describe("Mocked: GET /routes/:id", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   // Input:
   // Expected status code:
   // Expected behavior:
@@ -204,15 +216,41 @@ describe("Mocked: GET /routes/:id", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("Try to get deleted route", async () => {
+  test("Try to get route that doesn't exist", async () => {
     const tripID = new ObjectId(123);
-    jest.spyOn(RouteHelpers, "getRouteFromDb").mockResolvedValue(null);
+    // db does not contain any route with this id
+    const response = await request(app)
+      .get(`/routes/${tripID.toHexString()}`)
+      .expect(404);
+    expect(response.body).toHaveProperty("error", "Route not found");
+  });
 
-    await request(app).get(`/route/${tripID}`).expect(404);
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Get database failure", async () => {
+    const tripID = new ObjectId(123);
+    jest
+      .spyOn(RouteHelpers, "getRouteFromDb")
+      .mockRejectedValue(new Error("Database connection failed"));
+
+    const response = await request(app)
+      .get(`/routes/${tripID.toHexString()}`)
+      .expect(500);
+    expect(response.body).toHaveProperty("error", "Internal server error");
   });
 });
 
 describe("Mocked: DELETE /routes/:id", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   // Input:
   // Expected status code:
   // Expected behavior:
