@@ -14,12 +14,9 @@ export class RouteController {
   async createRoute(req: Request, res: Response, next: NextFunction) {
     const { userID, origin, destination, numStops } = req.body;
 
-    if (!userID) {
-      return res.status(400).json({ error: "userID is required" });
-    }
-    if (!origin || !destination || !numStops) {
+    if (!userID || !origin || !destination || !numStops) {
       return res.status(400).json({
-        error: "Origin, destination and number of stops are required",
+        error: "userID, origin, destination and numStops are required",
       });
     }
     if (numStops < 1) {
