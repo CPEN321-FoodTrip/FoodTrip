@@ -95,7 +95,7 @@ describe("Unmocked: POST /routes", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("Invalid origin city", async () => {
+  test("Nonexistant origin city", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
       .collection(ROUTES_COLLECTION_NAME)
@@ -127,7 +127,7 @@ describe("Unmocked: POST /routes", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("Invalid destination city", async () => {
+  test("Nonexistant destination city", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
       .collection(ROUTES_COLLECTION_NAME)
@@ -159,7 +159,43 @@ describe("Unmocked: POST /routes", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("Invalid number of stops", async () => {
+  test("Invalid string value for stops", async () => {
+    const dbCountBefore = await client
+      .db(ROUTES_DB_NAME)
+      .collection(ROUTES_COLLECTION_NAME)
+      .countDocuments();
+
+    const response = await request(app)
+      .post("/routes")
+      .send({
+        userID: "test-user",
+        origin: "Vancouver",
+        destination: "Toronto",
+        numStops: "invalid",
+      })
+      .expect(400);
+
+    expect(response.body).toHaveProperty("errors");
+    expect(
+      response.body.errors.some((error: { msg: string }) =>
+        error.msg.includes("must be an integer")
+      )
+    ).toBe(true);
+
+    // verify db unchaged
+    const dbCountAfter = await client
+      .db(ROUTES_DB_NAME)
+      .collection(ROUTES_COLLECTION_NAME)
+      .countDocuments();
+
+    expect(dbCountBefore).toBe(dbCountAfter);
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Negative number of stops", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
       .collection(ROUTES_COLLECTION_NAME)
@@ -177,6 +213,38 @@ describe("Unmocked: POST /routes", () => {
 
     expect(response.body).toHaveProperty("error");
     expect(response.body.error).toContain("Number of stops must be at least");
+
+    // verify db unchaged
+    const dbCountAfter = await client
+      .db(ROUTES_DB_NAME)
+      .collection(ROUTES_COLLECTION_NAME)
+      .countDocuments();
+
+    expect(dbCountBefore).toBe(dbCountAfter);
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Extreme number of stops", async () => {
+    const dbCountBefore = await client
+      .db(ROUTES_DB_NAME)
+      .collection(ROUTES_COLLECTION_NAME)
+      .countDocuments();
+
+    const response = await request(app)
+      .post("/routes")
+      .send({
+        userID: "test-user",
+        origin: "Vancouver",
+        destination: "Toronto",
+        numStops: 999999999999999,
+      })
+      .expect(400);
+
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toContain("Number of stops must be at most");
 
     // verify db unchaged
     const dbCountAfter = await client
@@ -211,38 +279,6 @@ describe("Unmocked: POST /routes", () => {
     expect(response.body.error).toContain(
       "Same start and end city not allowed"
     );
-
-    // verify db unchaged
-    const dbCountAfter = await client
-      .db(ROUTES_DB_NAME)
-      .collection(ROUTES_COLLECTION_NAME)
-      .countDocuments();
-
-    expect(dbCountBefore).toBe(dbCountAfter);
-  });
-
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
-  test("Extreme number of stops", async () => {
-    const dbCountBefore = await client
-      .db(ROUTES_DB_NAME)
-      .collection(ROUTES_COLLECTION_NAME)
-      .countDocuments();
-
-    const response = await request(app)
-      .post("/routes")
-      .send({
-        userID: "test-user",
-        origin: "Vancouver",
-        destination: "Toronto",
-        numStops: 999999999999999,
-      })
-      .expect(400);
-
-    expect(response.body).toHaveProperty("error");
-    expect(response.body.error).toContain("Number of stops must be at most");
 
     // verify db unchaged
     const dbCountAfter = await client
