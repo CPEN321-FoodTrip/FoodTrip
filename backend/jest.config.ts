@@ -6,7 +6,7 @@ const config: Config = {
   setupFilesAfterEnv: ["./jest.setup.ts"],
   testMatch: ["**/__tests__/**/*.test.ts"],
   moduleFileExtensions: ["ts", "js"],
-  collectCoverage: false, // enable with flag --coverage
+  // enable coverage with flag --coverage
   collectCoverageFrom: [
     // 'backend/helpers/*.ts',
     // 'backend/controllers/*.ts',
