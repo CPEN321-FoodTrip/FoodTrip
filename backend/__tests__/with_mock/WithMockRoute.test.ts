@@ -70,60 +70,6 @@ describe("Mocked: POST /routes", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("Invalid origin city", async () => {
-    // mock empty coordinates from openstreetmap api call
-    global.fetch = jest
-      .fn()
-      .mockResolvedValueOnce({ ok: true, json: async () => [] });
-
-    const response = await request(app)
-      .post("/routes")
-      .send({
-        userID: "test-user",
-        origin: ";;ee",
-        destination: "Toronto",
-        numStops: 1,
-      })
-      .expect(400);
-
-    expect(response.body).toHaveProperty("error");
-    expect(response.body.error).toContain("Origin"); // error should mention origin
-  });
-
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
-  test("Invalid destination city", async () => {
-    // mock empty coordinates from openstreetmap api call
-    global.fetch = jest
-      .fn()
-      // vancover
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
-      })
-      // not found destination
-      .mockResolvedValueOnce({ ok: true, json: async () => [] });
-
-    const response = await request(app)
-      .post("/routes")
-      .send({
-        userID: "test-user",
-        origin: "Vancouver",
-        destination: "..;ea'",
-        numStops: 1,
-      })
-      .expect(400);
-
-    expect(response.body).toHaveProperty("error");
-    expect(response.body.error).toContain("Destination"); // error should mention destination
-  });
-
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
   test("Insert database failure", async () => {
     global.fetch = jest
       .fn()

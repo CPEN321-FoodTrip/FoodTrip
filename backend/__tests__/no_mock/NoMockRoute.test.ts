@@ -48,6 +48,44 @@ describe("Unmocked: POST /generate-route", () => {
     expect(Array.isArray(result!.stops)).toBe(true);
     expect(result!.stops).toHaveLength(1); // 1 stop
   });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Invalid origin city", async () => {
+    const response = await request(app)
+      .post("/routes")
+      .send({
+        userID: "test-user",
+        origin: "dofig;lkdflkgdfj",
+        destination: "Toronto",
+        numStops: 1,
+      })
+      .expect(400);
+
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toContain("Origin"); // error should mention origin
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Invalid destination city", async () => {
+    const response = await request(app)
+      .post("/routes")
+      .send({
+        userID: "test-user",
+        origin: "Vancouver",
+        destination: "tlskhdka;;jshdkjash",
+        numStops: 1,
+      })
+      .expect(400);
+
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toContain("Destination"); // error should mention destination
+  });
 });
 
 describe("Unmocked: GET /get-route", () => {
