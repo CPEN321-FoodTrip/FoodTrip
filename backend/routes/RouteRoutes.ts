@@ -9,9 +9,22 @@ export const RouteRoutes = [
     route: "/routes",
     action: controller.createRoute,
     validation: [
-      body("origin").exists().isString(),
-      body("destination").exists().isString(),
-      body("numStops").exists().isInt(),
+      body("userID")
+        .exists()
+        .isString()
+        .withMessage("userID is required and must be a string"),
+      body("origin")
+        .exists()
+        .isString()
+        .withMessage("origin is required and must be a string"),
+      body("destination")
+        .exists()
+        .isString()
+        .withMessage("destination is required and must be a string"),
+      body("numStops")
+        .exists()
+        .isInt()
+        .withMessage("numStops is required and must be an integer"),
     ],
   },
   {

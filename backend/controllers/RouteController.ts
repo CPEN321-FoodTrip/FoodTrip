@@ -8,18 +8,19 @@ import {
 } from "../helpers/RouteHelpers";
 import { Location } from "../interfaces/RouteInterfaces";
 import { ObjectId } from "mongodb";
+import { validationResult } from "express-validator";
 
 export class RouteController {
   // create a new route
   // POST /routes
   async createRoute(req: Request, res: Response, next: NextFunction) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const { userID, origin, destination, numStops } = req.body;
 
-    if (!userID || !origin || !destination || !numStops) {
-      return res.status(400).json({
-        error: "userID, origin, destination and numStops are required",
-      });
-    }
     if (numStops < 1) {
       return res
         .status(400)
