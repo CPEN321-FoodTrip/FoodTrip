@@ -6,13 +6,19 @@ import { validationResult } from "express-validator";
 import morgan from "morgan";
 import { initializeGeoNamesDatabase } from "./helpers/RouteHelpers";
 import { RecipeRoutes } from "./routes/RecipesRoutes";
+import { UserRoutes } from "./routes/UserRoutes";
 
 const app = express();
 
 app.use(express.json());
 app.use(morgan("tiny"));
 
-const Routes = [...RouteRoutes, ...DiscountRoutes,...RecipeRoutes];
+const Routes = [
+  ...RouteRoutes,
+  ...DiscountRoutes,
+  ...RecipeRoutes,
+  ...UserRoutes,
+];
 
 Routes.forEach((route) => {
   (app as any)[route.method](

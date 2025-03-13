@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import {
-  Location,
   generateRouteStops,
   getRouteFromDatabase,
   saveRouteToDatabase,
   deleteRouteFromDatabase,
   fetchCityData,
 } from "../helpers/RouteHelpers";
+import { Location } from "../interfaces/RouteInterfaces";
 
 export class RouteController {
   // create a new route
@@ -66,10 +66,7 @@ export class RouteController {
 
       res.json(response);
     } catch (error) {
-      console.error("Error creating route:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      res.status(500).json({ error: errorMessage });
+      next(error);
     }
   }
 
