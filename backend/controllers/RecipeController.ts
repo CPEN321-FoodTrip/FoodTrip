@@ -1,102 +1,83 @@
 import { NextFunction, Request, Response } from "express";
-import { 
-    fetchRecipe,
-    saveRecipeToDatabase,
-    getRecipeFromDatabase,
-    Recipe,
-
-    newfetchRecipe,
-} from '../helpers/RecipeHelper';
+import {
+  saveRecipesToDb,
+  getRecipesFromDb,
+  createRecipesfromRoute,
+  deleteRecipesFromDb,
+} from "../helpers/RecipeHelper";
+import { validationResult } from "express-validator";
+import { ObjectId } from "mongodb";
 
 export class RecipeController {
-  async getRecipes(req: Request, res: Response) {
-
-    const query = req.query.query as string;
-    
-    if (!query || typeof query !== 'string') {
-      res.status(400).json({ error: "Invalid or missing request parameters" });
-      return;
+  // generate a list of recipes from a route
+  // POST /recipes
+  async createRecipesfromRoute(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-    
+
+    const { tripID } = req.body;
+
     try {
-      const recipes = await fetchRecipe(query);        
+      const recipes = await createRecipesfromRoute(tripID);
+      if (!recipes) {
+        return res.status(404).json({ error: "Trip not found" });
+      }
 
-      console.log(recipes);
+      // save recipes to db
+      const insertId = await saveRecipesToDb(tripID, recipes);
+      if (!insertId) {
+        return res.status(500).json({ error: "Failed to save recipes" });
+      }
 
-      res.json({ 
-        success: true, 
-        data: recipes,
-        total: recipes.length
-      });
+      res.json(recipes);
     } catch (error) {
-      res.status(500).json({ 
-        success: false, 
-        error: "Failed to fetch recipes",
-        details: error instanceof Error ? error.message : 'Unknown error'
-      });
+      next(error);
     }
   }
 
+  // get all recipes from a trip
+  // GET /recipes/:id
+  async getRecipes(req: Request, res: Response, next: NextFunction) {
+    try {
+      const tripID = req.params.id;
+      if (!ObjectId.isValid(tripID)) {
+        return res.status(400).json({ error: "Invalid tripID format" });
+      }
 
-  async getRecipe(req: Request, res: Response) {
-    
-  try{
-      const { recipeName, recipeID, url } = req.query;
+      const recipes = await getRecipesFromDb(tripID);
+      if (!recipes) {
+        return res.status(404).json({ error: "No recipes found for tripID" });
+      }
 
-    if (!recipeID && !recipeID && !url) {
-      res.status(400).json({ error: "Must provide recipeID, recipeName, or url" });
-      return;
-    }
-
-    const recipe = await getRecipeFromDatabase({ 
-      recipeName: recipeName as string, 
-      recipeID: recipeID ? Number(recipeID) : undefined, 
-      url: url as string
-    });
-    if (!recipe) {
-      res.status(404).json({ error: "Recipe not found" });
-      return;
-    }
-
-    res.json(recipe);
-    }
-    catch(error){
+      res.json(recipes);
+    } catch (error) {
       console.error("Error getting recipe:", error);
-      res.status(500).json({ error: "Error getting recipe" });
-
+      next(error);
     }
-
-    res.json(recipe);
   }
 
-
-  async getRecipefromRoute(req: Request, res: Response) {
-
-  }
-
-  async deleteRecipe(req: Request, res: Response) {
-    
-  }
-
-  async newfetch(req: Request, res: Response) {
-    const query = req.query.query as string;
-    if (!query || typeof query !== 'string') {
-      res.status(400).json({ error: "Invalid or missing request parameters" });
-      return;
-    }
-    
+  // delete all recipes from a trip
+  // DELETE /recipes/:id
+  async deleteRecipes(req: Request, res: Response, next: NextFunction) {
     try {
-      const recipes = await newfetchRecipe(query);
-      console.log(recipes);
+      const tripID = req.params.id;
+      if (!ObjectId.isValid(tripID)) {
+        return res.status(400).json({ error: "Invalid tripID format" });
+      }
+
+      const result = await deleteRecipesFromDb(tripID);
+      if (!result) {
+        return res.status(404).json({ error: "No recipes found for tripID" });
+      }
+      res.json({ success: true, message: "Recipes deleted" });
     } catch (error) {
-      res.status(500).json({ 
-        success: false, 
-        error: "Failed to fetch recipes",
-        details: error instanceof Error ? error.message : 'Unknown error'
-      });
+      next(error);
     }
   }
-
 }
-
-
