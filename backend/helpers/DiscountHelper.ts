@@ -5,6 +5,16 @@ import { Discount } from "../interfaces/DiscountInterfaces";
 const DB_NAME = "discounts";
 const COLLECTION_NAME = "discounts";
 
+// add a discount to the database
+export async function addDiscountToDb(discount: Discount): Promise<string> {
+  const result = await client
+    .db(DB_NAME)
+    .collection(COLLECTION_NAME)
+    .insertOne(discount);
+
+  return result.insertedId.toString();
+}
+
 // get all discounts for a store
 export async function getDiscountsFromDb(storeID: string): Promise<{}> {
   const discounts = await client
@@ -14,16 +24,6 @@ export async function getDiscountsFromDb(storeID: string): Promise<{}> {
     .toArray();
 
   return discounts.map(({ _id, ...rest }) => ({ discountID: _id, ...rest }));
-}
-
-// add a discount to the database
-export async function addDiscountToDb(discount: Discount): Promise<string> {
-  const result = await client
-    .db(DB_NAME)
-    .collection(COLLECTION_NAME)
-    .insertOne(discount);
-
-  return result.insertedId.toString();
 }
 
 // get all discounts from the database, with optional ingredient filter
