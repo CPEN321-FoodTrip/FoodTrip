@@ -6,13 +6,19 @@ import { validationResult } from "express-validator";
 import morgan from "morgan";
 import { initializeGeoNamesDatabase } from "./helpers/RouteHelpers";
 import { RecipeRoutes } from "./routes/RecipesRoutes";
+import { UserRoutes } from "./routes/UserRoutes";
 
 const app = express();
 
 app.use(express.json());
 app.use(morgan("tiny"));
 
-const Routes = [...RouteRoutes, ...DiscountRoutes, ...RecipeRoutes];
+const Routes = [
+  ...RouteRoutes,
+  ...DiscountRoutes,
+  ...RecipeRoutes,
+  ...UserRoutes,
+];
 
 Routes.forEach((route) => {
   (app as any)[route.method](
@@ -57,8 +63,16 @@ if (process.env.NODE_ENV !== "test") {
   startServer();
 }
 
-const errorHandle = (req: Request, res: Response) => {
-  console.error(res.status);
+const errorHandle = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.error("Error:", err.message);
+  console.error("Stack trace:", err.stack);
+
+  res.status(500).json({ error: "Internal server error" });
 };
 
 app.use(errorHandle);

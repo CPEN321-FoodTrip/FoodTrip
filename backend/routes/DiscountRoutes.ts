@@ -5,32 +5,44 @@ const controller = new DiscountController();
 
 export const DiscountRoutes = [
   {
+    method: "post",
+    route: "/discounts",
+    action: controller.addDiscount,
+    validation: [
+      body("storeID")
+        .exists()
+        .isString()
+        .withMessage("storeID is required and must be a string"),
+      body("storeName")
+        .exists()
+        .isString()
+        .withMessage("storeName is required and must be a string"),
+      body("ingredient")
+        .exists()
+        .isString()
+        .withMessage("ingredient is required and must be a string"),
+      body("price")
+        .exists()
+        .isNumeric()
+        .withMessage("price is required and must be a number"),
+    ],
+  },
+  {
     method: "get",
-    route: "/discount",
+    route: "/discounts/:id",
     action: controller.getDiscounts,
     validation: [],
   },
   {
-    method: "post",
-    route: "/discount",
-    action: controller.addDiscount,
-    validation: [
-      body("storeID").exists().isString(),
-      body("storeName").exists().isString(),
-      body("ingredient").exists().isString(),
-      body("price").exists().isNumeric(),
-    ],
-  },
-  {
-    method: "delete",
-    route: "/discount",
-    action: controller.deleteDiscount,
+    method: "get",
+    route: "/discounts",
+    action: controller.getAllDiscounts,
     validation: [],
   },
   {
-    method: "get",
-    route: "/discount/all",
-    action: controller.getAllDiscounts,
+    method: "delete",
+    route: "/discounts/:id",
+    action: controller.deleteDiscount,
     validation: [],
   },
 ];
