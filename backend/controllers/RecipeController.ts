@@ -1,69 +1,83 @@
 import { NextFunction, Request, Response } from "express";
-import { 
-    fetchRecipe,
-    saveRecipeToDatabase,
-    getRecipeFromDatabase,
-    Recipe,
-} from '../helpers/RecipeHelper';
+import {
+  saveRecipesToDb,
+  getRecipesFromDb,
+  createRecipesfromRoute,
+  deleteRecipesFromDb,
+} from "../helpers/RecipeHelper";
+import { validationResult } from "express-validator";
+import { ObjectId } from "mongodb";
 
 export class RecipeController {
-  async getRecipes(req: Request, res: Response, next: NextFunction) {
-    const query = req.query.query as string;
-    
-    if (!query || typeof query !== 'string') {
-      res.status(400).json({ error: "Invalid or missing request parameters" });
-      return;
+  // generate a list of recipes from a route
+  // POST /recipes
+  async createRecipesfromRoute(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-    
+
+    const { tripID } = req.body;
+
     try {
-      const recipes = await fetchRecipe(query);        
-      res.json({ 
-        success: true, 
-        data: recipes,
-        total: recipes.length
-      });
+      const recipes = await createRecipesfromRoute(tripID);
+      if (!recipes) {
+        return res.status(404).json({ error: "Trip not found" });
+      }
+
+      // save recipes to db
+      const insertId = await saveRecipesToDb(tripID, recipes);
+      if (!insertId) {
+        return res.status(500).json({ error: "Failed to save recipes" });
+      }
+
+      res.json(recipes);
     } catch (error) {
-      res.status(500).json({ 
-        success: false, 
-        error: "Failed to fetch recipes",
-        details: error instanceof Error ? error.message : 'Unknown error'
-      });
+      next(error);
     }
   }
 
-  // async getSingle(req: Request, res: Response, next: NextFunction) {
-  //   const recipeName = req.query.name as string;
-  //   if (!recipeName){
-  //     throw new Error("Recipe name is required");
-  //   }
+  // get all recipes from a trip
+  // GET /recipes/:id
+  async getRecipes(req: Request, res: Response, next: NextFunction) {
+    try {
+      const tripID = req.params.id;
+      if (!ObjectId.isValid(tripID)) {
+        return res.status(400).json({ error: "Invalid tripID format" });
+      }
 
-  //   try {
-  //     const recipe = await getSingle(recipeName);
+      const recipes = await getRecipesFromDb(tripID);
+      if (!recipes) {
+        return res.status(404).json({ error: "No recipes found for tripID" });
+      }
 
-  //   }
-  //   catch(error){
-  //     console.error("Error getting recipe:", error);
-  //   res.status(500).json({ error: "Error getting recipe" });
-  //   }
-  // }
-
-  async getRecipe(req: Request, res: Response, next: NextFunction) {
-    // const recipeName = req.query.recipeName as string;
-    const recipeID = req.query.recipeID as string;
-
-    if (!recipeID) {
-      res.status(400).json({ error: "Invalid request parameters" });
-      return;
+      res.json(recipes);
+    } catch (error) {
+      console.error("Error getting recipe:", error);
+      next(error);
     }
+  }
 
-    const recipe = await getRecipeFromDatabase(recipeID);
-    if (!recipe) {
-      res.status(404).json({ error: "Recipe not found" });
-      return;
+  // delete all recipes from a trip
+  // DELETE /recipes/:id
+  async deleteRecipes(req: Request, res: Response, next: NextFunction) {
+    try {
+      const tripID = req.params.id;
+      if (!ObjectId.isValid(tripID)) {
+        return res.status(400).json({ error: "Invalid tripID format" });
+      }
+
+      const result = await deleteRecipesFromDb(tripID);
+      if (!result) {
+        return res.status(404).json({ error: "No recipes found for tripID" });
+      }
+      res.json({ success: true, message: "Recipes deleted" });
+    } catch (error) {
+      next(error);
     }
-
-    res.json(recipe);
   }
 }
-
-
