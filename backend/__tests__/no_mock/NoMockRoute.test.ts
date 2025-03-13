@@ -1,29 +1,54 @@
 import request from "supertest";
 import app from "../../index";
+import { initializeGeoNamesDatabase } from "../../helpers/RouteHelpers";
+import { client } from "../../services";
+import e from "express";
+
+// constants for routes saved in MongoDB
+const ROUTES_DB_NAME = "route_data";
+const ROUTES_COLLECTION_NAME = "routes";
 
 describe("Unmocked: POST /generate-route", () => {
-  let tripID = "";
-  const userID = "test-user";
+  beforeAll(async () => {
+    await initializeGeoNamesDatabase();
+  });
 
   // Input:
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("Valid request", async () => {
+  test("Succesful route generated", async () => {
     const response = await request(app)
-      .post("/generate-route")
+      .post("/routes")
       .send({
-        userID,
+        userID: "test-user",
         origin: "Vancouver",
         destination: "Toronto",
-        numStops: 3,
+        numStops: 1,
       })
       .expect(200);
 
+    // response verification
     expect(response.body).toHaveProperty("tripID");
+    expect(response.body).toHaveProperty("start_location");
+    expect(response.body).toHaveProperty("end_location");
     expect(response.body).toHaveProperty("stops");
     expect(Array.isArray(response.body.stops)).toBe(true);
-    tripID = response.body.tripID;
+    expect(response.body.stops).toHaveLength(1); // 1 stop
+
+    // db verification
+    const db = client.db(ROUTES_DB_NAME);
+    const collection = db.collection(ROUTES_COLLECTION_NAME);
+    const tripID = response.body.tripID;
+    const result = await collection.findOne({ _id: tripID });
+
+    expect(result).not.toBeNull();
+    expect(result).toHaveProperty("userID", "test-user");
+    expect(result).toHaveProperty("start_location", "Vancouver");
+    expect(result).toHaveProperty("end_location", "Toronto");
+    expect(result).toHaveProperty("stops");
+    expect(Array.isArray(result!.stops)).toBe(true);
+    expect(result!.stops).toHaveLength(1); // 1 stop
   });
 });
 
