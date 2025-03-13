@@ -2,7 +2,6 @@ import request from "supertest";
 import app from "../../index";
 import { initializeGeoNamesDatabase } from "../../helpers/RouteHelpers";
 import { client } from "../../services";
-import e from "express";
 
 // constants for routes saved in MongoDB
 const ROUTES_DB_NAME = "route_data";
