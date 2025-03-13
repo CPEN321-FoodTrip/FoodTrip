@@ -2,12 +2,12 @@ import { NextFunction, Request, Response } from "express";
 import {
   addDiscountToDatabase,
   deleteDiscountFromDatabase,
-  Discount,
   getAllDiscountsFromDatabase,
   getDiscountsFromDatabase,
 } from "../helpers/DiscountHelper";
 import { validationResult } from "express-validator";
 import { ObjectId } from "mongodb";
+import { Discount } from "../interfaces/DiscountInterfaces";
 
 export class DiscountController {
   // add a new discount

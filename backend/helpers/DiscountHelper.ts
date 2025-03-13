@@ -1,15 +1,9 @@
 import { ObjectId } from "mongodb";
 import { client } from "../services";
+import { Discount } from "../interfaces/DiscountInterfaces";
 
 const DB_NAME = "discounts";
 const COLLECTION_NAME = "discounts";
-
-export interface Discount {
-  storeID: string;
-  storeName: string;
-  ingredient: string;
-  price: number;
-}
 
 // get all discounts for a store
 export async function getDiscountsFromDatabase(storeID: string): Promise<{}> {
