@@ -29,6 +29,10 @@ export class RouteController {
 
     try {
       const originCityData = await fetchCityData(origin);
+      if (!originCityData) {
+        return res.status(400).json({ error: "Origin city not found" });
+      }
+
       const start: Location = {
         name: origin,
         latitude: parseFloat(originCityData.lat),
@@ -37,6 +41,10 @@ export class RouteController {
       };
 
       const destinationCityData = await fetchCityData(destination);
+      if (!destinationCityData) {
+        return res.status(400).json({ error: "Destination city not found" });
+      }
+
       const end: Location = {
         name: destination,
         latitude: parseFloat(destinationCityData.lat),

@@ -100,16 +100,21 @@ async function importGeoNamesToMongoDB(): Promise<void> {
 }
 
 // helper function to fetch city data from OpenStreetMap API
-export async function fetchCityData(city: string) {
+export async function fetchCityData(city: string): Promise<any | null> {
   const url = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(
     city
   )}&format=json&limit=1`;
   try {
     const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch city data: ${response.statusText}`);
+    }
+
     const data = await response.json();
 
     if (data.length === 0) {
-      throw new Error(`Could not locate city: ${city}`);
+      return null;
     }
 
     return data[0];

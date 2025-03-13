@@ -3,11 +3,9 @@ import app from "../../index";
 import * as RouteHelpers from "../../helpers/RouteHelpers";
 import { ObjectId } from "mongodb";
 
-jest.mock("../../helpers/RouteHelpers");
-
 jest.mock("node-fetch", () => jest.fn());
 
-describe("Mocked: POST /generate-route", () => {
+describe("Mocked: POST /routes", () => {
   beforeAll(async () => {
     await RouteHelpers.initializeGeoNamesDatabase();
   });
@@ -29,20 +27,19 @@ describe("Mocked: POST /generate-route", () => {
       .fn()
       // vancover
       .mockResolvedValueOnce({
+        ok: true,
         json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
       })
       // toronto
       .mockResolvedValueOnce({
+        ok: true,
         json: async () => [{ lat: "43.6532", lon: "-79.3832" }],
       });
 
-    // jest
-    //   .spyOn(RouteHelpers, "generateRouteStops")
-    //   .mockResolvedValue(mockRoute.stops);
-    jest.spyOn(RouteHelpers, "saveRouteToDatabase").mockResolvedValue(tripID);
+    jest.spyOn(RouteHelpers, "saveRouteToDb").mockResolvedValue(tripID);
 
     const response = await request(app)
-      .post("/generate-route")
+      .post("/routes")
       .send({
         userID: userID,
         origin: "Vancouver",
@@ -51,14 +48,13 @@ describe("Mocked: POST /generate-route", () => {
       })
       .expect(200);
 
-    console.log(response.body);
     expect(response.body).toHaveProperty("tripID");
     expect(response.body.tripID).toBe(tripID.toHexString());
     expect(response.body).toHaveProperty("stops");
   });
 });
 
-describe("Mocked: GET /get-route", () => {
+describe("Mocked: GET /routes/:id", () => {
   // Input:
   // Expected status code:
   // Expected behavior:
@@ -87,13 +83,10 @@ describe("Mocked: GET /get-route", () => {
       ],
     };
 
-    jest
-      .spyOn(RouteHelpers, "getRouteFromDatabase")
-      .mockResolvedValue(mockRoute);
+    jest.spyOn(RouteHelpers, "getRouteFromDb").mockResolvedValue(mockRoute);
 
     const response = await request(app)
-      .get("/get-route")
-      .query({ tripID: tripID.toHexString() })
+      .get(`/routes/${tripID.toHexString()}`)
       .expect(200);
 
     expect(response.body).toMatchObject(mockRoute);
@@ -105,54 +98,23 @@ describe("Mocked: GET /get-route", () => {
   // Expected output:
   test("Try to get deleted route", async () => {
     const tripID = new ObjectId(123);
-    jest.spyOn(RouteHelpers, "getRouteFromDatabase").mockResolvedValue(null);
+    jest.spyOn(RouteHelpers, "getRouteFromDb").mockResolvedValue(null);
 
-    await request(app)
-      .get("/get-route")
-      .query({ tripID: tripID.toHexString() })
-      .expect(404);
+    await request(app).get(`/route/${tripID}`).expect(404);
   });
 });
 
-describe("Mocked: GET /get-routes", () => {
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
-  test("Sucessful routes retrieved", async () => {
-    const tripID = new ObjectId(123);
-    const userID = "test-user";
-    const mockRoutes = [
-      { tripID, userID, start_location: "Vancouver", end_location: "Toronto" },
-    ];
-
-    jest
-      .spyOn(RouteHelpers, "getRoutesFromDatabase")
-      .mockResolvedValue(mockRoutes);
-
-    const response = await request(app)
-      .get("/get-routes")
-      .query({ userID: userID })
-      .expect(200);
-
-    expect(Array.isArray(response.body)).toBe(true);
-    expect(response.body.length).toBe(1);
-    expect(response.body[0]).toHaveProperty("tripID");
-    expect(response.body[0].tripID).toBe(tripID.toHexString());
-  });
-});
-
-describe("Mocked: DELETE /delete-route", () => {
+describe("Mocked: DELETE /routes/:id", () => {
   // Input:
   // Expected status code:
   // Expected behavior:
   // Expected output:
   test("Successful route deletion", async () => {
     const tripID = new ObjectId(123);
-    jest.spyOn(RouteHelpers, "deleteRouteFromDatabase").mockResolvedValue(1);
+    jest.spyOn(RouteHelpers, "deleteRouteFromDb").mockResolvedValue(1);
 
     const response = await request(app)
-      .delete("/delete-route")
+      .delete(`/routes/${tripID.toHexString()}`)
       .query({ tripID: tripID.toHexString() })
       .expect(200);
 
