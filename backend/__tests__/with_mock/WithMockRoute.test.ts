@@ -52,6 +52,35 @@ describe("Mocked: POST /routes", () => {
     expect(response.body).toHaveProperty("end_location");
     expect(response.body).toHaveProperty("stops");
     expect(response.body.stops).toHaveLength(1); // 1 stop
+
+    // TODO: check db actually has saved route (actually only do this unmocked)
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Fail external api on second request", async () => {
+    // dont mock second coordinates from openstreetmap api call, cause it to fail
+    global.fetch = jest
+      .fn()
+      // vancover
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
+      }); // no toronto
+
+    const response = await request(app)
+      .post("/routes")
+      .send({
+        userID: "test-user",
+        origin: "Vancouver",
+        destination: "Toronto",
+        numStops: 1,
+      })
+      .expect(500);
+
+    expect(response.body).toHaveProperty("error", "Internal server error");
   });
 
   // Input:
