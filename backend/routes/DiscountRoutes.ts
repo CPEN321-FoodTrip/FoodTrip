@@ -9,10 +9,22 @@ export const DiscountRoutes = [
     route: "/discounts",
     action: controller.addDiscount,
     validation: [
-      body("storeID").exists().isString(),
-      body("storeName").exists().isString(),
-      body("ingredient").exists().isString(),
-      body("price").exists().isNumeric(),
+      body("storeID")
+        .exists()
+        .isString()
+        .withMessage("storeID is required and must be a string"),
+      body("storeName")
+        .exists()
+        .isString()
+        .withMessage("storeName is required and must be a string"),
+      body("ingredient")
+        .exists()
+        .isString()
+        .withMessage("ingredient is required and must be a string"),
+      body("price")
+        .exists()
+        .isNumeric()
+        .withMessage("price is required and must be a number"),
     ],
   },
   {
