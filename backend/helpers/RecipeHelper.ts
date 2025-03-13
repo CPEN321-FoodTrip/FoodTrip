@@ -33,10 +33,15 @@ interface EdamamResponse {
     }>;
   }
 
-  export function sum(a: number, b: number): number { //FOR TESTING COVERAGE
-    return a + b;
+  interface newEdamamResponse {
+
+      // recipe: {
+        label: string;
+        uri: string;
+        url: string;
+        ingredientLines: string[];
+      // } 
   }
-  
 
 export async function fetchRecipe(query: string): Promise<Recipe[]> {
 
@@ -71,10 +76,9 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
       }
   
       const data: EdamamResponse = await response.json();
-      
+      console.log(data);
       return data.hits.map((hit) => ({
         recipeName: hit.recipe.label || '',
-        // Convert URI to a numeric ID or use a consistent approach
         recipeID: parseInt(hit.recipe.uri.split('_')[1] || '0', 10),
         url: hit.recipe.url,
         ingredients: hit.recipe.ingredientLines || [],
@@ -87,6 +91,46 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
 
 }
 
+export async function newfetchRecipe(query: string): Promise<EdamamResponse> { // do i want 1 or hits?
+  try {
+    if (!appId || !apikey) {
+      throw new Error("Edamam App ID or API Key is missing");
+    }
+
+    // const response = await fetch('https://api.edamam.com/api/recipes/v2?q=chicken&app_id=${process.env.EDAMAM_APP_ID}&api_key=${process.env.EDAMAM_API_KEY}');
+    // bad response above
+
+    const params = new URLSearchParams({
+      type: 'public',
+      q: query,
+      app_id: appId,
+      app_key: apikey,
+    });
+    const response = await fetch(`${BASE_URL}?${params.toString()}`);  
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`Edamam API Error: ${response.status} - ${errorBody}`);
+    }
+
+    const data: EdamamResponse = await response.json();
+    // console.log(response);
+    console.log(data);
+    // const out  data.hits[0];
+    return data;
+    // return data.hits.map((hit) => ({
+    //   recipeName: hit.recipe.label || '',
+    //   recipeID: parseInt(hit.recipe.uri.split('_')[1] || '0', 10),
+    //   url: hit.recipe.url,
+    //   ingredients: hit.recipe.ingredientLines || [],
+    // }));
+    
+  }
+  catch(error){
+    console.error('Detailed recipe fetch error:', error);
+    throw error;
+  }
+}
 
 // export async function getRecipesfromRoute(tripID: string,userID:string): Promise<Recipe[]> {
 export async function getRecipesfromRoute(tripID: string): Promise<Recipe[]> { //currently all tripIDs are unique
@@ -155,14 +199,34 @@ export async function getRecipesfromRoute(tripID: string): Promise<Recipe[]> { /
   //   }
   // }
 
-  export async function getRecipeFromDatabase(RecipeID: string): Promise<{} | null> {
+  export async function getRecipeFromDatabase(
+    query: { recipeName?: string; recipeID?: number; url?: string }
+  ): Promise<{} | null> {
     const db = client.db(DB_NAME);
     const collection = db.collection(COLLECTION_NAME);
   
-    const result = await collection.findOne({ _id: new ObjectId(RecipeID) });
-    // const result = await collection.findOne({ recipeName: new ObjectId(RecipeID) }); // no
-    // const result = await collection.findOne({ "recipe.label": label });
-    return result ? result : null;
+    let filter: any = {};
+
+  const orConditions = [];
+
+  if (query.url) {
+    orConditions.push({ url: query.url });
+  }
+
+  if (query.recipeName) { // quite buggy
+    orConditions.push({ recipeName: query.recipeName });
+  }
+  if (query.recipeID) {
+    orConditions.push({ recipeID: query.recipeID });
+  }
+
+  // If there are any OR conditions, apply the $or filter
+  if (orConditions.length > 0) {
+    filter.$or = orConditions;
+  }
+
+  const result = await collection.findOne(filter);
+  return result ? result : null;
   }
 
 
