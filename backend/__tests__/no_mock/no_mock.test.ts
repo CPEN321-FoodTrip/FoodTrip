@@ -1,38 +1,35 @@
 import {
-  fetchRecipe,
-  getRecipesFromDb,
-} from "../../../backend/helpers/RecipeHelper";
+    sum
+} from '../../../backend/helpers/RecipeHelper';
 
-jest.mock("../../../backend/helpers/RecipeHelper", () => ({
-  getRecipeFromDatabase: jest.fn(),
-  fetchRecipe: jest.fn(),
-}));
+// import { sum } from '../../example';  // EXAMPLE
 
-beforeEach(() => {
-  jest.clearAllMocks(); // Clears previous calls & return values
-});
+// test('adds 1 + 2 to equal 3', () => {
+//   expect(sum(1, 2)).toBe(3);
+// });
 
-describe("RecipeHelper tests WITHOUT mocking", () => {
-  test("get Biscotti Regina by ID", async () => {
-    (getRecipesFromDb as jest.Mock).mockResolvedValue({ recipeID: 113 });
 
-    const result = await getRecipesFromDb({ recipeID: 113 });
-    jest.setTimeout(10000); //10 second timeout
-    expect(result).toEqual({ recipeID: 113 });
-    expect(getRecipesFromDb).toHaveBeenCalledWith({ recipeID: 113 });
-  });
+// const myBeverage = {
+//   delicious: true,
+//   sour: false,
+// };
 
-  test("get Biscotti Regina by name", async () => {
-    (getRecipesFromDb as jest.Mock).mockResolvedValue({
-      recipeName: "Biscotti Regina",
+// describe('my beverage', () => {
+//   test('is delicious', () => {
+//     expect(myBeverage.delicious).toBeTruthy();
+//   });
+
+//   test('is not sour', () => {
+//     expect(myBeverage.sour).toBeFalsy();
+//   });
+// });
+
+describe('tests WITHOUT mocking', () => {
+    test('testing sum from recipeHelper', () => { // test description
+      expect(sum(1, 2)).toBe(3);
     });
-
-    const result = await getRecipesFromDb({ recipeName: "Biscotti Regina" });
-    jest.setTimeout(10000); //10 second timeout
-    console.log(result);
-    expect(result).toEqual({ recipeName: "Biscotti Regina" });
-    expect(getRecipesFromDb).toHaveBeenCalledWith({
-      recipeName: "Biscotti Regina",
+  
+    test('', () => {
+    //   expect(myBeverage.sour).toBeFalsy();
     });
   });
-});
