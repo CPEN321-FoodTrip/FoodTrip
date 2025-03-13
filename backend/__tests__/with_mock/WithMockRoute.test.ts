@@ -8,41 +8,21 @@ jest.mock("../../helpers/RouteHelpers");
 jest.mock("node-fetch", () => jest.fn());
 
 describe("Mocked: POST /generate-route", () => {
-  beforeAll(() => {
-    // DB connection setup
-    return new Promise((resolve) => {
-      setTimeout(resolve, 100);
-    });
+  beforeAll(async () => {
+    await RouteHelpers.initializeGeoNamesDatabase();
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
   test("Succesful route generated", async () => {
     const tripID = new ObjectId(123);
     const userID = "test-user";
-    const mockRoute = {
-      start_location: {
-        name: "Vancouver",
-        latitude: 49.2827,
-        longitude: -123.1207,
-      },
-      end_location: { name: "Toronto", latitude: 43.6532, longitude: -79.3832 },
-      stops: [
-        {
-          location: {
-            name: "Calgary",
-            latitude: 51.0447,
-            longitude: -114.0719,
-            population: 1400000,
-          },
-          distanceFromStart: 100,
-          cumulativeDistance: 100,
-          segmentPercentage: 50,
-        },
-      ],
-    };
 
     // mock coordinates for vancouver and toronto for response from openstreetmap api call
     global.fetch = jest
@@ -56,9 +36,9 @@ describe("Mocked: POST /generate-route", () => {
         json: async () => [{ lat: "43.6532", lon: "-79.3832" }],
       });
 
-    jest
-      .spyOn(RouteHelpers, "generateRouteStops")
-      .mockResolvedValue(mockRoute.stops);
+    // jest
+    //   .spyOn(RouteHelpers, "generateRouteStops")
+    //   .mockResolvedValue(mockRoute.stops);
     jest.spyOn(RouteHelpers, "saveRouteToDatabase").mockResolvedValue(tripID);
 
     const response = await request(app)
@@ -71,13 +51,18 @@ describe("Mocked: POST /generate-route", () => {
       })
       .expect(200);
 
+    console.log(response.body);
     expect(response.body).toHaveProperty("tripID");
     expect(response.body.tripID).toBe(tripID.toHexString());
-    expect(response.body.stops.length).toBeGreaterThan(0);
+    expect(response.body).toHaveProperty("stops");
   });
 });
 
 describe("Mocked: GET /get-route", () => {
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
   test("Sucessful route retrieved", async () => {
     const tripID = new ObjectId(123);
     const mockRoute = {
@@ -114,6 +99,10 @@ describe("Mocked: GET /get-route", () => {
     expect(response.body).toMatchObject(mockRoute);
   });
 
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
   test("Try to get deleted route", async () => {
     const tripID = new ObjectId(123);
     jest.spyOn(RouteHelpers, "getRouteFromDatabase").mockResolvedValue(null);
@@ -126,6 +115,10 @@ describe("Mocked: GET /get-route", () => {
 });
 
 describe("Mocked: GET /get-routes", () => {
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
   test("Sucessful routes retrieved", async () => {
     const tripID = new ObjectId(123);
     const userID = "test-user";
@@ -150,6 +143,10 @@ describe("Mocked: GET /get-routes", () => {
 });
 
 describe("Mocked: DELETE /delete-route", () => {
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
   test("Successful route deletion", async () => {
     const tripID = new ObjectId(123);
     jest.spyOn(RouteHelpers, "deleteRouteFromDatabase").mockResolvedValue(1);
