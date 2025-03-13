@@ -22,15 +22,9 @@ describe("Mocked: POST /routes", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("Fail external api on second request", async () => {
-    // dont mock second coordinates from openstreetmap api call, cause it to fail
-    global.fetch = jest
-      .fn()
-      // vancover
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
-      }); // no toronto
+  test("Fail external api request", async () => {
+    // dont mock coordinates from openstreetmap api call, cause it to fail
+    global.fetch = jest.fn();
 
     const response = await request(app)
       .post("/routes")
@@ -49,9 +43,15 @@ describe("Mocked: POST /routes", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("Fail external api request", async () => {
-    // dont mock coordinates from openstreetmap api call, cause it to fail
-    global.fetch = jest.fn();
+  test("Fail external api on second request", async () => {
+    // dont mock second coordinates from openstreetmap api call, cause it to fail
+    global.fetch = jest
+      .fn()
+      // vancover
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
+      }); // no toronto
 
     const response = await request(app)
       .post("/routes")
