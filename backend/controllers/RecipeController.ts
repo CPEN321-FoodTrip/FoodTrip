@@ -4,11 +4,13 @@ import {
     saveRecipeToDatabase,
     getRecipeFromDatabase,
     Recipe,
+
     newfetchRecipe,
 } from '../helpers/RecipeHelper';
 
 export class RecipeController {
   async getRecipes(req: Request, res: Response) {
+
     const query = req.query.query as string;
     
     if (!query || typeof query !== 'string') {
@@ -18,7 +20,9 @@ export class RecipeController {
     
     try {
       const recipes = await fetchRecipe(query);        
+
       console.log(recipes);
+
       res.json({ 
         success: true, 
         data: recipes,
@@ -32,6 +36,7 @@ export class RecipeController {
       });
     }
   }
+
 
   async getRecipe(req: Request, res: Response) {
     
@@ -58,8 +63,12 @@ export class RecipeController {
     catch(error){
       console.error("Error getting recipe:", error);
       res.status(500).json({ error: "Error getting recipe" });
+
     }
+
+    res.json(recipe);
   }
+
 
   async getRecipefromRoute(req: Request, res: Response) {
 
@@ -87,6 +96,7 @@ export class RecipeController {
       });
     }
   }
+
 }
 
 

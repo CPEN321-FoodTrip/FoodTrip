@@ -1,10 +1,15 @@
 import { ObjectId } from "mongodb";
 import { client } from "../services";
 
+
 // import { RecipeSearchParams, EdamamApiResponse } from '../recipe.types';
 import { RouteStop } from './RouteHelpers';
 
-const BASE_URL = 'https://api.edamam.com/api/recipes/v2';
+
+// import { RecipeSearchParams, EdamamApiResponse } from '../recipe.types';
+import { RouteStop } from "../interfaces/RouteInterfaces";
+
+const BASE_URL = "https://api.edamam.com/api/recipes/v2";
 const appId = process.env.EDAMAM_APP_ID;
 const apikey = process.env.EDAMAM_API_KEY;
 // constants for recipes saved in MongoDB
@@ -18,9 +23,21 @@ const ROUTES_COLLECTION_NAME = "routes";
 export interface Recipe {
   recipeName: string;
   recipeID: number;
-  url:string;
-  ingredients:string[];
+  url: string;
+  ingredients: string[];
 }
+
+interface EdamamResponse {
+  hits: Array<{
+    recipe: {
+      label: string;
+      uri: string;
+      url: string;
+      ingredientLines: string[];
+    };
+  }>;
+}
+
 
 interface EdamamResponse {
     hits: Array<{ 
@@ -102,11 +119,14 @@ export async function newfetchRecipe(query: string): Promise<EdamamResponse> { /
 
     const params = new URLSearchParams({
       type: 'public',
+
       q: query,
       app_id: appId,
       app_key: apikey,
     });
+
     const response = await fetch(`${BASE_URL}?${params.toString()}`);  
+
 
     if (!response.ok) {
       const errorBody = await response.text();
@@ -114,6 +134,7 @@ export async function newfetchRecipe(query: string): Promise<EdamamResponse> { /
     }
 
     const data: EdamamResponse = await response.json();
+
     // console.log(response);
     console.log(data);
     // const out  data.hits[0];
@@ -232,3 +253,45 @@ export async function getRecipesfromRoute(tripID: string): Promise<Recipe[]> { /
 
 
 
+// save recipe to MongoDB and return ID
+
+export async function saveRecipeToDatabase(
+  userID: string,
+  recipeName: {}
+): Promise<ObjectId> {
+  const db = client.db(DB_NAME);
+  const collection = db.collection(COLLECTION_NAME);
+
+  const result = await collection.insertOne({ userID, ...recipeName });
+  return result.insertedId;
+}
+
+// export async function getRecipeFromDatabase(recipeID: string): Promise<{} | null> {
+//   const db = client.db(DB_NAME);
+//   const collection = db.collection(ROUTES_COLLECTION_NAME);
+
+//   if (!ObjectId.isValid(recipeID)) {
+//     throw new Error("Invalid recipe ID format");
+//   }
+
+//   const objectId = new ObjectId(recipeID);
+//   try{
+//     const result = await collection.findOne({ _id: objectId });
+//     return result;
+//   }
+//   catch{
+//     throw new Error("Recipe not found");
+//   }
+// }
+
+export async function getRecipeFromDatabase(
+  RecipeID: string
+): Promise<{} | null> {
+  const db = client.db(DB_NAME);
+  const collection = db.collection(COLLECTION_NAME);
+
+  const result = await collection.findOne({ _id: new ObjectId(RecipeID) });
+  // const result = await collection.findOne({ recipeName: new ObjectId(RecipeID) }); // no
+  // const result = await collection.findOne({ "recipe.label": label });
+  return result ? result : null;
+}

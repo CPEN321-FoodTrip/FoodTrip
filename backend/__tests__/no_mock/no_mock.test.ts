@@ -30,5 +30,6 @@ describe('RecipeHelper tests WITHOUT mocking', () => {
       console.log(result);
       expect(result).toEqual({ recipeName: "Biscotti Regina" });
       expect(getRecipeFromDatabase).toHaveBeenCalledWith({ recipeName: "Biscotti Regina" });
+
     });
   });
