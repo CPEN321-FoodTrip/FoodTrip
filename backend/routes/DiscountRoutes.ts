@@ -29,7 +29,7 @@ export const DiscountRoutes = [
   },
   {
     method: "get",
-    route: "/discount/:id",
+    route: "/discounts/:id",
     action: controller.getDiscounts,
     validation: [],
   },
