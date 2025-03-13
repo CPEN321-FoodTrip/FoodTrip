@@ -6,57 +6,99 @@ import {
   getAllDiscountsFromDatabase,
   getDiscountsFromDatabase,
 } from "../helpers/DiscountHelper";
+import { validationResult } from "express-validator";
+import { ObjectId } from "mongodb";
 
 export class DiscountController {
-  // store can access all its discounts
-  async getDiscounts(req: Request, res: Response, next: NextFunction) {
-    const storeID = req.query.storeID as string;
-
-    if (!storeID) {
-      res.status(400).json({ error: "Invalid request parameters" });
-      return;
-    }
-
-    const discounts = await getDiscountsFromDatabase(storeID);
-    res.json(discounts);
-  }
-
-  // store can add a discount
+  // add a new discount
+  // POST /discounts
   async addDiscount(req: Request, res: Response, next: NextFunction) {
-    const discount = req.body as Discount;
-
-    if (!discount) {
-      res.status(400).json({ error: "Invalid request parameters" });
-      return;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    const discountID = await addDiscountToDatabase(discount);
-    res.json({ discountID: discountID });
+    const { storeID, storeName, ingredient, price } = req.body;
+
+    const discount: Discount = {
+      storeID,
+      storeName,
+      ingredient,
+      price,
+    };
+
+    try {
+      const discountID = await addDiscountToDatabase(discount);
+
+      res
+        .status(201)
+        .json({ message: "Discount created successfully", discountID });
+    } catch (error) {
+      next(error);
+    }
   }
 
-  // store can delete a discount
-  async deleteDiscount(req: Request, res: Response, next: NextFunction) {
-    const discountID = req.query.discountID as string;
+  // get discounts for a store
+  // GET /discounts/:id
+  async getDiscounts(req: Request, res: Response, next: NextFunction) {
+    try {
+      const storeID = req.params.id;
 
-    if (!discountID) {
-      res.status(400).json({ error: "Invalid request parameters" });
-      return;
+      if (!storeID) {
+        return res.status(400).json({ error: "storeID is required" });
+      }
+
+      const discounts = await getDiscountsFromDatabase(storeID);
+
+      if (!Array.isArray(discounts) || discounts.length === 0) {
+        return res
+          .status(404)
+          .json({ error: "No discounts found for this store" });
+      }
+
+      res.json(discounts);
+    } catch (error) {
+      next(error);
     }
-
-    const result = await deleteDiscountFromDatabase(discountID);
-    if (!result) {
-      res.status(404).json({ error: "Discount not found" });
-      return;
-    }
-
-    res.json({ success: true });
   }
 
-  // for users, access all discounts, with optional ingredient filter
+  // access all discounts
+  // GET /discounts
   async getAllDiscounts(req: Request, res: Response, next: NextFunction) {
-    const ingredient = (req.query.ingredient as string) || "";
+    try {
+      const ingredient = (req.query.ingredient as string) || "";
 
-    const discounts = await getAllDiscountsFromDatabase(ingredient);
-    res.json(discounts);
+      const discounts = await getAllDiscountsFromDatabase(ingredient);
+
+      if (!Array.isArray(discounts) || discounts.length === 0) {
+        return res.status(404).json({ error: "No discounts found" });
+      }
+
+      res.json(discounts);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // delete a discount
+  // DELETE /discounts/:id
+  async deleteDiscount(req: Request, res: Response, next: NextFunction) {
+    try {
+      const discountID = req.params.id as string;
+
+      if (!ObjectId.isValid(discountID)) {
+        return res.status(400).json({ error: "Invalid discountID format" });
+      }
+
+      const result = await deleteDiscountFromDatabase(discountID);
+
+      if (!result) {
+        return res.status(404).json({ error: "Discount not found" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      next(error);
+    }
   }
 }

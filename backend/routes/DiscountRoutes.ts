@@ -5,14 +5,8 @@ const controller = new DiscountController();
 
 export const DiscountRoutes = [
   {
-    method: "get",
-    route: "/discount",
-    action: controller.getDiscounts,
-    validation: [],
-  },
-  {
     method: "post",
-    route: "/discount",
+    route: "/discounts",
     action: controller.addDiscount,
     validation: [
       body("storeID").exists().isString(),
@@ -22,15 +16,21 @@ export const DiscountRoutes = [
     ],
   },
   {
-    method: "delete",
-    route: "/discount",
-    action: controller.deleteDiscount,
+    method: "get",
+    route: "/discount/:id",
+    action: controller.getDiscounts,
     validation: [],
   },
   {
     method: "get",
-    route: "/discount/all",
+    route: "/discounts",
     action: controller.getAllDiscounts,
+    validation: [],
+  },
+  {
+    method: "delete",
+    route: "/discounts/:id",
+    action: controller.deleteDiscount,
     validation: [],
   },
 ];
