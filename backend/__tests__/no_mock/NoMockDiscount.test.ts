@@ -8,10 +8,10 @@ const DB_NAME = "discounts";
 const COLLECTION_NAME = "discounts";
 
 describe("Unmocked: POST /discounts", () => {
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid discount
+  // Expected status code: 201
+  // Expected behavior: discount is saved in db
+  // Expected output: message with discountID
   test("Valid discount", async () => {
     const discount = {
       storeID: "store1",
@@ -45,10 +45,10 @@ describe("Unmocked: POST /discounts", () => {
     // db cleanup happens in afterEach in jest.setup.ts
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: discount missing all fields
+  // Expected status code: 400
+  // Expected behavior: discount is not saved in db
+  // Expected output: error message with missing fields
   test("Missing body params", async () => {
     const dbCountBefore = await client
       .db(DB_NAME)
@@ -88,10 +88,10 @@ describe("Unmocked: POST /discounts", () => {
     expect(dbCountAfter).toBe(dbCountBefore);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: discount with negative price
+  // Expected status code: 400
+  // Expected behavior: discount is not saved in db
+  // Expected output: error message mentioning negative price
   test("Negative price", async () => {
     const dbCountBefore = await client
       .db(DB_NAME)
@@ -124,10 +124,10 @@ describe("Unmocked: POST /discounts", () => {
     expect(dbCountAfter).toBe(dbCountBefore);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: discount with non-numeric price
+  // Expected status code: 400
+  // Expected behavior: discount is not saved in db
+  // Expected output: error message mentioning price is non-numeric
   test("Price is non-numeric", async () => {
     const dbCountBefore = await client
       .db(DB_NAME)
@@ -176,10 +176,10 @@ describe("Unmocked: GET /discounts/:id", () => {
     price: 2.5,
   };
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid SAMPLE_DISCOUNT1 and SAMPLE_DISCOUNT2 saved in db
+  // Expected status code: 200
+  // Expected behavior: discount details are returned
+  // Expected output: discount details match SAMPLE_DISCOUNT1 and SAMPLE_DISCOUNT2
   test("Valid storeID with discounts", async () => {
     // save discounts to db
     const discountID1 = await client
@@ -216,10 +216,10 @@ describe("Unmocked: GET /discounts/:id", () => {
     // db cleanup happens in afterEach in jest.setup.ts
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: nonexistant storeID
+  // Expected status code: 404
+  // Expected behavior: no discounts found for store
+  // Expected output: error message mentioning no discounts found
   test("Nonexistant storeID", async () => {
     const response = await request(app)
       .get("/discounts/nonexistent")
@@ -231,10 +231,10 @@ describe("Unmocked: GET /discounts/:id", () => {
     );
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: storeID missing in url
+  // Expected status code: 404
+  // Expected behavior: no discounts found for store
+  // Expected output: empty object
   test("Missing storeID", async () => {
     const response = await request(app).get("/discounts/").expect(404); // malformed url
     expect(response.body).toMatchObject({});
@@ -255,10 +255,10 @@ describe("Unmocked: GET /discounts", () => {
     price: 2.5,
   };
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid SAMPLE_DISCOUNT1 and SAMPLE_DISCOUNT2 saved in db
+  // Expected status code: 200
+  // Expected behavior: all discounts are returned
+  // Expected output: discounts match SAMPLE_DISCOUNT1 and SAMPLE_DISCOUNT2
   test("Valid list of discounts", async () => {
     // save discounts to db
     await client
@@ -289,19 +289,19 @@ describe("Unmocked: GET /discounts", () => {
     // db cleanup happens in afterEach in jest.setup.ts
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: no discounts saved in db
+  // Expected status code: 404
+  // Expected behavior: no discounts found
+  // Expected output: error message mentioning no discounts found
   test("No discounts available", async () => {
     const response = await request(app).get("/discounts").expect(404);
     expect(response.body).toHaveProperty("error", "No discounts found");
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: ingredient query parameter and valid SAMPLE_DISCOUNT1 and SAMPLE_DISCOUNT2 saved in db
+  // Expected status code: 200
+  // Expected behavior: only discounts with ingredient are returned
+  // Expected output: only SAMPLE_DISCOUNT1 is returned
   test("Optional ingredient query parameter", async () => {
     // save discounts to db
     await client
@@ -330,10 +330,10 @@ describe("Unmocked: GET /discounts", () => {
 });
 
 describe("Unmocked: DELETE /discounts/:id", () => {
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid discount saved in db
+  // Expected status code: 200
+  // Expected behavior: discount is deleted from db
+  // Expected output: success message
   test("Valid discount delete", async () => {
     const discount = {
       storeID: "store1",
@@ -367,10 +367,10 @@ describe("Unmocked: DELETE /discounts/:id", () => {
     expect(dbCountAfter).toBe(dbCountBefore - 1);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: discountID is not a valid ObjectId
+  // Expected status code: 400
+  // Expected behavior: discount is not deleted from db
+  // Expected output: error message mentioning invalid discountID format
   test("Invalid discountID format", async () => {
     const dbCountBefore = await client
       .db(DB_NAME)
@@ -393,10 +393,10 @@ describe("Unmocked: DELETE /discounts/:id", () => {
     expect(dbCountAfter).toBe(dbCountBefore);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: discountID is valid ObjectId but doesn't exist in db
+  // Expected status code: 404
+  // Expected behavior: discount is not deleted from db
+  // Expected output: error message mentioning discount doesn't exist
   test("Discount doesn't exist", async () => {
     const dbCountBefore = await client
       .db(DB_NAME)

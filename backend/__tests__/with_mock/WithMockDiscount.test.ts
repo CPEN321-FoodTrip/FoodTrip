@@ -13,10 +13,10 @@ describe("Mocked: POST /discounts", () => {
     jest.restoreAllMocks();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid discount
+  // Expected status code: 500
+  // Expected behavior: error is handled gracefully
+  // Expected output: error message
   test("Database connection failure", async () => {
     jest.spyOn(DiscountHelpers, "addDiscountToDb").mockImplementation(() => {
       throw new Error("Forced error");
@@ -36,10 +36,10 @@ describe("Mocked: POST /discounts", () => {
     expect(DiscountHelpers.addDiscountToDb).toHaveBeenCalled();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid discount
+  // Expected status code: 201
+  // Expected behavior: discount is created and stored in db
+  // Expected output: success message and discountID
   test("Valid discount mocked db response", async () => {
     const discountID = new ObjectId().toHexString();
     jest
@@ -64,10 +64,10 @@ describe("Mocked: POST /discounts", () => {
     expect(DiscountHelpers.addDiscountToDb).toHaveBeenCalled();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid discount
+  // Expected status code: 201
+  // Expected behavior: discount is created and stored in in-memory db
+  // Expected output: success message and discountID
   test("Valid discount in-memory db", async () => {
     const response = await request(app)
       .post("/discounts")
@@ -86,10 +86,10 @@ describe("Mocked: POST /discounts", () => {
     expect(response.body).toHaveProperty("discountID");
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: discount with missing fields
+  // Expected status code: 400
+  // Expected behavior: error is handled gracefully
+  // Expected output: error message
   test("Missing discount parameters", async () => {
     jest.spyOn(DiscountHelpers, "addDiscountToDb").mockImplementation();
 
@@ -125,10 +125,10 @@ describe("Mocked: GET /discounts/:id", () => {
     jest.restoreAllMocks();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid storeID
+  // Expected status code: 500
+  // Expected behavior: error is handled gracefully
+  // Expected output: error message
   test("Database connection failure", async () => {
     jest.spyOn(DiscountHelpers, "getDiscountsFromDb").mockImplementation(() => {
       throw new Error("Forced error");
@@ -140,10 +140,10 @@ describe("Mocked: GET /discounts/:id", () => {
     expect(DiscountHelpers.getDiscountsFromDb).toHaveBeenCalled();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid storeID
+  // Expected status code: 200
+  // Expected behavior: discounts are retrieved from db
+  // Expected output: discounts array
   test("Valid discount mock retrieved", async () => {
     const discountID = new ObjectId().toHexString();
     jest
@@ -156,10 +156,10 @@ describe("Mocked: GET /discounts/:id", () => {
     expect(DiscountHelpers.getDiscountsFromDb).toHaveBeenCalled();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid storeID with discount in in-memory db
+  // Expected status code: 200
+  // Expected behavior: discounts are retrieved from in-memory db
+  // Expected output: discounts array
   test("Valid discount in-mem retrieved", async () => {
     // use in-memory db for mock data
     const discountID = (
@@ -174,10 +174,10 @@ describe("Mocked: GET /discounts/:id", () => {
     expect(response.body).toEqual([{ discountID, storeID: "123" }]);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid storeID with no discounts
+  // Expected status code: 404
+  // Expected behavior: no discounts found for storeID
+  // Expected output: error message
   test("No discounts for storeID", async () => {
     // in-memory db empty, cleared after each test in jest setup
     const response = await request(app).get("/discounts/123").expect(404);
@@ -198,10 +198,10 @@ describe("Mocked: GET /discounts", () => {
     jest.restoreAllMocks();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: none
+  // Expected status code: 500
+  // Expected behavior: error is handled gracefully
+  // Expected output: error message
   test("Database connection failure", async () => {
     jest
       .spyOn(DiscountHelpers, "getAllDiscountsFromDb")
@@ -215,10 +215,10 @@ describe("Mocked: GET /discounts", () => {
     expect(DiscountHelpers.getAllDiscountsFromDb).toHaveBeenCalled();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: two mock discounts
+  // Expected status code: 200
+  // Expected behavior: discounts are retrieved from db
+  // Expected output: discounts array
   test("Valid discounts mock retrieved", async () => {
     const discounts = [
       { discountID: "123", storeID: "123" },
@@ -234,10 +234,10 @@ describe("Mocked: GET /discounts", () => {
     expect(DiscountHelpers.getAllDiscountsFromDb).toHaveBeenCalled();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: none
+  // Expected status code: 404
+  // Expected behavior: no discounts found in db
+  // Expected output: error message
   test("Discount from empty db no query", async () => {
     // in-memory db empty, cleared after each test in jest setup
     const response = await request(app).get("/discounts").expect(404);
@@ -245,10 +245,10 @@ describe("Mocked: GET /discounts", () => {
     expect(response.body).toHaveProperty("error", "No discounts found");
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: ingredient query
+  // Expected status code: 404
+  // Expected behavior: no discounts found for ingredient
+  // Expected output: error message
   test("Discount from empty db with query", async () => {
     // in-memory db empty, cleared after each test in jest setup
     const response = await request(app)
@@ -259,10 +259,10 @@ describe("Mocked: GET /discounts", () => {
     expect(response.body).toHaveProperty("error", "No discounts found");
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: ingredient query
+  // Expected status code: 200
+  // Expected behavior: discounts are retrieved from db
+  // Expected output: discounts array
   test("Optional ingredient query mock implemented", async () => {
     const mockDiscount = { storeName: "mock store" };
     jest
@@ -280,10 +280,10 @@ describe("Mocked: GET /discounts", () => {
     expect(DiscountHelpers.getAllDiscountsFromDb).toHaveBeenCalled();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: ingredient query
+  // Expected status code: 200
+  // Expected behavior: discounts are retrieved from in-memory db
+  // Expected output: discounts array
   test("Optional ingredient query in-mem db", async () => {
     // use in-memory db for mock data
     const mockDiscount = { storeName: "mock store", ingredient: "apple" };
@@ -311,10 +311,10 @@ describe("Mocked: DELETE /discounts/:id", () => {
     jest.restoreAllMocks();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid discountId
+  // Expected status code: 500
+  // Expected behavior: error is handled gracefully
+  // Expected output: error message
   test("Database connection failure", async () => {
     jest
       .spyOn(DiscountHelpers, "deleteDiscountFromDb")
@@ -331,10 +331,10 @@ describe("Mocked: DELETE /discounts/:id", () => {
     expect(DiscountHelpers.deleteDiscountFromDb).toHaveBeenCalled();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid discountId
+  // Expected status code: 200
+  // Expected behavior: discount is deleted from db
+  // Expected output: success message
   test("Valid discount deleted through mock", async () => {
     jest.spyOn(DiscountHelpers, "deleteDiscountFromDb").mockResolvedValue(1);
 
@@ -347,10 +347,10 @@ describe("Mocked: DELETE /discounts/:id", () => {
     expect(DiscountHelpers.deleteDiscountFromDb).toHaveBeenCalled();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid discountId
+  // Expected status code: 404
+  // Expected behavior: discount not found in db
+  // Expected output: error message
   test("Delete from empty db", async () => {
     // in-memory db empty, cleared after each test in jest setup
     const discountID = new ObjectId().toHexString();
@@ -361,10 +361,10 @@ describe("Mocked: DELETE /discounts/:id", () => {
     expect(response.body).toHaveProperty("error", "Discount not found");
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: discountId with invalid format
+  // Expected status code: 400
+  // Expected behavior: error is handled gracefully
+  // Expected output: error message
   test("Invalid discountId format", async () => {
     jest.spyOn(DiscountHelpers, "deleteDiscountFromDb").mockResolvedValue(0);
 
