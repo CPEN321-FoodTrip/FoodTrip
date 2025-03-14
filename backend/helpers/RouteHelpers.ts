@@ -70,7 +70,7 @@ async function importGeoNamesToMongoDB(): Promise<void> {
       admin4Code: fields[13],
       population: parseInt(fields[14]),
       elevation: fields[15] ? parseInt(fields[15]) : 0,
-      dem: fields[16] ? parseInt(fields[16]) : 0,
+      dem: 0, // not used
       timezone: fields[17],
       modificationDate: fields[18],
       // add GeoJSON point for geospace lookup
@@ -100,16 +100,21 @@ async function importGeoNamesToMongoDB(): Promise<void> {
 }
 
 // helper function to fetch city data from OpenStreetMap API
-export async function fetchCityData(city: string) {
+export async function fetchCityData(city: string): Promise<any | null> {
   const url = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(
     city
   )}&format=json&limit=1`;
   try {
     const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch city data: ${response.statusText}`);
+    }
+
     const data = await response.json();
 
     if (data.length === 0) {
-      throw new Error(`Could not locate city: ${city}`);
+      return null;
     }
 
     return data[0];
@@ -298,8 +303,7 @@ export async function getRouteFromDb(tripID: string): Promise<{} | null> {
   const db = client.db(ROUTES_DB_NAME);
   const collection = db.collection(ROUTES_COLLECTION_NAME);
 
-  const result = await collection.findOne({ _id: new ObjectId(tripID) });
-  return result ? result : null;
+  return await collection.findOne({ _id: new ObjectId(tripID) });
 }
 
 // delete route from MongoDB by ID

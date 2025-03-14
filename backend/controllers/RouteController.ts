@@ -8,17 +8,12 @@ import {
 } from "../helpers/RouteHelpers";
 import { Location } from "../interfaces/RouteInterfaces";
 import { ObjectId } from "mongodb";
-import { validationResult } from "express-validator";
 
 export class RouteController {
   // create a new route
   // POST /routes
   async createRoute(req: Request, res: Response, next: NextFunction) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
+    // validation of params performed by express-validator middleware
     const { userID, origin, destination, numStops } = req.body;
 
     if (numStops < 1) {
@@ -29,6 +24,10 @@ export class RouteController {
 
     try {
       const originCityData = await fetchCityData(origin);
+      if (!originCityData) {
+        return res.status(400).json({ error: "Origin city not found" });
+      }
+
       const start: Location = {
         name: origin,
         latitude: parseFloat(originCityData.lat),
@@ -37,6 +36,10 @@ export class RouteController {
       };
 
       const destinationCityData = await fetchCityData(destination);
+      if (!destinationCityData) {
+        return res.status(400).json({ error: "Destination city not found" });
+      }
+
       const end: Location = {
         name: destination,
         latitude: parseFloat(destinationCityData.lat),
@@ -63,7 +66,7 @@ export class RouteController {
       const tripID = await saveRouteToDb(userID, route);
       const response = { tripID, ...route };
 
-      res.json(response);
+      res.status(201).json(response);
     } catch (error) {
       next(error);
     }
@@ -97,8 +100,8 @@ export class RouteController {
     try {
       const tripID = req.params.id;
 
-      if (!tripID) {
-        return res.status(400).json({ error: "tripID is required" });
+      if (!ObjectId.isValid(tripID)) {
+        return res.status(400).json({ error: "Invalid tripID format" });
       }
 
       const result = await deleteRouteFromDb(tripID);

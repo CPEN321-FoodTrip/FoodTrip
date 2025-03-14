@@ -8,16 +8,12 @@ export class UserController {
     try {
       const userID = req.params.userID;
 
-      if (!userID) {
+      if (!userID || userID.trim() === "") {
         return res.status(400).json({ error: "userID is required" });
       }
 
       const routes = await getUserRoutesFromDb(userID);
-
-      if (routes === null || routes === undefined) {
-        return res.status(404).json({ error: "No routes found for the user" });
-      }
-
+      // route is empty array if user does not exist
       res.json(routes);
     } catch (error) {
       next(error);
