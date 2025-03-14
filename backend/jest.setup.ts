@@ -7,6 +7,24 @@ let client: MongoClient;
 
 const testDbs = ["recipes", "route_data", "discounts"];
 
+const waitForDbConnection = async () => {
+  let connected = false;
+  let retries = 5;
+
+  while (!connected && retries > 0) {
+    try {
+      await client.db("admin").command({ ping: 1 });
+      connected = true;
+    } catch (error) {
+      console.error("Waiting for in-memory DB to be ready...");
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 sec before retry
+      retries--;
+    }
+  }
+
+  if (!connected) throw new Error("MongoDB connection failed!");
+};
+
 beforeAll(async () => {
   // start in-memory MongoDB server
   mongoServer = await MongoMemoryServer.create();
@@ -15,6 +33,8 @@ beforeAll(async () => {
   client = new MongoClient(uri);
   await client.connect();
   initializeClient(client); // inject test client
+
+  await waitForDbConnection();
 });
 
 afterEach(async () => {
