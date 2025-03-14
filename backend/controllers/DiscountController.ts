@@ -13,11 +13,7 @@ export class DiscountController {
   // add a new discount
   // POST /discounts
   async addDiscount(req: Request, res: Response, next: NextFunction) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
+    // validation of params performed by express-validator middleware
     const { storeID, storeName, ingredient, price } = req.body;
 
     const discount: Discount = {
