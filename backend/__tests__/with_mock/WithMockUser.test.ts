@@ -1,6 +1,5 @@
 import request from "supertest";
 import app from "../../index";
-import { ObjectId } from "mongodb";
 import * as UserHelper from "../../helpers/UserHelper";
 
 describe("Mocked: GET /users/:id/routes", () => {
