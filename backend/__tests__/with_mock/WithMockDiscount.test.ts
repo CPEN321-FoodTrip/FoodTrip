@@ -2,6 +2,7 @@ import request from "supertest";
 import app from "../../index";
 import * as DiscountHelpers from "../../helpers/DiscountHelper";
 import { ObjectId } from "mongodb";
+import { client } from "../../services";
 
 describe("Mocked: POST /discounts", () => {
   beforeEach(() => {
@@ -159,6 +160,24 @@ describe("Mocked: GET /discounts/:id", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
+  test("Valid discount in-mem retrieved", async () => {
+    // use in-memory db for mock data
+    const discountID = (
+      await client
+        .db("discounts")
+        .collection("discounts")
+        .insertOne({ storeID: "123" })
+    ).insertedId.toHexString();
+
+    const response = await request(app).get("/discounts/123").expect(200);
+
+    expect(response.body).toEqual([{ discountID, storeID: "123" }]);
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
   test("No discounts for storeID", async () => {
     // in-memory db empty, cleared after each test in jest setup
     const response = await request(app).get("/discounts/123").expect(404);
@@ -219,7 +238,7 @@ describe("Mocked: GET /discounts", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("Retrieve discounts from empty db", async () => {
+  test("Discount from empty db no query", async () => {
     // in-memory db empty, cleared after each test in jest setup
     const response = await request(app).get("/discounts").expect(404);
 
@@ -230,20 +249,56 @@ describe("Mocked: GET /discounts", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("Optional ingredient query", async () => {
+  test("Discount from empty db with query", async () => {
+    // in-memory db empty, cleared after each test in jest setup
+    const response = await request(app)
+      .get("/discounts")
+      .query({ ingredient: "tomato" })
+      .expect(404);
+
+    expect(response.body).toHaveProperty("error", "No discounts found");
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Optional ingredient query mock implemented", async () => {
     const mockDiscount = { storeName: "mock store" };
     jest
       .spyOn(DiscountHelpers, "getAllDiscountsFromDb")
       .mockImplementation((ingredient: string) => {
-        return Promise.resolve(ingredient ? [mockDiscount] : []);
+        return Promise.resolve(ingredient === "apple" ? [mockDiscount] : []);
       });
 
     const response = await request(app)
-      .get("/discounts?ingredient=apple")
+      .get("/discounts")
+      .query({ ingredient: "apple" })
       .expect(200);
 
     expect(response.body).toEqual([mockDiscount]);
     expect(DiscountHelpers.getAllDiscountsFromDb).toHaveBeenCalled();
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Optional ingredient query in-mem db", async () => {
+    // use in-memory db for mock data
+    const mockDiscount = { storeName: "mock store", ingredient: "apple" };
+    await client
+      .db("discounts")
+      .collection("discounts")
+      .insertOne(mockDiscount);
+
+    const response = await request(app)
+      .get("/discounts")
+      .query({ ingredient: "apple" })
+      .expect(200);
+
+    expect(response.body.length).toBe(1);
+    expect(response.body[0]).toHaveProperty("storeName", "mock store");
   });
 });
 
