@@ -116,6 +116,14 @@ describe("Mocked: POST /discounts", () => {
 });
 
 describe("Mocked: GET /discounts/:id", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   // Input:
   // Expected status code:
   // Expected behavior:
@@ -135,7 +143,31 @@ describe("Mocked: GET /discounts/:id", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("", async () => {});
+  test("Valid discount mock retrieved", async () => {
+    const discountID = new ObjectId().toHexString();
+    jest
+      .spyOn(DiscountHelpers, "getDiscountsFromDb")
+      .mockResolvedValue([{ discountID, storeID: "123" }]);
+
+    const response = await request(app).get("/discounts/123").expect(200);
+
+    expect(response.body).toEqual([{ discountID, storeID: "123" }]);
+    expect(DiscountHelpers.getDiscountsFromDb).toHaveBeenCalled();
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("No discounts for storeID", async () => {
+    // in-memory db empty, cleared after each test in jest setup
+    const response = await request(app).get("/discounts/123").expect(404);
+
+    expect(response.body).toHaveProperty(
+      "error",
+      "No discounts found for this store"
+    );
+  });
 });
 
 describe("Mocked: GET /discounts", () => {
@@ -164,6 +196,14 @@ describe("Mocked: GET /discounts", () => {
 });
 
 describe("Mocked: DELETE /discounts/:id", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   // Input:
   // Expected status code:
   // Expected behavior:
