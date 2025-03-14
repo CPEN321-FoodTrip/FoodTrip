@@ -1,5 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { UserNotificationData } from "../interfaces/NotificationInterfaces";
+import {
+  addTokenToDb,
+  getTokenFromDb,
+  removeTokenFromDb,
+} from "../helpers/NotificationHelper";
 
 export class NotificationController {
   async subscribe(req: Request, res: Response, next: NextFunction) {
@@ -7,7 +12,16 @@ export class NotificationController {
     const { userId, fcmToken }: UserNotificationData = req.body;
 
     try {
-      // TODO: store token in db
+      const prevToken = await getTokenFromDb(userId);
+      if (prevToken) {
+        return res.status(400).send("Already subscribed");
+      }
+
+      const result = await addTokenToDb(userId, fcmToken);
+      if (!result) {
+        throw new Error("Failed to subscribe");
+      }
+
       res.status(201).send("Subscribed successfully");
     } catch (error) {
       next(error);
@@ -19,7 +33,11 @@ export class NotificationController {
     const { userId } = req.body;
 
     try {
-      // TODO: remove token from db
+      const result = await removeTokenFromDb(userId);
+      if (!result) {
+        return res.status(400).send("Not subscribed");
+      }
+
       res.status(201).send("Unsubscribed successfully");
     } catch (error) {
       next(error);
