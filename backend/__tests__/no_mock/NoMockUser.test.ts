@@ -3,6 +3,10 @@ import app from "../../index";
 import { client } from "../../services";
 import { ObjectId } from "mongodb";
 
+// constants for routes saved in MongoDB
+const ROUTES_DB_NAME = "route_data";
+const ROUTES_COLLECTION_NAME = "routes";
+
 describe("Unmocked: GET /users/:id/routes", () => {
   const SAMPLE_ROUTE1 = {
     userID: "test-user",
@@ -33,14 +37,14 @@ describe("Unmocked: GET /users/:id/routes", () => {
     _id: new ObjectId(),
   };
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: SAMPLE_ROUTE1 and SAMPLE_ROUTE2 are valid routes saved in the db
+  // Expected status code: 200
+  // Expected behavior: all routes are retrieved from the db
+  // Expected output: an array of routes
   test("Valid user with routes", async () => {
     // setup: insert sample routes into db
-    const db = client.db("route_data");
-    const collection = db.collection("routes");
+    const db = client.db(ROUTES_DB_NAME);
+    const collection = db.collection(ROUTES_COLLECTION_NAME);
     await collection.insertMany([SAMPLE_ROUTE1, SAMPLE_ROUTE2]);
 
     const userID = "test-user";
@@ -69,10 +73,10 @@ describe("Unmocked: GET /users/:id/routes", () => {
     // db cleanup happens in afterEach in jest.setup.ts
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: userID is valid but no routes are saved in the db
+  // Expected status code: 200
+  // Expected behavior: no routes are retrieved from the db
+  // Expected output: an empty array
   test("User with no routes", async () => {
     const userID = "nonexistent-user";
     const response = await request(app)
@@ -83,19 +87,19 @@ describe("Unmocked: GET /users/:id/routes", () => {
     expect(response.body.length).toBe(0);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: none
+  // Expected status code: 404
+  // Expected behavior: no routes are retrieved from the db
+  // Expected output: an empty object
   test("Missing userID", async () => {
     const response = await request(app).get("/users//routes").expect(404); // malformed url
     expect(response.body).toMatchObject({});
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: userID is empty
+  // Expected status code: 400
+  // Expected behavior: no routes are retrieved from the db
+  // Expected output: an error message indicating that userID is required
   test("Invalid userID format", async () => {
     const userID = " "; // empty
     const response = await request(app)

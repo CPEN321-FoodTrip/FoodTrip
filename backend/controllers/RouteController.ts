@@ -71,7 +71,7 @@ export class RouteController {
       const tripID = await saveRouteToDb(userID, route);
       const response = { tripID, ...route };
 
-      res.json(response);
+      res.status(201).json(response);
     } catch (error) {
       next(error);
     }

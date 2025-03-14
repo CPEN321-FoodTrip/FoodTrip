@@ -11,10 +11,10 @@ describe("Mocked: GET /users/:id/routes", () => {
     jest.restoreAllMocks();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid user ID
+  // Expected status code: 500
+  // Expected behavior: handle error gracefully
+  // Expected output: error message
   test("Database connection failure", async () => {
     const userID = "test-user";
     jest.spyOn(UserHelper, "getUserRoutesFromDb").mockImplementation(() => {

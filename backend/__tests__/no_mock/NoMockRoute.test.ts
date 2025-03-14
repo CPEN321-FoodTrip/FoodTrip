@@ -50,10 +50,10 @@ describe("Unmocked: POST /routes", () => {
     await initializeGeoNamesDatabase();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid userID, origin, destination and numStops
+  // Expected status code: 201
+  // Expected behavior: route is successfully generated and saved in db
+  // Expected output: route object with tripID, start_location, end_location and stops
   test("Succesful route generated", async () => {
     const response = await request(app)
       .post("/routes")
@@ -63,7 +63,7 @@ describe("Unmocked: POST /routes", () => {
         destination: "Toronto",
         numStops: 1,
       })
-      .expect(200);
+      .expect(201);
 
     // response verification
     expect(response.body).toHaveProperty("tripID");
@@ -88,10 +88,10 @@ describe("Unmocked: POST /routes", () => {
     // db cleanup happens in afterEach in jest.setup.ts
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: missing body parameters
+  // Expected status code: 400
+  // Expected behavior: database is unchanged
+  // Expected output: error message indicating missing parameters
   test("Missing body parameters", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
@@ -130,10 +130,10 @@ describe("Unmocked: POST /routes", () => {
     expect(dbCountBefore).toBe(dbCountAfter);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: invalid origin city
+  // Expected status code: 400
+  // Expected behavior: database is unchanged
+  // Expected output: error message indicating invalid origin city
   test("Nonexistant origin city", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
@@ -162,10 +162,10 @@ describe("Unmocked: POST /routes", () => {
     expect(dbCountBefore).toBe(dbCountAfter);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: invalid destination city
+  // Expected status code: 400
+  // Expected behavior: database is unchanged
+  // Expected output: error message indicating invalid destination city
   test("Nonexistant destination city", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
@@ -194,10 +194,10 @@ describe("Unmocked: POST /routes", () => {
     expect(dbCountBefore).toBe(dbCountAfter);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: numStops with invalid string value
+  // Expected status code: 400
+  // Expected behavior: database is unchanged
+  // Expected output: error message indicating invalid numStops
   test("Invalid string value for stops", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
@@ -230,10 +230,10 @@ describe("Unmocked: POST /routes", () => {
     expect(dbCountBefore).toBe(dbCountAfter);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: numStops with invalid negative value
+  // Expected status code: 400
+  // Expected behavior: database is unchanged
+  // Expected output: error message indicating invalid numStops
   test("Negative number of stops", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
@@ -262,10 +262,10 @@ describe("Unmocked: POST /routes", () => {
     expect(dbCountBefore).toBe(dbCountAfter);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: numStops with invalid high value
+  // Expected status code: 400
+  // Expected behavior: database is unchanged
+  // Expected output: error message indicating invalid numStops
   test("Too high number of stops", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
@@ -294,10 +294,10 @@ describe("Unmocked: POST /routes", () => {
     expect(dbCountBefore).toBe(dbCountAfter);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: same origin and destination city
+  // Expected status code: 400
+  // Expected behavior: database is unchanged
+  // Expected output: error message indicating same origin and destination city
   test("Check same origin and destination city", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
@@ -330,10 +330,10 @@ describe("Unmocked: POST /routes", () => {
 });
 
 describe("Unmocked: GET /routes/:id", () => {
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: SAMPLE_ROUTE is a valid route
+  // Expected status code: 200
+  // Expected behavior: route is successfully retrieved from db
+  // Expected output: route object with start_location, end_location and stops
   test("Retreive valid route", async () => {
     // setup: inset sample route into db
     const db = client.db(ROUTES_DB_NAME);
@@ -356,29 +356,29 @@ describe("Unmocked: GET /routes/:id", () => {
     // db cleanup happens in afterEach in jest.setup.ts
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: malformed url without tripID
+  // Expected status code: 404
+  // Expected behavior: no route is retrieved from db
+  // Expected output: empty object
   test("Missing tripID", async () => {
     const response = await request(app).get("/routes/").expect(404); // malformed url
     expect(response.body).toMatchObject({});
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: tripID with invalid format
+  // Expected status code: 400
+  // Expected behavior: no route is retrieved from db
+  // Expected output: error message indicating invalid tripID format
   test("Invalid tripID format", async () => {
     const tripID = "1234"; // tripID should be a valid ObjectId
     const response = await request(app).get(`/routes/${tripID}`).expect(400);
     expect(response.body).toHaveProperty("error", "Invalid tripID format");
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: tripID with nonexistant route
+  // Expected status code: 404
+  // Expected behavior: no route is retrieved from db
+  // Expected output: error message indicating route not found
   test("Route not found (Empty db)", async () => {
     const tripID = new ObjectId().toHexString(); // nonexistant tripID
     const response = await request(app).get(`/routes/${tripID}`).expect(404);
@@ -387,10 +387,10 @@ describe("Unmocked: GET /routes/:id", () => {
 });
 
 describe("Unmocked: DELETE /routes/:id", () => {
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: SAMPLE_ROUTE is a valid route
+  // Expected status code: 200
+  // Expected behavior: route is successfully deleted from db
+  // Expected output: success message
   test("Valid deletion", async () => {
     // setup: insert sample route
     const db = client.db(ROUTES_DB_NAME);
@@ -409,10 +409,10 @@ describe("Unmocked: DELETE /routes/:id", () => {
     expect(newCount).toBe(originalCount - 1);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: malformed url without tripID
+  // Expected status code: 404
+  // Expected behavior: database is unchanged
+  // Expected output: empty object
   test("Missing tripID", async () => {
     const db = client.db(ROUTES_DB_NAME);
     const collection = db.collection(ROUTES_COLLECTION_NAME);
@@ -428,10 +428,10 @@ describe("Unmocked: DELETE /routes/:id", () => {
     // db cleanup happens in afterEach in jest.setup.ts
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: tripID with invalid format
+  // Expected status code: 400
+  // Expected behavior: database is unchanged
+  // Expected output: error message indicating invalid tripID format
   test("Invalid tripID format", async () => {
     const db = client.db(ROUTES_DB_NAME);
     const collection = db.collection(ROUTES_COLLECTION_NAME);
@@ -446,10 +446,10 @@ describe("Unmocked: DELETE /routes/:id", () => {
     expect(newCount).toBe(originalCount);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: tripID with nonexistant route
+  // Expected status code: 404
+  // Expected behavior: database is unchanged
+  // Expected output: error message indicating route not found
   test("Delete nonexistant route", async () => {
     // setup: insert sample route
     const db = client.db(ROUTES_DB_NAME);
@@ -471,10 +471,10 @@ describe("Unmocked: DELETE /routes/:id", () => {
     expect(newCount).toBe(originalCount);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: empty db and nonexistant tripID
+  // Expected status code: 404
+  // Expected behavior: database is unchanged
+  // Expected output: error message indicating route not found
   test("Delete on empty db", async () => {
     // no setup, no routes in db
 

@@ -18,10 +18,10 @@ describe("Mocked: POST /routes", () => {
     jest.restoreAllMocks();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: user id, origin, destination, numStops all valid
+  // Expected status code: 500
+  // Expected behavior: error handled gracefully
+  // Expected output: error message
   test("Fail external api request", async () => {
     // dont mock coordinates from openstreetmap api call, cause it to fail
     global.fetch = jest.fn();
@@ -39,10 +39,10 @@ describe("Mocked: POST /routes", () => {
     expect(response.body).toHaveProperty("error", "Internal server error");
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: user id, origin, destination, numStops all valid and valid coordinates for first city
+  // Expected status code: 500
+  // Expected behavior: error handled gracefully
+  // Expected output: error message
   test("Fail external api on second request", async () => {
     // dont mock second coordinates from openstreetmap api call, cause it to fail
     global.fetch = jest
@@ -66,10 +66,10 @@ describe("Mocked: POST /routes", () => {
     expect(response.body).toHaveProperty("error", "Internal server error");
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: user id, origin, destination, numStops all valid and valid coordinates for both cities
+  // Expected status code: 500
+  // Expected behavior: error handled gracefully
+  // Expected output: error message
   test("Insert database failure", async () => {
     global.fetch = jest
       .fn()
@@ -113,10 +113,10 @@ describe("Mocked: GET /routes/:id", () => {
     jest.restoreAllMocks();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid trip id
+  // Expected status code: 500
+  // Expected behavior: error handled gracefully
+  // Expected output: error message
   test("Database connection failure", async () => {
     const tripID = new ObjectId(123);
     jest.spyOn(RouteHelpers, "getRouteFromDb").mockImplementation(() => {
@@ -130,10 +130,10 @@ describe("Mocked: GET /routes/:id", () => {
     expect(RouteHelpers.getRouteFromDb).toHaveBeenCalled();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid trip id
+  // Expected status code: 404
+  // Expected behavior: error handled gracefully
+  // Expected output: error message
   test("Empty database", async () => {
     const tripID = new ObjectId(123);
     jest.spyOn(RouteHelpers, "getRouteFromDb").mockResolvedValueOnce(null);
@@ -155,10 +155,10 @@ describe("Mocked: DELETE /routes/:id", () => {
     jest.restoreAllMocks();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid trip id
+  // Expected status code: 500
+  // Expected behavior: error handled gracefully
+  // Expected output: error message
   test("Database connection failure", async () => {
     const tripID = new ObjectId(123);
     jest.spyOn(RouteHelpers, "deleteRouteFromDb").mockImplementation(() => {
@@ -173,10 +173,10 @@ describe("Mocked: DELETE /routes/:id", () => {
     expect(RouteHelpers.deleteRouteFromDb).toHaveBeenCalled();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid trip id
+  // Expected status code: 404
+  // Expected behavior: error handled gracefully
+  // Expected output: error message
   test("Empty database", async () => {
     const tripID = new ObjectId(123);
     jest.spyOn(RouteHelpers, "deleteRouteFromDb").mockResolvedValueOnce(0);
