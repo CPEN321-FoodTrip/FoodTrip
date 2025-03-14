@@ -171,6 +171,14 @@ describe("Mocked: GET /discounts/:id", () => {
 });
 
 describe("Mocked: GET /discounts", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   // Input:
   // Expected status code:
   // Expected behavior:
@@ -192,7 +200,51 @@ describe("Mocked: GET /discounts", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("", async () => {});
+  test("Valid discounts mock retrieved", async () => {
+    const discounts = [
+      { discountID: "123", storeID: "123" },
+      { discountID: "456", storeID: "456" },
+    ];
+    jest
+      .spyOn(DiscountHelpers, "getAllDiscountsFromDb")
+      .mockResolvedValue(discounts);
+
+    const response = await request(app).get("/discounts").expect(200);
+
+    expect(response.body).toEqual(discounts);
+    expect(DiscountHelpers.getAllDiscountsFromDb).toHaveBeenCalled();
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Retrieve discounts from empty db", async () => {
+    // in-memory db empty, cleared after each test in jest setup
+    const response = await request(app).get("/discounts").expect(404);
+
+    expect(response.body).toHaveProperty("error", "No discounts found");
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Optional ingredient query", async () => {
+    const mockDiscount = { storeName: "mock store" };
+    jest
+      .spyOn(DiscountHelpers, "getAllDiscountsFromDb")
+      .mockImplementation((ingredient: string) => {
+        return Promise.resolve(ingredient ? [mockDiscount] : []);
+      });
+
+    const response = await request(app)
+      .get("/discounts?ingredient=apple")
+      .expect(200);
+
+    expect(response.body).toEqual([mockDiscount]);
+    expect(DiscountHelpers.getAllDiscountsFromDb).toHaveBeenCalled();
+  });
 });
 
 describe("Mocked: DELETE /discounts/:id", () => {
