@@ -15,6 +15,16 @@ beforeAll(async () => {
   client = new MongoClient(uri);
   await client.connect();
   initializeClient(client); // inject test client
+
+  for (const dbName of testDbs) {
+    const db = client.db(dbName);
+    await Promise.all([
+      db.createCollection("cities"),
+      db.createCollection("routes"),
+      db.createCollection("discounts"),
+      db.createCollection("recipes"),
+    ]);
+  }
 });
 
 afterEach(async () => {
