@@ -5,7 +5,6 @@ import {
   getAllDiscountsFromDb,
   getDiscountsFromDb,
 } from "../helpers/DiscountHelper";
-import { validationResult } from "express-validator";
 import { ObjectId } from "mongodb";
 import { Discount } from "../interfaces/DiscountInterfaces";
 
@@ -13,11 +12,7 @@ export class DiscountController {
   // add a new discount
   // POST /discounts
   async addDiscount(req: Request, res: Response, next: NextFunction) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
+    // validation of params performed by express-validator middleware
     const { storeID, storeName, ingredient, price } = req.body;
 
     const discount: Discount = {
@@ -42,11 +37,8 @@ export class DiscountController {
   // GET /discounts/:id
   async getDiscounts(req: Request, res: Response, next: NextFunction) {
     try {
+      // storeID validation is performed by express-validator middleware
       const storeID = req.params.id;
-
-      if (!storeID) {
-        return res.status(400).json({ error: "storeID is required" });
-      }
 
       const discounts = await getDiscountsFromDb(storeID);
 
