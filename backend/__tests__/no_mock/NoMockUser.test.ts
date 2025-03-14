@@ -66,7 +66,7 @@ describe("Unmocked: GET /users/:id/routes", () => {
       ])
     );
 
-    // cleanup happens in afterEach in jest.setup.ts
+    // db cleanup happens in afterEach in jest.setup.ts
   });
 
   // Input:

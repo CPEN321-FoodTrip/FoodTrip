@@ -84,6 +84,8 @@ describe("Unmocked: POST /routes", () => {
     expect(result!.end_location).toHaveProperty("name", "Toronto");
     expect(Array.isArray(result!.stops)).toBe(true);
     expect(result!.stops).toHaveLength(1); // 1 stop
+
+    // db cleanup happens in afterEach in jest.setup.ts
   });
 
   // Input:
@@ -350,6 +352,8 @@ describe("Unmocked: GET /routes/:id", () => {
       SAMPLE_ROUTE.end_location
     );
     expect(response.body).toHaveProperty("stops", SAMPLE_ROUTE.stops);
+
+    // db cleanup happens in afterEach in jest.setup.ts
   });
 
   // Input:
@@ -357,8 +361,8 @@ describe("Unmocked: GET /routes/:id", () => {
   // Expected behavior:
   // Expected output:
   test("Missing tripID", async () => {
-    const response = await request(app).get("/routes/").expect(400);
-    expect(response.body).toHaveProperty("error", "tripID is required");
+    const response = await request(app).get("/routes/").expect(404); // malformed url
+    expect(response.body).toMatchObject({});
   });
 
   // Input:
@@ -414,12 +418,14 @@ describe("Unmocked: DELETE /routes/:id", () => {
     const collection = db.collection(ROUTES_COLLECTION_NAME);
     const originalCount = await collection.countDocuments();
 
-    const response = await request(app).delete("/routes/").expect(400);
-    expect(response.body).toHaveProperty("error", "tripID is required");
+    const response = await request(app).delete("/routes/").expect(404); // malformed url
+    expect(response.body).toMatchObject({});
 
     // verify nothing deleted in db
     const newCount = await collection.countDocuments();
     expect(newCount).toBe(originalCount);
+
+    // db cleanup happens in afterEach in jest.setup.ts
   });
 
   // Input:
