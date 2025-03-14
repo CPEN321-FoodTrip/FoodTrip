@@ -334,5 +334,88 @@ describe("Unmocked: DELETE /discounts/:id", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("", async () => {});
+  test("Valid discount delete", async () => {
+    const discount = {
+      storeID: "store1",
+      storeName: "Store 1",
+      ingredient: "apple",
+      price: 1.5,
+    };
+
+    // save discount to db
+    const discountID = await client
+      .db(DB_NAME)
+      .collection(COLLECTION_NAME)
+      .insertOne(discount);
+
+    const dbCountBefore = await client
+      .db(DB_NAME)
+      .collection(COLLECTION_NAME)
+      .countDocuments();
+
+    const response = await request(app)
+      .delete(`/discounts/${discountID.insertedId}`)
+      .expect(200);
+
+    expect(response.body).toHaveProperty("success", true);
+
+    const dbCountAfter = await client
+      .db(DB_NAME)
+      .collection(COLLECTION_NAME)
+      .countDocuments();
+
+    expect(dbCountAfter).toBe(dbCountBefore - 1);
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Invalid discountID format", async () => {
+    const dbCountBefore = await client
+      .db(DB_NAME)
+      .collection(COLLECTION_NAME)
+      .countDocuments();
+
+    // discountID is not a valid ObjectId
+    const response = await request(app)
+      .delete("/discounts/invalid")
+      .expect(400);
+
+    expect(response.body).toHaveProperty("error", "Invalid discountID format");
+
+    // check db is unchanged
+    const dbCountAfter = await client
+      .db(DB_NAME)
+      .collection(COLLECTION_NAME)
+      .countDocuments();
+
+    expect(dbCountAfter).toBe(dbCountBefore);
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Discount doesn't exist", async () => {
+    const dbCountBefore = await client
+      .db(DB_NAME)
+      .collection(COLLECTION_NAME)
+      .countDocuments();
+
+    // discountID is valid ObjectId but doesn't exist in db
+    const response = await request(app)
+      .delete(`/discounts/${new ObjectId()}`)
+      .expect(404);
+
+    expect(response.body).toHaveProperty("error", "Discount not found");
+
+    // check db is unchanged
+    const dbCountAfter = await client
+      .db(DB_NAME)
+      .collection(COLLECTION_NAME)
+      .countDocuments();
+
+    expect(dbCountAfter).toBe(dbCountBefore);
+  });
 });
