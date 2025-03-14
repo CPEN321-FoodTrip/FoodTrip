@@ -27,4 +27,4 @@ jobs:
 
       - name: Run Jest tests with coverage
         working-directory: backend
-        run: npm run test:coverage -- --onlyFailures
+        run: npm run test:coverage
