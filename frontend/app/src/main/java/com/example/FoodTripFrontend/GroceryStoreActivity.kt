@@ -102,7 +102,7 @@ class GroceryStoreActivity : AppCompatActivity() {
     }
 
     private fun getDiscount(storeID : String, callback: (List<DiscountItem>) -> Unit) {
-        val url = "${BuildConfig.SERVER_URL}discount?storeID=$storeID"
+        val url = "${BuildConfig.SERVER_URL}discounts?storeID=$storeID"
 //        Log.d(TAG, url)
 
         val request = Request.Builder()
