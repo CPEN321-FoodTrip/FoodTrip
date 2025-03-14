@@ -46,7 +46,7 @@ const SAMPLE_ROUTE = {
 };
 
 describe("Unmocked: POST /routes", () => {
-  beforeAll(async () => {
+  beforeEach(async () => {
     await initializeGeoNamesDatabase();
   });
 
