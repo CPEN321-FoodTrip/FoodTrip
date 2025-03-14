@@ -319,7 +319,7 @@ describe("Mocked: POST /routes", () => {
     expect(RouteHelpers.saveRouteToDb).toHaveBeenCalled();
   });
 
-  // Mocked behavior: mock openstreetmap api call to return valid coordinates for Vancouver and Toronto
+  // Mocked behavior: mock openstreetmap api call to return valid coordinates for Vancouver and Nanaimo
   // Input: valid userID, origin, destination, numStops all valid
   // Expected status code: 201
   // Expected behavior: route saved successfully
@@ -332,10 +332,10 @@ describe("Mocked: POST /routes", () => {
         ok: true,
         json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
       })
-      // toronto
+      // nanaimo
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [{ lat: "43.6532", lon: "-79.3832" }],
+        json: async () => [{ lat: "49.1638", lon: "-123.9381" }],
       });
 
     const response = await request(app)
@@ -343,8 +343,8 @@ describe("Mocked: POST /routes", () => {
       .send({
         userID: "test-user",
         origin: "Vancouver",
-        destination: "Toronto",
-        numStops: 1,
+        destination: "Nanaimo",
+        numStops: 10,
       })
       .expect(201);
 
