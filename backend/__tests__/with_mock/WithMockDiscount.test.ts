@@ -39,7 +39,80 @@ describe("Mocked: POST /discounts", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("", async () => {});
+  test("Valid discount mocked db response", async () => {
+    const discountID = new ObjectId().toHexString();
+    jest
+      .spyOn(DiscountHelpers, "addDiscountToDb")
+      .mockResolvedValue(discountID);
+
+    const response = await request(app)
+      .post("/discounts")
+      .send({
+        storeID: "123",
+        storeName: "Test Store",
+        ingredient: "apple",
+        price: 0.5,
+      })
+      .expect(201);
+
+    expect(response.body).toHaveProperty(
+      "message",
+      "Discount created successfully"
+    );
+    expect(response.body).toHaveProperty("discountID", discountID);
+    expect(DiscountHelpers.addDiscountToDb).toHaveBeenCalled();
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Valid discount in-memory db", async () => {
+    const response = await request(app)
+      .post("/discounts")
+      .send({
+        storeID: "123",
+        storeName: "Test Store",
+        ingredient: "apple",
+        price: 0.5,
+      })
+      .expect(201);
+
+    expect(response.body).toHaveProperty(
+      "message",
+      "Discount created successfully"
+    );
+    expect(response.body).toHaveProperty("discountID");
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Missing discount parameters", async () => {
+    jest.spyOn(DiscountHelpers, "addDiscountToDb").mockImplementation();
+
+    const response = await request(app)
+      .post("/discounts")
+      .send({
+        storeID: "123",
+        storeName: "Test Store",
+      })
+      .expect(400);
+
+    // error should include missing ingredient and price
+    expect(
+      response.body.errors.some((error: { msg: string }) =>
+        error.msg.includes("ingredient")
+      )
+    ).toBe(true);
+    expect(
+      response.body.errors.some((error: { msg: string }) =>
+        error.msg.includes("price")
+      )
+    ).toBe(true);
+    expect(DiscountHelpers.addDiscountToDb).not.toHaveBeenCalled();
+  });
 });
 
 describe("Mocked: GET /discounts/:id", () => {
