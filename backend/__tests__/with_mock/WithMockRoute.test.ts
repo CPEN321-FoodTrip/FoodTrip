@@ -2,6 +2,7 @@ import request from "supertest";
 import app from "../../index";
 import * as RouteHelpers from "../../helpers/RouteHelpers";
 import { ObjectId } from "mongodb";
+import { client } from "../../services";
 
 jest.mock("node-fetch", () => jest.fn());
 
@@ -316,6 +317,49 @@ describe("Mocked: POST /routes", () => {
 
     expect(response.body).toHaveProperty("error", "Internal server error");
     expect(RouteHelpers.saveRouteToDb).toHaveBeenCalled();
+  });
+
+  // Mocked behavior: mock openstreetmap api call to return valid coordinates for Vancouver and Toronto
+  // Input: valid userID, origin, destination, numStops all valid
+  // Expected status code: 201
+  // Expected behavior: route saved successfully
+  // Expected output: success message
+  test("Valid request", async () => {
+    global.fetch = jest
+      .fn()
+      // vancover
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
+      })
+      // toronto
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ lat: "43.6532", lon: "-79.3832" }],
+      });
+
+    const response = await request(app)
+      .post("/routes")
+      .send({
+        userID: "test-user",
+        origin: "Vancouver",
+        destination: "Toronto",
+        numStops: 1,
+      })
+      .expect(201);
+
+    expect(response.body).toHaveProperty("tripID");
+    expect(response.body).toHaveProperty("start_location");
+    expect(response.body).toHaveProperty("end_location");
+    expect(Array.isArray(response.body.stops)).toBe(true);
+    expect(response.body.stops).toHaveLength(1); // 1 stop
+
+    // check if route added to in-memory db which was cleared after last test by afterEach in jest setup
+    const result = await client
+      .db("route_data")
+      .collection("routes")
+      .findOne({ userID: "test-user" });
+    expect(result).not.toBeNull();
   });
 });
 
