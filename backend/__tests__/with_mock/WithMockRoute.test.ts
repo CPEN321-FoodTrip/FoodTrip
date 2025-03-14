@@ -390,9 +390,9 @@ describe("Mocked: DELETE /routes/:id", () => {
   // Input: valid trip id and empty in-memory database
   // Expected status code: 404
   // Expected behavior: error handled gracefully
-  // Expected output: error message
+  // Expected output: error message for route not found
   test("Empty database", async () => {
-    // in-memory db cleared by jest setup
+    // in-memory db cleared by jest setup afterEach
     const tripID = new ObjectId(123);
     const response = await request(app)
       .delete(`/routes/${tripID.toHexString()}`)
