@@ -36,5 +36,3 @@ afterAll(async () => {
   await client.close();
   await mongoServer.stop();
 });
-
-export { client };
