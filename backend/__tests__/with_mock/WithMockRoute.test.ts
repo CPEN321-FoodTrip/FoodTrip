@@ -250,7 +250,7 @@ describe("Mocked: POST /routes", () => {
 
     expect(response.body).toHaveProperty(
       "error",
-      "Number of stops must be at least"
+      "Number of stops must be at least 1"
     );
   });
 
@@ -337,7 +337,7 @@ describe("Mocked: GET /routes/:id", () => {
   // Expected output: error message for invalid tripID format
   test("Invalid tripID format", async () => {
     const tripID = "123"; // not a valid ObjectId
-    const response = await request(app).get(`/routes/${tripID}`).expect(404);
+    const response = await request(app).get(`/routes/${tripID}`).expect(400);
     expect(response.body).toHaveProperty("error", "Invalid tripID format");
   });
 
@@ -406,7 +406,7 @@ describe("Mocked: DELETE /routes/:id", () => {
   // Expected output: error message for invalid tripID format
   test("Invalid tripID format", async () => {
     const tripID = "123"; // not a valid ObjectId
-    const response = await request(app).delete(`/routes/${tripID}`).expect(404);
+    const response = await request(app).delete(`/routes/${tripID}`).expect(400);
     expect(response.body).toHaveProperty("error", "Invalid tripID format");
   });
 
