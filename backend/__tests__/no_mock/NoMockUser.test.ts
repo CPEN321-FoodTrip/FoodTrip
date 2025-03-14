@@ -7,6 +7,7 @@ import { ObjectId } from "mongodb";
 const ROUTES_DB_NAME = "route_data";
 const ROUTES_COLLECTION_NAME = "routes";
 
+// Interface GET /users/:id/routes
 describe("Unmocked: GET /users/:id/routes", () => {
   const SAMPLE_ROUTE1 = {
     userID: "test-user",

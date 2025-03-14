@@ -5,6 +5,7 @@ import { ObjectId } from "mongodb";
 
 jest.mock("node-fetch", () => jest.fn());
 
+// Interface POST /routes
 describe("Mocked: POST /routes", () => {
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -292,6 +293,7 @@ describe("Mocked: POST /routes", () => {
   });
 });
 
+// Interface GET /routes/:id
 describe("Mocked: GET /routes/:id", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -360,6 +362,7 @@ describe("Mocked: GET /routes/:id", () => {
   });
 });
 
+// Interface DELETE /routes/:id
 describe("Mocked: DELETE /routes/:id", () => {
   beforeEach(() => {
     jest.clearAllMocks();

@@ -7,6 +7,7 @@ import { ObjectId } from "mongodb";
 const DB_NAME = "discounts";
 const COLLECTION_NAME = "discounts";
 
+// Interface POST /discounts
 describe("Unmocked: POST /discounts", () => {
   // Input: valid discount
   // Expected status code: 201
@@ -162,6 +163,7 @@ describe("Unmocked: POST /discounts", () => {
   });
 });
 
+// Interface GET /discounts/:id
 describe("Unmocked: GET /discounts/:id", () => {
   const SAMPLE_DISCOUNT1 = {
     storeID: "store1",
@@ -241,6 +243,7 @@ describe("Unmocked: GET /discounts/:id", () => {
   });
 });
 
+// Interface GET /discounts
 describe("Unmocked: GET /discounts", () => {
   const SAMPLE_DISCOUNT1 = {
     storeID: "store1",
@@ -329,6 +332,7 @@ describe("Unmocked: GET /discounts", () => {
   });
 });
 
+// Interface PATCH /discounts/:id
 describe("Unmocked: DELETE /discounts/:id", () => {
   // Input: valid discount saved in db
   // Expected status code: 200

@@ -4,6 +4,7 @@ import * as DiscountHelpers from "../../helpers/DiscountHelper";
 import { ObjectId } from "mongodb";
 import { client } from "../../services";
 
+// Interface POST /discounts
 describe("Mocked: POST /discounts", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -116,6 +117,7 @@ describe("Mocked: POST /discounts", () => {
   });
 });
 
+// Interface GET /discounts/:id
 describe("Mocked: GET /discounts/:id", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -189,6 +191,7 @@ describe("Mocked: GET /discounts/:id", () => {
   });
 });
 
+// Interface GET /discounts
 describe("Mocked: GET /discounts", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -302,6 +305,7 @@ describe("Mocked: GET /discounts", () => {
   });
 });
 
+// Interface DELETE /discounts/:id
 describe("Mocked: DELETE /discounts/:id", () => {
   beforeEach(() => {
     jest.clearAllMocks();
