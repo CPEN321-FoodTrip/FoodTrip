@@ -45,6 +45,7 @@ const SAMPLE_ROUTE = {
   ],
 };
 
+// Interface POST /routes
 describe("Unmocked: POST /routes", () => {
   beforeEach(async () => {
     await initializeGeoNamesDatabase();
@@ -329,6 +330,7 @@ describe("Unmocked: POST /routes", () => {
   });
 });
 
+// Interface GET /routes/:id
 describe("Unmocked: GET /routes/:id", () => {
   // Input: SAMPLE_ROUTE is a valid route
   // Expected status code: 200
@@ -386,6 +388,7 @@ describe("Unmocked: GET /routes/:id", () => {
   });
 });
 
+// Interface DELETE /routes/:id
 describe("Unmocked: DELETE /routes/:id", () => {
   // Input: SAMPLE_ROUTE is a valid route
   // Expected status code: 200

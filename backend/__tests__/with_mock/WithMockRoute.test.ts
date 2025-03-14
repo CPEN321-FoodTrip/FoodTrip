@@ -2,9 +2,11 @@ import request from "supertest";
 import app from "../../index";
 import * as RouteHelpers from "../../helpers/RouteHelpers";
 import { ObjectId } from "mongodb";
+import { client } from "../../services";
 
 jest.mock("node-fetch", () => jest.fn());
 
+// Interface POST /routes
 describe("Mocked: POST /routes", () => {
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -15,12 +17,13 @@ describe("Mocked: POST /routes", () => {
     jest.restoreAllMocks();
   });
 
+  // Mocked behavior: mock openstreetmap api call to return no coordinates for Vancouver and Toronto
   // Input: user id, origin, destination, numStops all valid
   // Expected status code: 500
   // Expected behavior: error handled gracefully
   // Expected output: error message
   test("Fail external api request", async () => {
-    // dont mock coordinates from openstreetmap api call, cause it to fail
+    // mock no response coordinates from openstreetmap api call, cause it to fail
     global.fetch = jest.fn();
 
     const response = await request(app)
@@ -36,7 +39,8 @@ describe("Mocked: POST /routes", () => {
     expect(response.body).toHaveProperty("error", "Internal server error");
   });
 
-  // Input: user id, origin, destination, numStops all valid and valid coordinates for first city
+  // Mocked behavior: mock openstreetmap api call to return coordinates for Vancouver but not Toronto
+  // Input: user id, origin, destination, numStops all valid
   // Expected status code: 500
   // Expected behavior: error handled gracefully
   // Expected output: error message
@@ -63,7 +67,8 @@ describe("Mocked: POST /routes", () => {
     expect(response.body).toHaveProperty("error", "Internal server error");
   });
 
-  // Input: api response from openstreetmap api with status code 500
+  // Mocked behavior: mock openstreetmap api call to return 500 status response
+  // Input: valid userID, origin, destination, numStops parameters
   // Expected status code: 500
   // Expected behavior: error handled gracefully
   // Expected output: error message
@@ -88,36 +93,43 @@ describe("Mocked: POST /routes", () => {
     expect(response.body).toHaveProperty("error", "Internal server error");
   });
 
-  // Input: empty response from openstreetmap api
+  // Mocked behavior: mock openstreetmap api call to return empty response for not found city
+  //                  and mock RouteHelpers.saveRouteToDb to have empty implementation
+  // Input: valid userID, destination, numStops parameters and invalid origin
   // Expected status code: 400
-  // Expected behavior: error handled gracefully
+  // Expected behavior: saveRouteToDb not called
   // Expected output: error message mentioning origin not found
-  test("External api with empty response", async () => {
+  test("External api with not found first city response", async () => {
     // cant find first city, empty response
     global.fetch = jest.fn().mockResolvedValueOnce({
       ok: true,
       json: async () => [],
     });
+    jest.spyOn(RouteHelpers, "saveRouteToDb").mockImplementation();
 
     const response = await request(app)
       .post("/routes")
       .send({
         userID: "test-user",
-        origin: "Vancouver",
+        origin: "NonExistentCity",
         destination: "Toronto",
         numStops: 1,
       })
       .expect(400);
 
     expect(response.body).toHaveProperty("error");
-    expect(response.body.error).toContain("Origin"); // error should mention origin since it was empty
+    // error should mention origin since it couldn't be found
+    expect(response.body.error).toContain("Origin");
+    expect(RouteHelpers.saveRouteToDb).not.toHaveBeenCalled();
   });
 
-  // Input: valid first response and empty second response from openstreetmap api
+  // Mocked behavior: mock openstreetmap api call to return empty response for not found second city
+  //                  and mock RouteHelpers.saveRouteToDb to have empty implementation
+  // Input: valid userID, origin, numStops parameters and invalid destination
   // Expected status code: 400
-  // Expected behavior: error handled gracefully
+  // Expected behavior: saveRouteToDb not called
   // Expected output: error message mentioning destination not found
-  test("External api with empty response", async () => {
+  test("External api with not found second city response", async () => {
     // cant find second city, empty response
     global.fetch = jest
       .fn()
@@ -130,22 +142,26 @@ describe("Mocked: POST /routes", () => {
         ok: true,
         json: async () => [],
       });
+    jest.spyOn(RouteHelpers, "saveRouteToDb").mockImplementation();
 
     const response = await request(app)
       .post("/routes")
       .send({
         userID: "test-user",
         origin: "Vancouver",
-        destination: "Toronto",
+        destination: "NonExistentCity",
         numStops: 1,
       })
       .expect(400);
 
     expect(response.body).toHaveProperty("error");
-    expect(response.body.error).toContain("Destination"); // error should mention destination since it was empty
+    // error should mention destination since it coulnd't be found
+    expect(response.body.error).toContain("Destination");
+    expect(RouteHelpers.saveRouteToDb).not.toHaveBeenCalled();
   });
 
-  // Input: netowrk error from openstreetmap api
+  // Mocked behavior: mock openstreetmap api call to return network error
+  // Input: valid userID, origin, destination, numStops parameters
   // Expected status code: 500
   // Expected behavior: error handled gracefully
   // Expected output: error message
@@ -167,9 +183,11 @@ describe("Mocked: POST /routes", () => {
     expect(response.body).toHaveProperty("error", "Internal server error");
   });
 
-  // Input: two responses with vancouver coordinates from openstreetmap api
+  // Mocked behavior: mock openstreetmap api call to return valid coordinates for Vancouver and Toronto
+  //                  and mock RouteHelpers.saveRouteToDb to have empty implementation
+  // Input: origin and destination as same city
   // Expected status code: 400
-  // Expected behavior: error handled gracefully
+  // Expected behavior: saveRouteToDb not called
   // Expected output: error message for same start and end city
   test("Same start and end city", async () => {
     global.fetch = jest
@@ -183,6 +201,7 @@ describe("Mocked: POST /routes", () => {
         ok: true,
         json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
       });
+    jest.spyOn(RouteHelpers, "saveRouteToDb").mockImplementation();
 
     const response = await request(app)
       .post("/routes")
@@ -198,11 +217,14 @@ describe("Mocked: POST /routes", () => {
       "error",
       "Same start and end city not allowed"
     );
+    expect(RouteHelpers.saveRouteToDb).not.toHaveBeenCalled();
   });
 
-  // Input: two responses with vancouver and nanaimo coordinates from openstreetmap api
+  // Mocked behavior: mock openstreetmap api call to return valid coordinates for Vancouver and Nanaimo
+  //                  and mock RouteHelpers.saveRouteToDb to have empty implementation
+  // Input: numStops with too large value
   // Expected status code: 400
-  // Expected behavior: error handled gracefully
+  // Expected behavior: saveRouteToDb not called
   // Expected output: error message for too many stops
   test("Too many stops", async () => {
     global.fetch = jest
@@ -216,6 +238,7 @@ describe("Mocked: POST /routes", () => {
         ok: true,
         json: async () => [{ lat: "49.1638", lon: "-123.9381" }],
       });
+    jest.spyOn(RouteHelpers, "saveRouteToDb").mockImplementation();
 
     const response = await request(app)
       .post("/routes")
@@ -231,13 +254,16 @@ describe("Mocked: POST /routes", () => {
       "error",
       "Number of stops must be at most"
     );
+    expect(RouteHelpers.saveRouteToDb).not.toHaveBeenCalled();
   });
 
+  // Mocked behavior: mock RouteHelpers.saveRouteToDb to have empty implementation
   // Input: negative number of stops
   // Expected status code: 400
-  // Expected behavior: error handled gracefully
+  // Expected behavior: saveRouteToDb not called
   // Expected output: error message for improper number of stops
   test("Negative number of stops", async () => {
+    jest.spyOn(RouteHelpers, "saveRouteToDb").mockImplementation();
     const response = await request(app)
       .post("/routes")
       .send({
@@ -252,8 +278,10 @@ describe("Mocked: POST /routes", () => {
       "error",
       "Number of stops must be at least 1"
     );
+    expect(RouteHelpers.saveRouteToDb).not.toHaveBeenCalled();
   });
 
+  // Mocked behavior: RouteHelpers.saveRouteToDb throws an error
   // Input: user id, origin, destination, numStops all valid and valid coordinates for both cities
   // Expected status code: 500
   // Expected behavior: error handled gracefully
@@ -290,8 +318,52 @@ describe("Mocked: POST /routes", () => {
     expect(response.body).toHaveProperty("error", "Internal server error");
     expect(RouteHelpers.saveRouteToDb).toHaveBeenCalled();
   });
+
+  // Mocked behavior: mock openstreetmap api call to return valid coordinates for Vancouver and Nanaimo
+  // Input: valid userID, origin, destination, numStops all valid
+  // Expected status code: 201
+  // Expected behavior: route saved successfully
+  // Expected output: success message
+  test("Valid request", async () => {
+    global.fetch = jest
+      .fn()
+      // vancover
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
+      })
+      // nanaimo
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ lat: "49.1638", lon: "-123.9381" }],
+      });
+
+    const response = await request(app)
+      .post("/routes")
+      .send({
+        userID: "test-user",
+        origin: "Vancouver",
+        destination: "Nanaimo",
+        numStops: 10,
+      })
+      .expect(201);
+
+    expect(response.body).toHaveProperty("tripID");
+    expect(response.body).toHaveProperty("start_location");
+    expect(response.body).toHaveProperty("end_location");
+    expect(Array.isArray(response.body.stops)).toBe(true);
+    expect(response.body.stops).toHaveLength(10); // 10 stops
+
+    // check if route added to in-memory db which was cleared after last test by afterEach in jest setup
+    const result = await client
+      .db("route_data")
+      .collection("routes")
+      .findOne({ userID: "test-user" });
+    expect(result).not.toBeNull();
+  });
 });
 
+// Interface GET /routes/:id
 describe("Mocked: GET /routes/:id", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -301,6 +373,7 @@ describe("Mocked: GET /routes/:id", () => {
     jest.restoreAllMocks();
   });
 
+  // Mocked behavior: RouteHelpers.getRouteFromDb throws an error
   // Input: valid trip id
   // Expected status code: 500
   // Expected behavior: error handled gracefully
@@ -318,7 +391,8 @@ describe("Mocked: GET /routes/:id", () => {
     expect(RouteHelpers.getRouteFromDb).toHaveBeenCalled();
   });
 
-  // Input: valid trip id and empty in-memory database
+  // Mocked behavior: empty in-memory database
+  // Input: valid tripID
   // Expected status code: 404
   // Expected behavior: error handled gracefully
   // Expected output: error message
@@ -331,16 +405,20 @@ describe("Mocked: GET /routes/:id", () => {
     expect(response.body).toHaveProperty("error", "Route not found");
   });
 
+  // Mocked behavior: RouteHelpers.getRouteFromDb with empty implementation
   // Input: tripID with invalid format
   // Expected status code: 400
-  // Expected behavior: error handled gracefully
+  // Expected behavior: getRouteFromDb not called
   // Expected output: error message for invalid tripID format
   test("Invalid tripID format", async () => {
+    jest.spyOn(RouteHelpers, "getRouteFromDb").mockImplementation();
     const tripID = "123"; // not a valid ObjectId
     const response = await request(app).get(`/routes/${tripID}`).expect(400);
     expect(response.body).toHaveProperty("error", "Invalid tripID format");
+    expect(RouteHelpers.getRouteFromDb).not.toHaveBeenCalled();
   });
 
+  // Mocked behavior: RouteHelpers.getRouteFromDb with mocked route object
   // Input: valid trip id with mocked valid route
   // Expected status code: 200
   // Expected behavior: route returned successfully
@@ -360,6 +438,7 @@ describe("Mocked: GET /routes/:id", () => {
   });
 });
 
+// Interface DELETE /routes/:id
 describe("Mocked: DELETE /routes/:id", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -369,6 +448,7 @@ describe("Mocked: DELETE /routes/:id", () => {
     jest.restoreAllMocks();
   });
 
+  // Mocked behavior: RouteHelpers.deleteRouteFromDb throws an error
   // Input: valid trip id
   // Expected status code: 500
   // Expected behavior: error handled gracefully
@@ -387,6 +467,7 @@ describe("Mocked: DELETE /routes/:id", () => {
     expect(RouteHelpers.deleteRouteFromDb).toHaveBeenCalled();
   });
 
+  // Mocked behavior: empty in-memory database
   // Input: valid trip id and empty in-memory database
   // Expected status code: 404
   // Expected behavior: error handled gracefully
@@ -400,16 +481,22 @@ describe("Mocked: DELETE /routes/:id", () => {
     expect(response.body).toHaveProperty("error", "Route not found");
   });
 
+  // Mocked behavior: RouteHelpers.deleteRouteFromDb with empty implementation
   // Input: tripID with invalid format
   // Expected status code: 400
-  // Expected behavior: error handled gracefully
+  // Expected behavior: deleteRouteFromDb not called
   // Expected output: error message for invalid tripID format
   test("Invalid tripID format", async () => {
+    jest.spyOn(RouteHelpers, "deleteRouteFromDb").mockImplementation();
+
     const tripID = "123"; // not a valid ObjectId
     const response = await request(app).delete(`/routes/${tripID}`).expect(400);
     expect(response.body).toHaveProperty("error", "Invalid tripID format");
+
+    expect(RouteHelpers.deleteRouteFromDb).not.toHaveBeenCalled();
   });
 
+  // Mocked behavior: RouteHelpers.deleteRouteFromDb with mocked successful deletion
   // Input: valid tripID with mocked successful deletion
   // Expected status code: 200
   // Expected behavior: route deleted successfully

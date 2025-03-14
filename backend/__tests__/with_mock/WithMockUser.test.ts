@@ -2,6 +2,7 @@ import request from "supertest";
 import app from "../../index";
 import * as UserHelper from "../../helpers/UserHelper";
 
+// Interface GET /users/:id/routes
 describe("Mocked: GET /users/:id/routes", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -11,6 +12,7 @@ describe("Mocked: GET /users/:id/routes", () => {
     jest.restoreAllMocks();
   });
 
+  // Mocked behavior: UserHelper.getUserRoutesFromDb throws an error
   // Input: valid user ID
   // Expected status code: 500
   // Expected behavior: handle error gracefully
@@ -28,6 +30,7 @@ describe("Mocked: GET /users/:id/routes", () => {
     expect(response.body).toHaveProperty("error", "Internal server error");
   });
 
+  // Mocked behavior: empty in-memory database
   // Input: valid userID and empty in-memory database
   // Expected status code: 200
   // Expected behavior: query database for user routes
@@ -42,19 +45,23 @@ describe("Mocked: GET /users/:id/routes", () => {
     expect(response.body).toEqual([]);
   });
 
+  // Mocked behavior: UserHelper.getUserRoutesFromDb with empty implementation
   // Input: invalid userID with only whitespaces
   // Expected status code: 400
-  // Expected behavior: handle error gracefully
+  // Expected behavior: getUserRoutesFromDb not called
   // Expected output: error message for missing userID
   test("Invalid userID", async () => {
+    jest.spyOn(UserHelper, "getUserRoutesFromDb").mockImplementation();
     const userID = "  ";
     const response = await request(app)
       .get(`/users/${userID}/routes`)
       .expect(400);
 
     expect(response.body).toEqual({ error: "userID is required" });
+    expect(UserHelper.getUserRoutesFromDb).not.toHaveBeenCalled();
   });
 
+  // Mocked behavior: UserHelper.getUserRoutesFromDb with mocked routes
   // Input: valid userID with mocked routes in in-memory database
   // Expected status code: 200
   // Expected behavior: query database for user routes
