@@ -85,9 +85,9 @@ describe("Mocked: POST /routes", () => {
       });
 
     // database failure
-    jest
-      .spyOn(RouteHelpers, "saveRouteToDb")
-      .mockRejectedValue(new Error("Database connection failed"));
+    jest.spyOn(RouteHelpers, "saveRouteToDb").mockImplementation(() => {
+      throw new Error("Forced error");
+    });
 
     const response = await request(app)
       .post("/routes")
@@ -118,9 +118,9 @@ describe("Mocked: GET /routes/:id", () => {
   // Expected output:
   test("Database connection failure", async () => {
     const tripID = new ObjectId(123);
-    jest
-      .spyOn(RouteHelpers, "getRouteFromDb")
-      .mockRejectedValue(new Error("Database connection failed"));
+    jest.spyOn(RouteHelpers, "getRouteFromDb").mockImplementation(() => {
+      throw new Error("Forced error");
+    });
 
     const response = await request(app)
       .get(`/routes/${tripID.toHexString()}`)
@@ -156,15 +156,31 @@ describe("Mocked: DELETE /routes/:id", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("Successful route deletion", async () => {
+  test("Database connection failure", async () => {
     const tripID = new ObjectId(123);
-    jest.spyOn(RouteHelpers, "deleteRouteFromDb").mockResolvedValue(1);
+    jest.spyOn(RouteHelpers, "deleteRouteFromDb").mockImplementation(() => {
+      throw new Error("Forced error");
+    });
 
     const response = await request(app)
       .delete(`/routes/${tripID.toHexString()}`)
-      .query({ tripID: tripID.toHexString() })
-      .expect(200);
+      .expect(500);
 
-    expect(response.body).toHaveProperty("success", true);
+    expect(response.body).toHaveProperty("error", "Internal server error");
+    expect(RouteHelpers.deleteRouteFromDb).toHaveBeenCalled();
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Empty database", async () => {
+    const tripID = new ObjectId(123);
+    jest.spyOn(RouteHelpers, "deleteRouteFromDb").mockRejectedValueOnce(null);
+
+    const response = await request(app)
+      .delete(`/routes/${tripID.toHexString()}`)
+      .expect(404);
+    expect(response.body).toHaveProperty("error", "Route not found");
   });
 });
