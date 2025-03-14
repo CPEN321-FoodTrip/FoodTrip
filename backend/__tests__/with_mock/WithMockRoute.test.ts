@@ -352,7 +352,7 @@ describe("Mocked: POST /routes", () => {
     expect(response.body).toHaveProperty("start_location");
     expect(response.body).toHaveProperty("end_location");
     expect(Array.isArray(response.body.stops)).toBe(true);
-    expect(response.body.stops).toHaveLength(1); // 1 stop
+    expect(response.body.stops).toHaveLength(10); // 10 stops
 
     // check if route added to in-memory db which was cleared after last test by afterEach in jest setup
     const result = await client
