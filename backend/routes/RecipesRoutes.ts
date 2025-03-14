@@ -5,26 +5,26 @@ const controller = new RecipeController();
 
 export const RecipeRoutes = [
   {
-    method: "get",
-    route: "/search",
-    action: controller.getRecipes,  
-    validation: [],
-
+    method: "post",
+    route: "/recipes",
+    action: controller.createRecipesfromRoute,
+    validation: [
+      body("tripID")
+        .exists()
+        .isString()
+        .withMessage("tripID is required and must be a string"),
+    ],
   },
-
-  // {
-  //   method: "get",
-  //   route: "/single-recipe",
-  //   action: controller.getSingle,  
-  //   validation: [],
-  // },
-
   {
     method: "get",
-    route: "/get-recipe",
-    action: controller.getRecipe,  
+    route: "/recipes/:id",
+    action: controller.getRecipes,
     validation: [],
-  }
-
-
+  },
+  {
+    method: "delete",
+    route: "/recipes/:id",
+    action: controller.deleteRecipes,
+    validation: [],
+  },
 ];

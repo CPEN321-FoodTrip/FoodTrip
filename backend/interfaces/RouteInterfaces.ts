@@ -38,3 +38,9 @@ export interface RouteStop {
   cumulativeDistance: number;
   segmentPercentage: number;
 }
+
+export interface Route {
+  start_location: Location;
+  end_location: Location;
+  stops: RouteStop[];
+}

@@ -19,6 +19,8 @@ services:
     environment:
       - DB_URI=${DB_URI}
       - PORT=${PORT}
+      - EDAMAM_APP_ID=${EDAMAM_APP_ID}
+      - EDAMAM_API_KEY=${EDAMAM_API_KEY}
     ports:
       - "${PORT}:${PORT}"
     depends_on:
