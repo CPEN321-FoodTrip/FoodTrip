@@ -100,6 +100,7 @@ describe("Mocked: POST /routes", () => {
       .expect(500);
 
     expect(response.body).toHaveProperty("error", "Internal server error");
+    expect(RouteHelpers.saveRouteToDb).toHaveBeenCalled();
   });
 });
 
@@ -126,6 +127,7 @@ describe("Mocked: GET /routes/:id", () => {
       .get(`/routes/${tripID.toHexString()}`)
       .expect(500);
     expect(response.body).toHaveProperty("error", "Internal server error");
+    expect(RouteHelpers.getRouteFromDb).toHaveBeenCalled();
   });
 
   // Input:
@@ -134,12 +136,13 @@ describe("Mocked: GET /routes/:id", () => {
   // Expected output:
   test("Empty database", async () => {
     const tripID = new ObjectId(123);
-    jest.spyOn(RouteHelpers, "getRouteFromDb").mockRejectedValueOnce(null);
+    jest.spyOn(RouteHelpers, "getRouteFromDb").mockResolvedValueOnce(null);
 
     const response = await request(app)
       .get(`/routes/${tripID.toHexString()}`)
       .expect(404);
     expect(response.body).toHaveProperty("error", "Route not found");
+    expect(RouteHelpers.getRouteFromDb).toHaveBeenCalled();
   });
 });
 
@@ -176,11 +179,12 @@ describe("Mocked: DELETE /routes/:id", () => {
   // Expected output:
   test("Empty database", async () => {
     const tripID = new ObjectId(123);
-    jest.spyOn(RouteHelpers, "deleteRouteFromDb").mockRejectedValueOnce(null);
+    jest.spyOn(RouteHelpers, "deleteRouteFromDb").mockResolvedValueOnce(0);
 
     const response = await request(app)
       .delete(`/routes/${tripID.toHexString()}`)
       .expect(404);
     expect(response.body).toHaveProperty("error", "Route not found");
+    expect(RouteHelpers.deleteRouteFromDb).toHaveBeenCalled();
   });
 });

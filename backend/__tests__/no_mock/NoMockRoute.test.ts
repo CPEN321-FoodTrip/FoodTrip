@@ -264,7 +264,7 @@ describe("Unmocked: POST /routes", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("Extreme number of stops", async () => {
+  test("Too high number of stops", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
       .collection(ROUTES_COLLECTION_NAME)
