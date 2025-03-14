@@ -7,9 +7,6 @@ let client: MongoClient;
 
 const testDbs = ["recipes", "route_data", "discounts"];
 
-// suppress console logs in tests to avoid clutter
-jest.spyOn(console, "log").mockImplementation(() => {});
-
 beforeAll(async () => {
   // start in-memory MongoDB server
   mongoServer = await MongoMemoryServer.create();
