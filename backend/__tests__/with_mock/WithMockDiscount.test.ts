@@ -280,5 +280,44 @@ describe("Mocked: DELETE /discounts/:id", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("", async () => {});
+  test("Valid discount deleted through mock", async () => {
+    jest.spyOn(DiscountHelpers, "deleteDiscountFromDb").mockResolvedValue(1);
+
+    const discountID = new ObjectId().toHexString();
+    const response = await request(app)
+      .delete(`/discounts/${discountID}`)
+      .expect(200);
+
+    expect(response.body).toHaveProperty("success", true);
+    expect(DiscountHelpers.deleteDiscountFromDb).toHaveBeenCalled();
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Delete from empty db", async () => {
+    // in-memory db empty, cleared after each test in jest setup
+    const discountID = new ObjectId().toHexString();
+    const response = await request(app)
+      .delete(`/discounts/${discountID}`)
+      .expect(404);
+
+    expect(response.body).toHaveProperty("error", "Discount not found");
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Invalid discountId format", async () => {
+    jest.spyOn(DiscountHelpers, "deleteDiscountFromDb").mockResolvedValue(0);
+
+    const response = await request(app)
+      .delete("/discounts/invalid_id")
+      .expect(400);
+
+    expect(response.body).toHaveProperty("error", "Invalid discountID format");
+    expect(DiscountHelpers.deleteDiscountFromDb).not.toHaveBeenCalled();
+  });
 });
