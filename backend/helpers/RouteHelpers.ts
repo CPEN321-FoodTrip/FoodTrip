@@ -70,7 +70,7 @@ async function importGeoNamesToMongoDB(): Promise<void> {
       admin4Code: fields[13],
       population: parseInt(fields[14]),
       elevation: fields[15] ? parseInt(fields[15]) : 0,
-      dem: fields[16] ? parseInt(fields[16]) : 0,
+      dem: 0, // not used
       timezone: fields[17],
       modificationDate: fields[18],
       // add GeoJSON point for geospace lookup
@@ -303,8 +303,7 @@ export async function getRouteFromDb(tripID: string): Promise<{} | null> {
   const db = client.db(ROUTES_DB_NAME);
   const collection = db.collection(ROUTES_COLLECTION_NAME);
 
-  const result = await collection.findOne({ _id: new ObjectId(tripID) });
-  return result ? result : null;
+  return await collection.findOne({ _id: new ObjectId(tripID) });
 }
 
 // delete route from MongoDB by ID
