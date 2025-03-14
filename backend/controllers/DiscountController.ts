@@ -5,7 +5,6 @@ import {
   getAllDiscountsFromDb,
   getDiscountsFromDb,
 } from "../helpers/DiscountHelper";
-import { validationResult } from "express-validator";
 import { ObjectId } from "mongodb";
 import { Discount } from "../interfaces/DiscountInterfaces";
 
