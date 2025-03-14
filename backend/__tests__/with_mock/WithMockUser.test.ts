@@ -4,26 +4,28 @@ import { ObjectId } from "mongodb";
 import * as UserHelper from "../../helpers/UserHelper";
 
 describe("Mocked: GET /users/:id/routes", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   // Input:
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("Sucessful routes retrieved", async () => {
-    const tripID = new ObjectId(123);
+  test("Database connection failure", async () => {
     const userID = "test-user";
-    const mockRoutes = [
-      { tripID, userID, start_location: "Vancouver", end_location: "Toronto" },
-    ];
-
-    jest.spyOn(UserHelper, "getUserRoutesFromDb").mockResolvedValue(mockRoutes);
+    jest.spyOn(UserHelper, "getUserRoutesFromDb").mockImplementation(() => {
+      throw new Error("Forced error");
+    });
 
     const response = await request(app)
       .get(`/users/${userID}/routes`)
-      .expect(200);
+      .expect(500);
 
-    expect(Array.isArray(response.body)).toBe(true);
-    expect(response.body.length).toBe(1);
-    expect(response.body[0]).toHaveProperty("tripID");
-    expect(response.body[0].tripID).toBe(tripID.toHexString());
+    expect(response.body).toHaveProperty("error", "Internal server error");
   });
 });
