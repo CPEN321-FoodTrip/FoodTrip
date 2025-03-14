@@ -355,9 +355,20 @@ describe("Unmocked: GET /routes/:id", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("Attempt to get route that doesn't exist", async () => {
-    const tripID = new ObjectId().toHexString();
-    await request(app).get(`/routes/${tripID}`).expect(404);
+  test("Invalid tripID format", async () => {
+    const tripID = "1234"; // tripID should be a valid ObjectId
+    const response = await request(app).get(`/routes/${tripID}`).expect(400);
+    expect(response.body).toHaveProperty("error", "Invalid tripID format");
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Route not found", async () => {
+    const tripID = new ObjectId().toHexString(); // nonexistant tripID
+    const response = await request(app).get(`/routes/${tripID}`).expect(404);
+    expect(response.body).toHaveProperty("error", "Route not found");
   });
 });
 
