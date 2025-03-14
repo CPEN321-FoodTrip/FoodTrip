@@ -1,6 +1,5 @@
 import fs from "fs";
 import readline from "readline";
-import fetch from "node-fetch";
 import { client } from "../services";
 import { ObjectId } from "mongodb";
 import {
