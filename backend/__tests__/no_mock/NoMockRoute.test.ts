@@ -80,10 +80,10 @@ describe("Unmocked: POST /routes", () => {
 
     expect(result).not.toBeNull();
     expect(result).toHaveProperty("userID", "test-user");
-    expect(result!.start_location).toHaveProperty("name", "Vancouver");
-    expect(result!.end_location).toHaveProperty("name", "Toronto");
-    expect(Array.isArray(result!.stops)).toBe(true);
-    expect(result!.stops).toHaveLength(1); // 1 stop
+    expect(result?.start_location).toHaveProperty("name", "Vancouver");
+    expect(result?.end_location).toHaveProperty("name", "Toronto");
+    expect(Array.isArray(result?.stops)).toBe(true);
+    expect(result?.stops).toHaveLength(1); // 1 stop
 
     // db cleanup happens in afterEach in jest.setup.ts
   });
