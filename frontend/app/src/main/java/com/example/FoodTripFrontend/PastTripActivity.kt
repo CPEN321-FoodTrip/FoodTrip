@@ -78,7 +78,7 @@ class PastTripActivity : AppCompatActivity() {
     }
 
     private fun getTrip(userID : String, callback: (List<TripItem>) -> Unit) {
-        val url = "${BuildConfig.SERVER_URL}get-routes?userID=$userID"
+        val url = "${BuildConfig.SERVER_URL}users/$userID/routes"
 //        Log.d(TAG, url)
 
         val request = Request.Builder()

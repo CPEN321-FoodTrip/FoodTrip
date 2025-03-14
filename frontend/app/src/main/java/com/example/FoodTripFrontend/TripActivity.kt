@@ -27,6 +27,7 @@ import java.io.IOException
 import org.json.JSONArray
 import org.json.JSONObject
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.material.snackbar.Snackbar
 import java.util.ArrayList
 
 class TripActivity : AppCompatActivity() {
@@ -76,19 +77,19 @@ class TripActivity : AppCompatActivity() {
             //Check if starting city is valid
             if (userStartInput.isNotEmpty() && !checkExistence(userStartInput)) {
                 isValid = false
-                Toast.makeText(this@TripActivity, "Invalid Start City", Toast.LENGTH_SHORT).show()
+                Snackbar.make(findViewById(android.R.id.content), "Invalid Start City", Snackbar.LENGTH_SHORT).show()
             }
 
             // Check if end city is valid
             if (userEndInput.isNotEmpty() && !checkExistence(userEndInput)) {
                 isValid = false
-                Toast.makeText(this@TripActivity, "Invalid End City", Toast.LENGTH_SHORT).show()
+                Snackbar.make(findViewById(android.R.id.content), "Invalid End City", Snackbar.LENGTH_SHORT).show()
             }
 
             // Check if the number of stops is valid (non null and at least 1 stop)
             if (userNumStops == null || userNumStops < 1) {
                 isValid = false
-                Toast.makeText(this@TripActivity, "Please Enter a Valid Number of Stops", Toast.LENGTH_SHORT).show()
+                Snackbar.make(findViewById(android.R.id.content), "Invalid Number of Stops", Snackbar.LENGTH_SHORT).show()
             }
 
             // If all fields are valid, proceed to the next activity
@@ -143,7 +144,7 @@ class TripActivity : AppCompatActivity() {
             val requestBody = json.toString().toRequestBody("application/json".toMediaType())
 
             val request = Request.Builder()
-                .url("${SERVER_URL}generate-route")
+                .url("${SERVER_URL}routes")
                 .post(requestBody)
                 .addHeader("Content-Type", "application/json")
                 .build()

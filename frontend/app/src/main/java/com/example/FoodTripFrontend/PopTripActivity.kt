@@ -95,7 +95,7 @@ class PopTripActivity : Activity() {
     }
 
     private fun getTrip(tripID : String, callback: (Route) -> Unit) {
-        val url = "${BuildConfig.SERVER_URL}get-route?tripID=$tripID"
+        val url = "${BuildConfig.SERVER_URL}routes/$tripID"
         Log.d(TAG, url)
 
         val request = Request.Builder()

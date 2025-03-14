@@ -40,7 +40,6 @@ import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
 
 
-
 /**
  * Instrumented test, which will execute on an Android device.
  *
@@ -168,6 +167,7 @@ class TripActivityTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(TripActivity::class.java)
 
+
     @Before
     fun setup() {
         Intents.init()
@@ -178,7 +178,7 @@ class TripActivityTest {
         Intents.release()
     }
 
-    @Test fun planRegularTrip() {
+    @Test fun planRegularTripShort() {
         onView(withId(R.id.startLocation)).perform(typeText("Calgary"), closeSoftKeyboard())
         onView(withId(R.id.startLocation)).check(matches(withText("Calgary")))
 
@@ -190,7 +190,28 @@ class TripActivityTest {
 
         onView(withId(R.id.CreateTrip)).perform(click())
 
-//        Intents.intended((MainActivity::class.java.name))
+        Thread.sleep(5000)
+
+        Intents.intended(hasComponent(MainActivity::class.java.name))
+
+        onView(withId(R.id.map)).check(matches(isDisplayed()))
+    }
+
+    @Test fun planRegularTripLong() {
+        onView(withId(R.id.startLocation)).perform(typeText("Calgary"), closeSoftKeyboard())
+        onView(withId(R.id.startLocation)).check(matches(withText("Calgary")))
+
+        onView(withId(R.id.endLocation)).perform(typeText("Vancouver"), closeSoftKeyboard())
+        onView(withId(R.id.endLocation)).check(matches(withText("Vancouver")))
+
+        onView(withId(R.id.numstops)).perform(typeText("10"), closeSoftKeyboard())
+        onView(withId(R.id.numstops)).check(matches(withText("10")))
+
+        onView(withId(R.id.CreateTrip)).perform(click())
+
+        Thread.sleep(5000)
+
+        Intents.intended(hasComponent(MainActivity::class.java.name))
 
         onView(withId(R.id.map)).check(matches(isDisplayed()))
     }
@@ -208,6 +229,11 @@ class TripActivityTest {
 
         onView(withId(R.id.CreateTrip)).perform(click())
 
+        Thread.sleep(1000)
+
+        onView(withText("Invalid Start City"))
+            .check(matches(isDisplayed()))
+
     }
 
     @Test fun wrongEnd() {
@@ -222,9 +248,10 @@ class TripActivityTest {
 
         onView(withId(R.id.CreateTrip)).perform(click())
 
-//        onView(withText("Create Trip"))
-//            .inRoot(MobileViewMatchers.isToast())
-//            .check(matches(isDisplayed()))
+        Thread.sleep(1000)
+
+        onView(withText("Invalid End City"))
+            .check(matches(isDisplayed()))
     }
 
     @Test fun sameStartEnd() {
@@ -239,9 +266,10 @@ class TripActivityTest {
 
         onView(withId(R.id.CreateTrip)).perform(click())
 
-//        onView(withText("Create Trip"))
-//            .inRoot(MobileViewMatchers.isToast())
-//            .check(matches(isDisplayed()))
+        Thread.sleep(1000)
+
+        onView(withText("Route Cannot Have Same Start/End"))
+            .check(matches(isDisplayed()))
     }
 
     @Test fun wrongStopsAmount() {
@@ -256,9 +284,10 @@ class TripActivityTest {
 
         onView(withId(R.id.CreateTrip)).perform(click())
 
-//        onView(withText("Create Trip"))
-//            .inRoot(MobileViewMatchers.isToast())
-//            .check(matches(isDisplayed()))
+        Thread.sleep(1000)
+
+        onView(withText("Invalid Number of Stops"))
+            .check(matches(isDisplayed()))
     }
 
     @Test fun missingInputsStart() {
@@ -270,9 +299,10 @@ class TripActivityTest {
 
         onView(withId(R.id.CreateTrip)).perform(click())
 
-//        onView(withText("Create Trip"))
-//            .inRoot(MobileViewMatchers.isToast())
-//            .check(matches(isDisplayed()))
+        Thread.sleep(1000)
+
+        onView(withText("Missing Start City"))
+            .check(matches(isDisplayed()))
     }
 
     @Test fun missingInputsEnd() {
@@ -284,9 +314,10 @@ class TripActivityTest {
 
         onView(withId(R.id.CreateTrip)).perform(click())
 
-//        onView(withText("Create Trip"))
-//            .inRoot(MobileViewMatchers.isToast())
-//            .check(matches(isDisplayed()))
+        Thread.sleep(1000)
+
+        onView(withText("Missing End City"))
+            .check(matches(isDisplayed()))
     }
 
     @Test fun missingInputsStops() {
@@ -298,9 +329,10 @@ class TripActivityTest {
 
         onView(withId(R.id.CreateTrip)).perform(click())
 
-//        onView(withText("Create Trip"))
-//            .inRoot(MobileViewMatchers.isToast())
-//            .check(matches(isDisplayed()))
+        Thread.sleep(1000)
+
+        onView(withText("Missing Number of Stops"))
+            .check(matches(isDisplayed()))
     }
 }
 
