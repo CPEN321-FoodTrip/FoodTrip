@@ -38,11 +38,8 @@ export class DiscountController {
   // GET /discounts/:id
   async getDiscounts(req: Request, res: Response, next: NextFunction) {
     try {
+      // storeID validation is performed by express-validator middleware
       const storeID = req.params.id;
-
-      if (!storeID) {
-        return res.status(400).json({ error: "storeID is required" });
-      }
 
       const discounts = await getDiscountsFromDb(storeID);
 

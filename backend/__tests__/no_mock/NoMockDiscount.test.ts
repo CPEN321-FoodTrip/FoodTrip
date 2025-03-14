@@ -163,11 +163,82 @@ describe("Unmocked: POST /discounts", () => {
 });
 
 describe("Unmocked: GET /discounts/:id", () => {
+  const SAMPLE_DISCOUNT1 = {
+    storeID: "store1",
+    storeName: "Store 1",
+    ingredient: "apple",
+    price: 1.5,
+  };
+  const SAMPLE_DISCOUNT2 = {
+    storeID: "store1",
+    storeName: "Store 1",
+    ingredient: "banana",
+    price: 2.5,
+  };
+
   // Input:
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("", async () => {});
+  test("Valid storeID with discounts", async () => {
+    // save discounts to db
+    const discountID1 = await client
+      .db(DB_NAME)
+      .collection(COLLECTION_NAME)
+      .insertOne(SAMPLE_DISCOUNT1);
+    const discountID2 = await client
+      .db(DB_NAME)
+      .collection(COLLECTION_NAME)
+      .insertOne(SAMPLE_DISCOUNT2);
+
+    const response = await request(app).get("/discounts/store1").expect(200);
+
+    expect(response.body).toHaveLength(2);
+
+    // first discount
+    expect(response.body[0].discountID).toBe(
+      new ObjectId(discountID1.insertedId).toHexString()
+    );
+    expect(response.body[0].storeID).toBe(SAMPLE_DISCOUNT1.storeID);
+    expect(response.body[0].storeName).toBe(SAMPLE_DISCOUNT1.storeName);
+    expect(response.body[0].ingredient).toBe(SAMPLE_DISCOUNT1.ingredient);
+    expect(response.body[0].price).toBe(SAMPLE_DISCOUNT1.price);
+
+    // second discount
+    expect(response.body[1].discountID).toBe(
+      new ObjectId(discountID2.insertedId).toHexString()
+    );
+    expect(response.body[1].storeID).toBe(SAMPLE_DISCOUNT2.storeID);
+    expect(response.body[1].storeName).toBe(SAMPLE_DISCOUNT2.storeName);
+    expect(response.body[1].ingredient).toBe(SAMPLE_DISCOUNT2.ingredient);
+    expect(response.body[1].price).toBe(SAMPLE_DISCOUNT2.price);
+
+    // db cleanup happens in afterEach in jest.setup.ts
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Nonexistant storeID", async () => {
+    const response = await request(app)
+      .get("/discounts/nonexistent")
+      .expect(404);
+
+    expect(response.body).toHaveProperty(
+      "error",
+      "No discounts found for this store"
+    );
+  });
+
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Missing storeID", async () => {
+    const response = await request(app).get("/discounts/").expect(404); // malformed url
+    expect(response.body).toMatchObject({});
+  });
 });
 
 describe("Unmocked: GET /discounts", () => {
