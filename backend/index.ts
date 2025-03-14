@@ -69,8 +69,8 @@ const errorHandle = (
   res: Response,
   next: NextFunction
 ) => {
-  // console.error("Error:", err.message);
-  // console.error("Stack trace:", err.stack);
+  console.error("Error:", err.message);
+  console.error("Stack trace:", err.stack);
 
   res.status(500).json({ error: "Internal server error" });
 };
