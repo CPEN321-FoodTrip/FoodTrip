@@ -21,6 +21,7 @@ services:
       - PORT=${PORT}
       - EDAMAM_APP_ID=${EDAMAM_APP_ID}
       - EDAMAM_API_KEY=${EDAMAM_API_KEY}
+      - FIREBASE_SERVICE_ACCOUNT_KEY=${FIREBASE_SERVICE_ACCOUNT_KEY}
     ports:
       - "${PORT}:${PORT}"
     depends_on:
