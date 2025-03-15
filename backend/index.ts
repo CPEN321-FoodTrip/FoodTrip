@@ -1,5 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
-import { client, initializeClient } from "./services";
+import { client, initializeClient, initializeFirebaseAdmin } from "./services";
 import { RouteRoutes } from "./routes/RouteRoutes";
 import { DiscountRoutes } from "./routes/DiscountRoutes";
 import { validationResult } from "express-validator";
@@ -47,6 +47,7 @@ async function startServer() {
     .then(async () => {
       console.log("Connected to MongoDB");
 
+      initializeFirebaseAdmin();
       await initializeGeoNamesDatabase();
 
       app.listen(process.env.PORT, () => {
