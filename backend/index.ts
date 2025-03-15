@@ -7,6 +7,7 @@ import morgan from "morgan";
 import { initializeGeoNamesDatabase } from "./helpers/RouteHelpers";
 import { RecipeRoutes } from "./routes/RecipesRoutes";
 import { UserRoutes } from "./routes/UserRoutes";
+import { NotificationRoutes } from "./routes/NotificationRoutes";
 
 const app = express();
 
@@ -18,6 +19,7 @@ const Routes = [
   ...DiscountRoutes,
   ...RecipeRoutes,
   ...UserRoutes,
+  ...NotificationRoutes,
 ];
 
 Routes.forEach((route) => {

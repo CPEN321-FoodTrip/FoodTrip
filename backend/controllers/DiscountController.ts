@@ -34,9 +34,14 @@ export class DiscountController {
       };
 
       // send notification using firebase
-      await admin
-        .messaging()
-        .sendEachForMulticast({ tokens, notification: payload.notification });
+      if (tokens.length !== 0) {
+        const response = await admin
+          .messaging()
+          .sendEachForMulticast({ tokens, notification: payload.notification });
+        if (response.failureCount > 0) {
+          console.error("Failed to send notifications to some devices");
+        }
+      }
 
       const discountID = await addDiscountToDb(discount);
 
