@@ -1,18 +1,24 @@
 import express, { NextFunction, Request, Response } from "express";
-import { client } from "./services";
+import { client, initializeClient } from "./services";
 import { RouteRoutes } from "./routes/RouteRoutes";
 import { DiscountRoutes } from "./routes/DiscountRoutes";
 import { validationResult } from "express-validator";
 import morgan from "morgan";
 import { initializeGeoNamesDatabase } from "./helpers/RouteHelpers";
 import { RecipeRoutes } from "./routes/RecipesRoutes";
+import { UserRoutes } from "./routes/UserRoutes";
 
 const app = express();
 
 app.use(express.json());
 app.use(morgan("tiny"));
 
-const Routes = [...RouteRoutes, ...DiscountRoutes,...RecipeRoutes];
+const Routes = [
+  ...RouteRoutes,
+  ...DiscountRoutes,
+  ...RecipeRoutes,
+  ...UserRoutes,
+];
 
 Routes.forEach((route) => {
   (app as any)[route.method](
@@ -34,24 +40,41 @@ Routes.forEach((route) => {
   );
 });
 
-client
-  .connect()
-  .then(async () => {
-    console.log("Connected to MongoDB");
+async function startServer() {
+  initializeClient();
+  client
+    .connect()
+    .then(async () => {
+      console.log("Connected to MongoDB");
 
-    await initializeGeoNamesDatabase();
+      await initializeGeoNamesDatabase();
 
-    app.listen(process.env.PORT, () => {
-      console.log("Server is running on port " + process.env.PORT);
+      app.listen(process.env.PORT, () => {
+        console.log("Server is running on port " + process.env.PORT);
+      });
+    })
+    .catch((err: Error) => {
+      console.error(err);
+      client.close();
     });
-  })
-  .catch((err: Error) => {
-    console.error(err);
-    client.close();
-  });
+}
 
-const errorHandle = (req: Request, res: Response) => {
-  console.error(res.status);
+if (process.env.NODE_ENV !== "test") {
+  void startServer();
+}
+
+const errorHandle = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.error("Error:", err.message);
+  console.error("Stack trace:", err.stack);
+
+  res.status(500).json({ error: "Internal server error" });
 };
 
 app.use(errorHandle);
+
+export default app; // needed for testing

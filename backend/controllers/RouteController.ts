@@ -1,66 +1,54 @@
 import { NextFunction, Request, Response } from "express";
 import {
-  Location,
   generateRouteStops,
-  getRouteFromDatabase,
-  saveRouteToDatabase,
-  getRoutesFromDatabase,
-  deleteRouteFromDatabase,
+  getRouteFromDb,
+  saveRouteToDb,
+  deleteRouteFromDb,
+  fetchCityData,
 } from "../helpers/RouteHelpers";
+import { Location } from "../interfaces/RouteInterfaces";
+import { ObjectId } from "mongodb";
 
 export class RouteController {
-  async generateRoute(req: Request, res: Response, next: NextFunction) {
+  // create a new route
+  // POST /routes
+  async createRoute(req: Request, res: Response, next: NextFunction) {
+    // validation of params performed by express-validator middleware
     const { userID, origin, destination, numStops } = req.body;
 
-    if (!userID || !origin || !destination || !numStops || numStops < 1) {
-      res.status(400).json({ error: "Invalid request parameters" });
-      return;
+    if (numStops < 1) {
+      return res
+        .status(400)
+        .json({ error: "Number of stops must be at least 1" });
     }
-
-    const originURL = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(
-      origin
-    )}&format=json&limit=1`;
-
-    const originResponse = await fetch(originURL);
-    const originData = await originResponse.json();
-
-    if (originData.length === 0) {
-      res.status(400).json({ error: "Could not locate start city" });
-      return;
-    }
-
-    const originCity = originData[0];
-
-    const start: Location = {
-      name: origin,
-      latitude: parseFloat(originCity.lat),
-      longitude: parseFloat(originCity.lon),
-      population: 0, // not used for start location
-    };
-
-    const destinationURL = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(
-      destination
-    )}&format=json&limit=1`;
-
-    const destinationResponse = await fetch(destinationURL);
-    const destinationData = await destinationResponse.json();
-
-    if (destinationData.length === 0) {
-      res.status(400).json({ error: "Could not locate end city" });
-      return;
-    }
-
-    const destinationCity = destinationData[0];
-
-    const end: Location = {
-      name: destination,
-      latitude: parseFloat(destinationCity.lat),
-      longitude: parseFloat(destinationCity.lon),
-      population: 0, // not used for end location
-    };
 
     try {
+      const originCityData = await fetchCityData(origin);
+      if (!originCityData) {
+        return res.status(400).json({ error: "Origin city not found" });
+      }
+
+      const start: Location = {
+        name: origin,
+        latitude: parseFloat(originCityData.lat),
+        longitude: parseFloat(originCityData.lon),
+        population: 0, // not used for start location
+      };
+
+      const destinationCityData = await fetchCityData(destination);
+      if (!destinationCityData) {
+        return res.status(400).json({ error: "Destination city not found" });
+      }
+
+      const end: Location = {
+        name: destination,
+        latitude: parseFloat(destinationCityData.lat),
+        longitude: parseFloat(destinationCityData.lon),
+        population: 0, // not used for end location
+      };
+
       const stops = await generateRouteStops(start, end, numStops);
+
       const route = {
         start_location: {
           name: origin,
@@ -75,62 +63,56 @@ export class RouteController {
         stops: stops,
       };
 
-      const tripID = await saveRouteToDatabase(userID, route);
+      const tripID = await saveRouteToDb(userID, route);
       const response = { tripID, ...route };
 
-      res.json(response);
+      res.status(201).json(response);
     } catch (error) {
-      console.error("Error generating route:", error);
-      res.status(500).json({ error: "Error generating route" });
+      next(error);
     }
   }
 
-  // get route information
+  // get information about a particular route
+  // GET /routes/:id
   async getRoute(req: Request, res: Response, next: NextFunction) {
-    const tripID = req.query.tripID as string;
+    try {
+      const tripID = req.params.id;
 
-    if (!tripID) {
-      res.status(400).json({ error: "Invalid request parameters" });
-      return;
+      if (!ObjectId.isValid(tripID)) {
+        return res.status(400).json({ error: "Invalid tripID format" });
+      }
+
+      const route = await getRouteFromDb(tripID);
+
+      if (!route) {
+        return res.status(404).json({ error: "Route not found" });
+      }
+
+      res.json(route);
+    } catch (error) {
+      next(error);
     }
-
-    const route = await getRouteFromDatabase(tripID);
-    if (!route) {
-      res.status(404).json({ error: "Route not found" });
-      return;
-    }
-
-    res.json(route);
   }
 
-  // get all routes for user
-  async getRoutes(req: Request, res: Response, next: NextFunction) {
-    const userID = req.query.userID as string;
-
-    if (!userID) {
-      res.status(400).json({ error: "Invalid request parameters" });
-      return;
-    }
-
-    const routes = await getRoutesFromDatabase(userID);
-    res.json(routes);
-  }
-
-  // delete route
+  // delete a route
+  // DELETE /routes/:id
   async deleteRoute(req: Request, res: Response, next: NextFunction) {
-    const tripID = req.query.tripID as string;
+    try {
+      const tripID = req.params.id;
 
-    if (!tripID) {
-      res.status(400).json({ error: "Invalid request parameters" });
-      return;
+      if (!ObjectId.isValid(tripID)) {
+        return res.status(400).json({ error: "Invalid tripID format" });
+      }
+
+      const result = await deleteRouteFromDb(tripID);
+
+      if (!result) {
+        return res.status(404).json({ error: "Route not found" });
+      }
+
+      res.json({ success: true, message: "Route deleted successfully" });
+    } catch (error) {
+      next(error);
     }
-
-    const result = await deleteRouteFromDatabase(tripID);
-    if (!result) {
-      res.status(404).json({ error: "Route not found" });
-      return;
-    }
-
-    res.json({ success: true });
   }
 }
