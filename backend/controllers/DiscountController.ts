@@ -7,6 +7,8 @@ import {
 } from "../helpers/DiscountHelper";
 import { ObjectId } from "mongodb";
 import { Discount } from "../interfaces/DiscountInterfaces";
+import { getAllTokensFromDb } from "../helpers/NotificationHelper";
+import * as admin from "firebase-admin";
 
 export class DiscountController {
   // add a new discount
@@ -23,6 +25,19 @@ export class DiscountController {
     };
 
     try {
+      const tokens = await getAllTokensFromDb();
+      const payload = {
+        notification: {
+          title: "New Discount Available!",
+          body: `Get ${discount.ingredient} for only $${discount.price}% at ${discount.storeName}!`,
+        },
+      };
+
+      // send notification using firebase
+      await admin
+        .messaging()
+        .sendEachForMulticast({ tokens, notification: payload.notification });
+
       const discountID = await addDiscountToDb(discount);
 
       res
