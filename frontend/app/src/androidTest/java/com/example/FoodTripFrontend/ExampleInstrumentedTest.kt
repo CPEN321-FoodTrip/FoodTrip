@@ -1,5 +1,6 @@
 package com.example.FoodTripFrontend
 
+import android.credentials.CredentialManager
 import android.view.View
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.UiController
@@ -26,25 +27,14 @@ import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 
-
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
-import java.util.function.Predicate.not
-import android.os.IBinder
-import android.util.Log
-import android.view.WindowManager
-import androidx.test.espresso.Root
+
 import androidx.test.espresso.intent.matcher.IntentMatchers
-import org.hamcrest.Description
-import org.hamcrest.TypeSafeMatcher
+import com.google.android.gms.maps.GoogleMap
 
 
-/**
- * Instrumented test, which will execute on an Android device.
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 @RunWith(AndroidJUnit4::class)
 class LoginActivityTest {
 
@@ -54,7 +44,6 @@ class LoginActivityTest {
     @Before
     fun setup() {
         Intents.init()
-
     }
 
     @After
@@ -67,19 +56,12 @@ class LoginActivityTest {
 
         onView(withId(R.id.sign_in_button_user)).perform(click())
 
-        Thread.sleep(2000)
-
-//        Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
-
     }
 
     @Test fun adminSignIn() {
 
         onView(withId(R.id.sign_in_button_admin)).perform(click())
 
-        Thread.sleep(2000)
-
-//        Intents.intended(IntentMatchers.hasComponent(MainActivityAdmin::class.java.name))
     }
 }
 
@@ -177,6 +159,10 @@ class TripActivityTest {
     fun tearDown() {
         Intents.release()
     }
+
+
+    private lateinit var googleMap: GoogleMap
+
 
     @Test fun planRegularTripShort() {
         onView(withId(R.id.startLocation)).perform(typeText("Calgary"), closeSoftKeyboard())

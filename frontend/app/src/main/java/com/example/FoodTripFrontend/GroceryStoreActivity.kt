@@ -102,7 +102,7 @@ class GroceryStoreActivity : AppCompatActivity() {
     }
 
     private fun getDiscount(storeID : String, callback: (List<DiscountItem>) -> Unit) {
-        val url = "${BuildConfig.SERVER_URL}discount?storeID=$storeID"
+        val url = "${BuildConfig.SERVER_URL}discounts/$storeID"
 //        Log.d(TAG, url)
 
         val request = Request.Builder()
@@ -129,7 +129,7 @@ class GroceryStoreActivity : AppCompatActivity() {
     }
 
     private fun postDiscount(storeID: String, storeName: String, ingredient: String, price: String) {
-        val url = "${BuildConfig.SERVER_URL}discount"
+        val url = "${BuildConfig.SERVER_URL}discounts"
 //        Log.d(TAG, url)
 
         val jsonBody = """
@@ -164,7 +164,7 @@ class GroceryStoreActivity : AppCompatActivity() {
     }
 
     private fun deleteDiscount(discountID: String) {
-        val url = "${BuildConfig.SERVER_URL}discount?discountID=$selectedDiscountID"
+        val url = "${BuildConfig.SERVER_URL}discounts/$selectedDiscountID"
 
         val request = Request.Builder()
             .url(url)
