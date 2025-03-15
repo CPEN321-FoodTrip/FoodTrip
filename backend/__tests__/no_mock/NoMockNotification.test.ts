@@ -7,7 +7,7 @@ describe("Unmocked: POST //notification/subscribe", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("Valid discount", async () => {});
+  test("", async () => {});
 });
 
 // Interface POST /notification/unsubscribe
@@ -16,5 +16,5 @@ describe("Unmocked: POST //notification/unsubscribe", () => {
   // Expected status code:
   // Expected behavior:
   // Expected output:
-  test("Valid discount", async () => {});
+  test("", async () => {});
 });
