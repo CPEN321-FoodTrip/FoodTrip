@@ -13,7 +13,7 @@ export async function addTokenToDb(
     .collection(COLLECTION_NAME)
     .insertOne({ userID: userID, fcmToken: fcmToken });
 
-  return result.insertedId ? true : false;
+  return result ? true : false;
 }
 
 // remove user fcm token from database

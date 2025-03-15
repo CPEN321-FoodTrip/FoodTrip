@@ -9,15 +9,15 @@ import {
 export class NotificationController {
   async subscribe(req: Request, res: Response, next: NextFunction) {
     // validation of params performed by express-validator middleware
-    const { userId, fcmToken }: UserNotificationData = req.body;
+    const { userID, fcmToken }: UserNotificationData = req.body;
 
     try {
-      const prevToken = await getTokenFromDb(userId);
+      const prevToken = await getTokenFromDb(userID);
       if (prevToken) {
         return res.status(400).send("Already subscribed");
       }
 
-      const result = await addTokenToDb(userId, fcmToken);
+      const result = await addTokenToDb(userID, fcmToken);
       if (!result) {
         throw new Error("Failed to subscribe");
       }
@@ -30,10 +30,10 @@ export class NotificationController {
 
   async unsubscribe(req: Request, res: Response, next: NextFunction) {
     // validation of param performed by express-validator middleware
-    const { userId } = req.body;
+    const { userID } = req.body;
 
     try {
-      const result = await removeTokenFromDb(userId);
+      const result = await removeTokenFromDb(userID);
       if (!result) {
         return res.status(400).send("Not subscribed");
       }

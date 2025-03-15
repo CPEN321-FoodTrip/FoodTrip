@@ -9,10 +9,10 @@ export const NotificationRoutes = [
     route: "/notifications/subscribe",
     action: controller.subscribe,
     validation: [
-      body("userId")
+      body("userID")
         .exists()
         .isString()
-        .withMessage("userId is required and must be a string"),
+        .withMessage("userID is required and must be a string"),
       body("fcmToken")
         .exists()
         .isString()
@@ -24,10 +24,10 @@ export const NotificationRoutes = [
     route: "/notifications/unsubscribe",
     action: controller.unsubscribe,
     validation: [
-      body("userId")
+      body("userID")
         .exists()
         .isString()
-        .withMessage("userId is required and must be a string"),
+        .withMessage("userID is required and must be a string"),
     ],
   },
 ];

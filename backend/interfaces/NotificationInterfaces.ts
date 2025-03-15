@@ -1,4 +1,4 @@
 export interface UserNotificationData {
-  userId: string;
+  userID: string;
   fcmToken: string;
 }
