@@ -28,6 +28,8 @@ describe("Unmocked: POST /notifications/subscribe", () => {
       .findOne({ userID: userID });
     expect(result).not.toBeNull();
     expect(result?.fcmToken).toBe(fcmToken);
+
+    // db cleanup happens in afterEach in jest.setup.ts
   });
 
   // Input:
@@ -95,6 +97,8 @@ describe("Unmocked: POST /notifications/subscribe", () => {
       .collection(COLLECTION_NAME)
       .countDocuments();
     expect(countAfter).toBe(countBefore);
+
+    // db cleanup happens in afterEach in jest.setup.ts
   });
 });
 
@@ -136,6 +140,8 @@ describe("Unmocked: POST /notifications/unsubscribe", () => {
       .collection(COLLECTION_NAME)
       .countDocuments();
     expect(countAfter).toBe(countBefore - 1);
+
+    // db cleanup happens in afterEach in jest.setup.ts
   });
 
   // Input:
@@ -179,6 +185,8 @@ describe("Unmocked: POST /notifications/unsubscribe", () => {
       .collection(COLLECTION_NAME)
       .findOne({ userID: userID });
     expect(result).not.toBeNull();
+
+    // db cleanup happens in afterEach in jest.setup.ts
   });
 
   // Input:
@@ -219,5 +227,7 @@ describe("Unmocked: POST /notifications/unsubscribe", () => {
       .collection(COLLECTION_NAME)
       .findOne({ userID: userID1 });
     expect(result).not.toBeNull();
+
+    // db cleanup happens in afterEach in jest.setup.ts
   });
 });
