@@ -236,6 +236,7 @@ class PopTripActivity : Activity() {
             // val recipe = recipes[i]
             itemView.textSize = 25f
             itemView.text = "    recipe ${i+1}: something"
+            itemView.tag = "recipe ${i+1}"
 
             // TODO: implement parameters to PopRecipeActivity
             itemView.setOnClickListener {

@@ -52,8 +52,10 @@ class PopRecipeActivity : Activity() {
             val urlTextView = TextView(this)
             urlTextView.textSize = 25f
             urlTextView.text = "$url"
+            urlTextView.tag = "url"
             urlTextView.setOnClickListener {
                 webView = WebView(this)
+                webView.tag = "recipe web"
                 webView.settings.javaScriptEnabled = true
                 webView.settings.domStorageEnabled = true
                 findViewById<ConstraintLayout>(R.id.main).addView(webView)
