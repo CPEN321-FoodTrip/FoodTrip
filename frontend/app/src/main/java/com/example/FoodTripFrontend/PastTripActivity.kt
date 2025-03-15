@@ -66,10 +66,11 @@ class PastTripActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // TODO: get user ID from login (use "test_person" as for developing)
-        val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
-        val userEmail = sharedPref.getString("userEmail", "No email found")
+        //use "test_person" for developing and debugging
+        //val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
+        //val userEmail = sharedPref.getString("userEmail", "No email found")
 
+        val userEmail = "test_person"
 
 //        getTrip(sampleID) {trips -> processTrip(trips)}
         if (userEmail != null) {

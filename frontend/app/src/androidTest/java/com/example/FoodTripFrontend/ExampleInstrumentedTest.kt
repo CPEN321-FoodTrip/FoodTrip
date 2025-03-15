@@ -33,6 +33,7 @@ import org.junit.Rule
 
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import com.google.android.gms.maps.GoogleMap
+import org.hamcrest.core.AllOf.allOf
 
 
 @RunWith(AndroidJUnit4::class)
@@ -346,11 +347,55 @@ class TripActivityTest {
 //    val activityRule = ActivityScenarioRule(GroceryStoreActivity::class.java)
 //}
 //
-//@RunWith(AndroidJUnit4::class)
-//class RecipeActivityTest {
-//    @Rule
-//    val activityRule = ActivityScenarioRule(PopRecipeActivity::class.java)
-//}
+@RunWith(AndroidJUnit4::class)
+class RecipeTests {
+    @Before
+    fun setup() {
+        Intents.init()
+    }
+
+    @After
+    fun tearDown() {
+        Intents.release()
+    }
+
+    @get:Rule
+    val activityRule = ActivityScenarioRule(MainActivity::class.java)
+
+    @Test fun displayRecipe()  {
+        onView(withId(R.id.ManageTrip)).perform(click())
+
+        Intents.intended(hasComponent(TripActivity::class.java.name))
+
+        onView(withId(R.id.startLocation)).perform(typeText("Calgary"), closeSoftKeyboard())
+
+        onView(withId(R.id.endLocation)).perform(typeText("Austin"), closeSoftKeyboard())
+
+        onView(withId(R.id.numstops)).perform(typeText("3"), closeSoftKeyboard())
+
+        onView(withId(R.id.CreateTrip)).perform(click())
+
+        Thread.sleep(5000)
+
+        Intents.intended(hasComponent(MainActivity::class.java.name))
+
+        onView(withId(R.id.PastTrips)).perform(click())
+
+        Intents.intended(hasComponent(PastTripActivity::class.java.name))
+
+        onView(allOf(withText("Calgary -> Austin"), isDisplayed()))
+            .perform(click())
+
+        Intents.intended(hasComponent(PopTripActivity::class.java.name))
+
+        onView(allOf(withText("    recipe 1: something"))).perform(click())
+
+        Intents.intended(hasComponent(PopRecipeActivity::class.java.name))
+
+        onView(withText("https://")).check(matches(isDisplayed()))
+
+    }
+}
 
 //@RunWith(AndroidJUnit4::class)
 //class SocialsActivityTest {
