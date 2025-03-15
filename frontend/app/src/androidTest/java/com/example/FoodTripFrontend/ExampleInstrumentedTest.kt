@@ -1,5 +1,6 @@
 package com.example.FoodTripFrontend
 
+import android.content.Context
 import android.credentials.CredentialManager
 import android.view.View
 import androidx.test.espresso.Espresso.onView
@@ -30,10 +31,23 @@ import org.junit.runner.RunWith
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
-
+import java.util.function.Predicate.not
+import android.os.IBinder
+import android.util.Log
+import android.view.WindowManager
+import androidx.test.core.app.ActivityScenario
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Root
+import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import com.google.android.gms.maps.GoogleMap
-import org.hamcrest.core.AllOf.allOf
+import androidx.test.espresso.matcher.ViewMatchers.withParent
+import androidx.test.espresso.matcher.ViewMatchers.withTagValue
+import org.hamcrest.Description
+import org.hamcrest.Matchers.allOf
+import org.hamcrest.Matchers.anyOf
+import org.hamcrest.Matchers.`is`
+import org.hamcrest.TypeSafeMatcher
 
 
 @RunWith(AndroidJUnit4::class)
@@ -329,12 +343,89 @@ class TripActivityTest {
 //    val activityRule = ActivityScenarioRule(AccountActivity::class.java)
 //}
 //
-//@RunWith(AndroidJUnit4::class)
-//class PastTripActivityTest {
-//    @Rule
-//    val activityRule = ActivityScenarioRule(PastTripActivity::class.java)
-//}
-//
+@RunWith(AndroidJUnit4::class)
+class PastTripActivityEmptyTest {
+    @Before
+    fun setup() {
+        Intents.init()
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        var sharedPreferences = context.getSharedPreferences("UserData", Context.MODE_PRIVATE);
+        sharedPreferences.edit().putString("userEmail", "").apply()
+    }
+
+    @After
+    fun tearDown() {
+        Intents.release()
+    }
+
+    @get:Rule
+    val activityRule = ActivityScenarioRule(PastTripActivity::class.java)
+
+    @Test fun checkElements() {
+        onView(withId(R.id.back_button_past)).check(matches(withText("Back")))
+    }
+
+    @Test fun backButton() {
+        onView(withId(R.id.back_button_past)).perform(click())
+        Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
+    }
+
+    @Test fun emptyPastTrip() {
+        onView(withParent(withId(R.id.past_trip_list_layout))).check(doesNotExist())
+    }
+}
+
+@RunWith(AndroidJUnit4::class)
+class PastTripActivityTestPersonTest {
+    // @get:Rule
+    val activityRule = ActivityScenarioRule(PastTripActivity::class.java)
+
+    @Before
+    fun setup() {
+        Intents.init()
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        var sharedPreferences = context.getSharedPreferences("UserData", Context.MODE_PRIVATE);
+        sharedPreferences.edit().putString("userEmail", "test_person").apply()
+
+        ActivityScenario.launch(PastTripActivity::class.java)
+    }
+
+    @After
+    fun tearDown() {
+        Intents.release()
+    }
+
+    @Test fun checkElements() {
+        onView(withId(R.id.back_button_past)).check(matches(withText("Back")))
+    }
+
+    @Test fun backButton() {
+        onView(withId(R.id.back_button_past)).perform(click())
+        Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
+    }
+
+    @Test fun GeneralRecipeViewPastTrip() {
+        Thread.sleep(1000)
+        onView(withId(R.id.past_trip_list_layout)).check(matches(isDisplayed()))
+        onView(withTagValue(`is`("route 1"))).check(matches(isDisplayed()))
+            .perform(click())
+
+        Thread.sleep(1000)
+        Intents.intended(IntentMatchers.hasComponent(PopTripActivity::class.java.name))
+        onView(withId(R.id.trip_list_layout)).check(matches(isDisplayed()))
+        onView(withTagValue(`is`("recipe 1"))).check(matches(isDisplayed())).perform(click())
+
+        Thread.sleep(1000)
+        Intents.intended(IntentMatchers.hasComponent(PopRecipeActivity::class.java.name))
+
+        Thread.sleep(1000)
+        onView(withTagValue(`is`("url"))).check(matches(isDisplayed())).perform(click())
+
+        Thread.sleep(5000)
+        onView(withTagValue(`is`("recipe web"))).check(matches(isDisplayed()))
+    }
+}
+
 //@RunWith(AndroidJUnit4::class)
 //class GroceryActivityTest {
 //    @Rule

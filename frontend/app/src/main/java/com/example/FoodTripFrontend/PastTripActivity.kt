@@ -125,6 +125,7 @@ class PastTripActivity : AppCompatActivity() {
             val trip = trips[i]
             itemView.textSize = 25f
             itemView.text = "${trip.start_location.name} -> ${trip.end_location.name}"
+            itemView.tag = "route ${i+1}"
 
             itemView.setOnClickListener {
                 val intent = Intent(applicationContext, PopTripActivity::class.java)
