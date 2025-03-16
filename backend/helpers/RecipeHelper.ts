@@ -41,7 +41,7 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
       recipeName: hit.recipe.label || "",
       recipeID: parseInt(hit.recipe.uri.split("_")[1] || "0", 10),
       url: hit.recipe.url,
-      ingredients: hit.recipe.ingredientLines || [],
+      ingredients: hit.recipe.ingredientLines,
     }));
   } catch (error) {
     console.error("Detailed recipe fetch error:", error);
@@ -69,7 +69,7 @@ export async function createRecipesfromRoute(
       stopNames.push(stopName);
     });
 
-    if (!stopNames) {
+    if (stopNames.length === 0) {
       throw new Error("No stops found in route");
     }
 
