@@ -72,7 +72,7 @@ const errorHandle = (
   err: Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   console.error("Error:", err.message);
   console.error("Stack trace:", err.stack);

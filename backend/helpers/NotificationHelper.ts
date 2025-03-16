@@ -28,13 +28,13 @@ export async function removeTokenFromDb(userID: string): Promise<number> {
 }
 
 // get user fcm token from database
-export async function getTokenFromDb(userID: string): Promise<object | null> {
+export async function getTokenFromDb(userID: string): Promise<string | null> {
   const result = await client
     .db(DB_NAME)
     .collection(COLLECTION_NAME)
     .findOne({ userID });
 
-  return result;
+  return result ? result.fcmToken : null;
 }
 
 // get all fcm tokens from database

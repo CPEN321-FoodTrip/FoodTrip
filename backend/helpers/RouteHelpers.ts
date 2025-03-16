@@ -81,7 +81,6 @@ async function importGeoNamesToMongoDB(): Promise<void> {
     };
 
     cities.push(city);
-    lineCount++;
 
     // insert in batches of 1000
     if (cities.length >= 1000) {

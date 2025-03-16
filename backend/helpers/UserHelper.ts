@@ -12,5 +12,5 @@ export async function getUserRoutesFromDb(userID: string): Promise<object[]> {
   const routes = await collection.find({ userID }).toArray();
 
   // add tripID to each route and remove _id and stops
-  return routes.map(({ _id, stops, ...rest }) => ({ ...rest, tripID: _id }));
+  return routes.map(({ _id, ...rest }) => ({ ...rest, tripID: _id }));
 }
