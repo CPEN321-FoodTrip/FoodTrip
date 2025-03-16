@@ -16,7 +16,7 @@ export async function addDiscountToDb(discount: Discount): Promise<string> {
 }
 
 // get all discounts for a store
-export async function getDiscountsFromDb(storeID: string): Promise<{}> {
+export async function getDiscountsFromDb(storeID: string): Promise<object> {
   const discounts = await client
     .db(DB_NAME)
     .collection(COLLECTION_NAME)
@@ -27,7 +27,9 @@ export async function getDiscountsFromDb(storeID: string): Promise<{}> {
 }
 
 // get all discounts from the database, with optional ingredient filter
-export async function getAllDiscountsFromDb(ingredient: string): Promise<{}> {
+export async function getAllDiscountsFromDb(
+  ingredient: string
+): Promise<object> {
   const query = ingredient ? { ingredient } : {};
 
   const discounts = await client

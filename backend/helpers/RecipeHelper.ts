@@ -98,7 +98,7 @@ export async function saveRecipesToDb(
   return result.insertedId;
 }
 
-export async function getRecipesFromDb(tripID: string): Promise<{} | null> {
+export async function getRecipesFromDb(tripID: string): Promise<object | null> {
   const recipes = await client
     .db(RECIPE_DB_NAME)
     .collection(RECIPE_COLLECTION_NAME)

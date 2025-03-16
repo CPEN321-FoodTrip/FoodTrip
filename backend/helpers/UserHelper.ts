@@ -5,7 +5,7 @@ const ROUTES_DB_NAME = "route_data";
 const ROUTES_COLLECTION_NAME = "routes";
 
 // get all routes from MongoDB for user
-export async function getUserRoutesFromDb(userID: string): Promise<{}[]> {
+export async function getUserRoutesFromDb(userID: string): Promise<object[]> {
   const db = client.db(ROUTES_DB_NAME);
   const collection = db.collection(ROUTES_COLLECTION_NAME);
 
