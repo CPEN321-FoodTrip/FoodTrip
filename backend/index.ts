@@ -8,6 +8,7 @@ import { initializeGeoNamesDatabase } from "./helpers/RouteHelpers";
 import { RecipeRoutes } from "./routes/RecipesRoutes";
 import { UserRoutes } from "./routes/UserRoutes";
 import { NotificationRoutes } from "./routes/NotificationRoutes";
+import { PreferenceRoutes } from "./routes/PreferenceRoutes";
 
 const app = express();
 
@@ -20,6 +21,7 @@ const Routes = [
   ...RecipeRoutes,
   ...UserRoutes,
   ...NotificationRoutes,
+  ...PreferenceRoutes,
 ];
 
 Routes.forEach((route) => {
