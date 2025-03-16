@@ -16,7 +16,7 @@ describe("Unmocked: POST /notifications", () => {
     const fcmToken = "real-token";
     const response = await request(app)
       .post("/notifications")
-      .send({ userID, fcmToken: fcmToken })
+      .send({ userID, fcmToken })
       .expect(201);
 
     expect(response.body).toHaveProperty("message", "Subscribed successfully");
@@ -114,7 +114,7 @@ describe("Unmocked: DELETE /notifications/:id", () => {
     await client
       .db(DB_NAME)
       .collection(COLLECTION_NAME)
-      .insertOne({ userID, fcmToken: fcmToken });
+      .insertOne({ userID, fcmToken });
     const countBefore = await client
       .db(DB_NAME)
       .collection(COLLECTION_NAME)
@@ -133,7 +133,7 @@ describe("Unmocked: DELETE /notifications/:id", () => {
     const result = await client
       .db(DB_NAME)
       .collection(COLLECTION_NAME)
-      .findOne({ userID: userID });
+      .findOne({ userID });
     expect(result).toBeNull();
 
     const countAfter = await client

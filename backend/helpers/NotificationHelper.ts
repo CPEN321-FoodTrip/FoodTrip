@@ -12,7 +12,7 @@ export async function addTokenToDb(
   const result = await client
     .db(DB_NAME)
     .collection(COLLECTION_NAME)
-    .insertOne({ userID, fcmToken: fcmToken });
+    .insertOne({ userID, fcmToken });
 
   return result.insertedId;
 }
