@@ -67,28 +67,28 @@ class LoginActivityTest {
         Intents.release()
     }
 
+
+    //Checks if the login page featurs both a sign in for genera users and admins (grocery stores)
     @Test
-    fun userSignIn() {
+    fun checkElements() {
 
-        onView(withId(R.id.sign_in_button_user)).perform(click())
-
-    }
-
-    @Test fun adminSignIn() {
-
-        onView(withId(R.id.sign_in_button_admin)).perform(click())
+        onView(withId(R.id.sign_in_button_user)).check(matches(withText("Sign In (User)")))
+        onView(withId(R.id.sign_in_button_admin)).check(matches(withText("Sign In (Admin)")))
 
     }
+
 }
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityTest {
 
+    //Needed for activity switching tests
     @Before
     fun setup() {
         Intents.init()
     }
 
+    //Needed for activity switching tests
     @After
     fun tearDown() {
         Intents.release()
@@ -97,6 +97,7 @@ class MainActivityTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(MainActivity::class.java)
 
+    //Verify main activity features the main use case buttons
     @Test fun checkElements() {
         onView(withId(R.id.PastTrips)).check(matches(withText("View Past Trips")))
         onView(withId(R.id.ManageTrip)).check(matches(withText("Manage Trip")))
@@ -104,6 +105,7 @@ class MainActivityTest {
         onView(withId(R.id.ManageAccount)).check(matches(withText("Manage Account")))
     }
 
+    //Verifies manage trip goes to the correct activity
     @Test fun checkManageTrip() {
         onView(withId(R.id.ManageTrip)).perform(click())
         Intents.intended(IntentMatchers.hasComponent(TripActivity::class.java.name))
