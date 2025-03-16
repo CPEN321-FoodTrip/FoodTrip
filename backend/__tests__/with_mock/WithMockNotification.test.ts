@@ -2,8 +2,8 @@ import request from "supertest";
 import app from "../../index";
 import * as NotificationHelper from "../../helpers/NotificationHelper";
 
-// Interface POST /notifications/subscribe
-describe("Mocked: POST /notifications/subscribe", () => {
+// Interface POST /notifications
+describe("Mocked: POST /notifications", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -23,7 +23,7 @@ describe("Mocked: POST /notifications/subscribe", () => {
     });
 
     const response = await request(app)
-      .post("/notifications/subscribe")
+      .post("/notifications")
       .send({ userID: "12345", fcmToken: "real-token" })
       .expect(500);
 
@@ -43,7 +43,7 @@ describe("Mocked: POST /notifications/subscribe", () => {
     jest.spyOn(NotificationHelper, "addTokenToDb").mockImplementation();
 
     const response = await request(app)
-      .post("/notifications/subscribe")
+      .post("/notifications")
       .send({ userID: "12345", fcmToken: "real-token" })
       .expect(500);
 
@@ -61,7 +61,7 @@ describe("Mocked: POST /notifications/subscribe", () => {
     jest.spyOn(NotificationHelper, "addTokenToDb").mockResolvedValue(null);
 
     const response = await request(app)
-      .post("/notifications/subscribe")
+      .post("/notifications")
       .send({ userID: "12345", fcmToken: "real-token" })
       .expect(500);
 
@@ -82,7 +82,7 @@ describe("Mocked: POST /notifications/subscribe", () => {
     jest.spyOn(NotificationHelper, "addTokenToDb").mockImplementation();
 
     const response = await request(app)
-      .post("/notifications/subscribe")
+      .post("/notifications")
       .send({ userID: "12345", fcmToken: "real-token" })
       .expect(400);
 
@@ -100,7 +100,7 @@ describe("Mocked: POST /notifications/subscribe", () => {
     jest.spyOn(NotificationHelper, "getTokenFromDb").mockResolvedValue(null);
 
     const response = await request(app)
-      .post("/notifications/subscribe")
+      .post("/notifications")
       .send({ userID: "12345", fcmToken: "real-token" })
       .expect(201);
 
@@ -109,8 +109,8 @@ describe("Mocked: POST /notifications/subscribe", () => {
   });
 });
 
-// Interface POST /notifications/unsubscribe
-describe("Mocked: POST /notifications/unsubscribe", () => {
+// Interface DELETE /notifications
+describe("Mocked: DELETE /notifications", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -132,8 +132,7 @@ describe("Mocked: POST /notifications/unsubscribe", () => {
       });
 
     const response = await request(app)
-      .post("/notifications/unsubscribe")
-      .send({ userID: "12345" })
+      .delete("/notifications/12345")
       .expect(500);
 
     expect(response.body).toHaveProperty("error", "Internal server error");
@@ -149,8 +148,7 @@ describe("Mocked: POST /notifications/unsubscribe", () => {
     jest.spyOn(NotificationHelper, "removeTokenFromDb").mockResolvedValue(0);
 
     const response = await request(app)
-      .post("/notifications/unsubscribe")
-      .send({ userID: "12345" })
+      .delete("/notifications/12345")
       .expect(400);
 
     expect(response.body).toHaveProperty("error", "Not subscribed");
@@ -165,8 +163,7 @@ describe("Mocked: POST /notifications/unsubscribe", () => {
   test("Empty database", async () => {
     // in-memory database is empty, cleared in jest setup afterEach
     const response = await request(app)
-      .post("/notifications/unsubscribe")
-      .send({ userID: "12345" })
+      .delete("/notifications/12345")
       .expect(400);
 
     expect(response.body).toHaveProperty("error", "Not subscribed");
@@ -174,16 +171,15 @@ describe("Mocked: POST /notifications/unsubscribe", () => {
 
   // Mocked behavior: NotificationHelper.removeTokenFromDb returns 1
   // Input: valid userID
-  // Expected status code: 201
+  // Expected status code: 200
   // Expected behavior: NotificationHelper.removeTokenFromDb called
   // Expected output: success message
   test("Unsubscribe success", async () => {
     jest.spyOn(NotificationHelper, "removeTokenFromDb").mockResolvedValue(1);
 
     const response = await request(app)
-      .post("/notifications/unsubscribe")
-      .send({ userID: "12345" })
-      .expect(201);
+      .delete("/notifications/12345")
+      .expect(200);
 
     expect(response.body).toHaveProperty(
       "message",

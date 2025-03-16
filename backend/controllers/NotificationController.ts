@@ -7,6 +7,7 @@ import {
 } from "../helpers/NotificationHelper";
 
 export class NotificationController {
+  // POST /notifications
   async subscribe(req: Request, res: Response, next: NextFunction) {
     // validation of params performed by express-validator middleware
     const { userID, fcmToken }: UserNotificationData = req.body;
@@ -28,9 +29,9 @@ export class NotificationController {
     }
   }
 
+  // DELETE /notifications/:id
   async unsubscribe(req: Request, res: Response, next: NextFunction) {
-    // validation of param performed by express-validator middleware
-    const { userID } = req.body;
+    const userID = req.params.id;
 
     try {
       const result = await removeTokenFromDb(userID);
@@ -38,7 +39,7 @@ export class NotificationController {
         return res.status(400).json({ error: "Not subscribed" });
       }
 
-      res.status(201).json({ message: "Unsubscribed successfully" });
+      res.status(200).json({ message: "Unsubscribed successfully" });
     } catch (error) {
       next(error);
     }

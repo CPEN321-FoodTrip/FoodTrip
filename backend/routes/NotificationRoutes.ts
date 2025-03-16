@@ -6,7 +6,7 @@ const controller = new NotificationController();
 export const NotificationRoutes = [
   {
     method: "post",
-    route: "/notifications/subscribe",
+    route: "/notifications",
     action: controller.subscribe,
     validation: [
       body("userID")
@@ -20,14 +20,9 @@ export const NotificationRoutes = [
     ],
   },
   {
-    method: "post",
-    route: "/notifications/unsubscribe",
+    method: "delete",
+    route: "/notifications/:id",
     action: controller.unsubscribe,
-    validation: [
-      body("userID")
-        .exists()
-        .isString()
-        .withMessage("userID is required and must be a string"),
-    ],
+    validation: [],
   },
 ];
