@@ -14,7 +14,7 @@ export class NotificationController {
     try {
       const prevToken = await getTokenFromDb(userID);
       if (prevToken) {
-        return res.status(400).send("Already subscribed");
+        return res.status(400).json({ error: "Already subscribed" });
       }
 
       const result = await addTokenToDb(userID, fcmToken);
@@ -22,7 +22,7 @@ export class NotificationController {
         throw new Error("Failed to subscribe");
       }
 
-      res.status(201).send("Subscribed successfully");
+      res.status(201).json({ message: "Subscribed successfully" });
     } catch (error) {
       next(error);
     }
@@ -35,10 +35,10 @@ export class NotificationController {
     try {
       const result = await removeTokenFromDb(userID);
       if (!result) {
-        return res.status(400).send("Not subscribed");
+        return res.status(400).json({ error: "Not subscribed" });
       }
 
-      res.status(201).send("Unsubscribed successfully");
+      res.status(201).json({ message: "Unsubscribed successfully" });
     } catch (error) {
       next(error);
     }
