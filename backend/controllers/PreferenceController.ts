@@ -12,11 +12,7 @@ export class PreferenceController {
     const { userID, allergy } = req.body;
 
     try {
-      const result = await addAllergyToDb(userID, allergy);
-      if (!result) {
-        throw new Error("Failed to update allergies");
-      }
-
+      await addAllergyToDb(userID, allergy);
       res.status(201).json({ message: "Allergy added successfully" });
     } catch (error) {
       next(error);
@@ -29,14 +25,12 @@ export class PreferenceController {
 
     try {
       const allergies = await getAllergiesFromDb(userID);
-      if (!allergies) {
-        throw new Error("Failed to retrieve allergies");
-      }
       if (allergies.length === 0) {
         return res.status(404).json({ error: "No allergies found" });
       }
 
-      res.status(200).json(allergies);
+      // return list with only allergy names
+      res.status(200).json(allergies.map((entry) => entry.allergy));
     } catch (error) {
       next(error);
     }
