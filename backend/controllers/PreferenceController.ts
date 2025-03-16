@@ -36,7 +36,7 @@ export class PreferenceController {
         return res.status(404).json({ error: "No allergies found" });
       }
 
-      res.status(200).json({ message: "Allergies retrieved successfully" });
+      res.status(200).json(allergies);
     } catch (error) {
       next(error);
     }
@@ -44,7 +44,7 @@ export class PreferenceController {
 
   // DELETE /preferences/allergies/:id/:allergy
   async deleteAllergy(req: Request, res: Response, next: NextFunction) {
-    const { userID, allergy } = req.params;
+    const { id: userID, allergy } = req.params;
 
     try {
       const deleteCount = await deleteAllergyFromDb(userID, allergy);

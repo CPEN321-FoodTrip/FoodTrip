@@ -21,7 +21,13 @@ export async function getAllergiesFromDb(userID: string): Promise<any[]> {
   const db = client.db(DB_NAME);
   const collection = db.collection(COLLECTION_NAME);
 
-  return collection.find({ userID }).toArray();
+  const allergies = await collection
+    .find({ userID })
+    .project({ allergy: 1, _id: 0 })
+    .toArray();
+
+  // return list with only allergy names
+  return allergies.map((entry) => entry.allergy);
 }
 
 // delete an allergy for a user
@@ -32,5 +38,6 @@ export async function deleteAllergyFromDb(
   const db = client.db(DB_NAME);
   const collection = db.collection(COLLECTION_NAME);
 
-  return (await collection.deleteOne({ userID, allergy })).deletedCount;
+  return (await collection.deleteOne({ userID: userID, allergy: allergy }))
+    .deletedCount;
 }
