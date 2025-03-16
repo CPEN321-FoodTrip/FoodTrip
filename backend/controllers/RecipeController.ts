@@ -12,6 +12,7 @@ export class RecipeController {
   // generate a list of recipes from a route
   // POST /recipes
   async createRecipesfromRoute(
+    this: void,
     req: Request,
     res: Response,
     next: NextFunction
@@ -43,7 +44,12 @@ export class RecipeController {
 
   // get all recipes from a trip
   // GET /recipes/:id
-  async getRecipes(req: Request, res: Response, next: NextFunction) {
+  async getRecipes(
+    this: void,
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const tripID = req.params.id;
       if (!ObjectId.isValid(tripID)) {
@@ -64,7 +70,12 @@ export class RecipeController {
 
   // delete all recipes from a trip
   // DELETE /recipes/:id
-  async deleteRecipes(req: Request, res: Response, next: NextFunction) {
+  async deleteRecipes(
+    this: void,
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const tripID = req.params.id;
       if (!ObjectId.isValid(tripID)) {
