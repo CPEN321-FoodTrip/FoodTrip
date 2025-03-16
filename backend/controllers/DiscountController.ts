@@ -96,7 +96,7 @@ export class DiscountController {
   // DELETE /discounts/:id
   async deleteDiscount(req: Request, res: Response, next: NextFunction) {
     try {
-      const discountID = req.params.id as string;
+      const discountID = req.params.id;
 
       if (!ObjectId.isValid(discountID)) {
         return res.status(400).json({ error: "Invalid discountID format" });

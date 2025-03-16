@@ -27,7 +27,7 @@ const Routes = [
 Routes.forEach((route) => {
   (app as express.Application)[route.method as keyof express.Application](
     route.route,
-    route.validation || [],
+    route.validation ?? [],
     async (req: Request, res: Response, next: NextFunction) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -65,7 +65,7 @@ function startServer() {
 }
 
 if (process.env.NODE_ENV !== "test") {
-  void startServer();
+  startServer();
 }
 
 const errorHandle = (

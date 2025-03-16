@@ -215,7 +215,7 @@ describe("Unmocked: DELETE /notifications/:id", () => {
     const result = await client
       .db(DB_NAME)
       .collection(COLLECTION_NAME)
-      .findOne({ userID: userID });
+      .findOne({ userID });
     expect(result).not.toBeNull();
     expect(result?.fcmToken).toBe(fcmToken);
 
