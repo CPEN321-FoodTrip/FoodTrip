@@ -25,6 +25,8 @@ export class DiscountController {
     };
 
     try {
+      const discountID = await addDiscountToDb(discount);
+
       const tokens = await getAllTokensFromDb();
       const payload = {
         notification: {
@@ -42,8 +44,6 @@ export class DiscountController {
           console.error("Failed to send notifications to some devices");
         }
       }
-
-      const discountID = await addDiscountToDb(discount);
 
       res
         .status(201)

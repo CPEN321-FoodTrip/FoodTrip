@@ -1,8 +1,20 @@
 import request from "supertest";
 import app from "../../index";
 import * as DiscountHelpers from "../../helpers/DiscountHelper";
+import * as NotificationHelper from "../../helpers/NotificationHelper";
 import { ObjectId } from "mongodb";
 import { client } from "../../services";
+
+// mock firebase-admin messaging for new discount notifications
+jest.mock("firebase-admin", () => {
+  const actualAdmin = jest.requireActual("firebase-admin");
+  return {
+    ...actualAdmin,
+    messaging: jest.fn().mockReturnValue({
+      sendEachForMulticast: jest.fn().mockResolvedValue("Message sent"),
+    }),
+  };
+});
 
 // Interface POST /discounts
 describe("Mocked: POST /discounts", () => {
@@ -17,7 +29,7 @@ describe("Mocked: POST /discounts", () => {
   // Mocked behavior: DiscountHelpers.addDiscountToDb throws an error
   // Input: valid discount
   // Expected status code: 500
-  // Expected behavior: error is handled gracefully
+  // Expected behavior: error is handled gracefully and no notifications are sent
   // Expected output: error message
   test("Database connection failure", async () => {
     jest.spyOn(DiscountHelpers, "addDiscountToDb").mockImplementation(() => {
@@ -36,18 +48,25 @@ describe("Mocked: POST /discounts", () => {
 
     expect(response.body).toHaveProperty("error", "Internal server error");
     expect(DiscountHelpers.addDiscountToDb).toHaveBeenCalled();
+    expect(
+      require("firebase-admin").messaging().sendEachForMulticast
+    ).not.toHaveBeenCalled();
   });
 
-  // Mocked behavior: DiscountHelpers.addDiscountToDb returns a discountID
+  // Mocked behavior: DiscountHelpers.addDiscountToDb returns a discountID and getAllTokensFromDb
+  //                  returns fcm tokens for notifications
   // Input: valid discount
   // Expected status code: 201
-  // Expected behavior: discount is created and stored in db
+  // Expected behavior: discount is created and stored in db and notifications are sent
   // Expected output: success message and discountID
-  test("Valid discount mocked db response", async () => {
+  test("Valid discount, mocked db response", async () => {
     const discountID = new ObjectId().toHexString();
     jest
       .spyOn(DiscountHelpers, "addDiscountToDb")
       .mockResolvedValue(discountID);
+    jest
+      .spyOn(NotificationHelper, "getAllTokensFromDb")
+      .mockResolvedValue(["token1", "token2"]);
 
     const response = await request(app)
       .post("/discounts")
@@ -65,14 +84,23 @@ describe("Mocked: POST /discounts", () => {
     );
     expect(response.body).toHaveProperty("discountID", discountID);
     expect(DiscountHelpers.addDiscountToDb).toHaveBeenCalled();
+    expect(NotificationHelper.getAllTokensFromDb).toHaveBeenCalled();
+    expect(
+      require("firebase-admin").messaging().sendEachForMulticast
+    ).toHaveBeenCalled();
   });
 
-  // Mocked behavior: in-memory db is used for storing discounts
+  // Mocked behavior: in-memory db is used for storing discounts and notifications
   // Input: valid discount
   // Expected status code: 201
-  // Expected behavior: discount is created and stored in in-memory db
+  // Expected behavior: discount is created and stored in in-memory db and notifications are sent
   // Expected output: success message and discountID
-  test("Valid discount in-memory db", async () => {
+  test("Valid discount, in-memory db", async () => {
+    await client
+      .db("discounts")
+      .collection("notifications")
+      .insertOne({ userID: "123", fcmToken: "token1" });
+
     const response = await request(app)
       .post("/discounts")
       .send({
@@ -88,12 +116,90 @@ describe("Mocked: POST /discounts", () => {
       "Discount created successfully"
     );
     expect(response.body).toHaveProperty("discountID");
+    expect(
+      require("firebase-admin").messaging().sendEachForMulticast
+    ).toHaveBeenCalled();
+  });
+
+  // Mocked behavior: DiscountHelpers.addDiscountToDb returns a discountID and getAllTokensFromDb
+  //                  returns an empty array of fcm tokens
+  // Input: valid discount
+  // Expected status code: 201
+  // Expected behavior: discount is created and stored in db and no notifications are sent
+  // Expected output: success message and discountID
+  test("Valid discount, no notification subscribers", async () => {
+    const discountID = new ObjectId().toHexString();
+    jest
+      .spyOn(DiscountHelpers, "addDiscountToDb")
+      .mockResolvedValue(discountID);
+    jest.spyOn(NotificationHelper, "getAllTokensFromDb").mockResolvedValue([]);
+
+    const response = await request(app)
+      .post("/discounts")
+      .send({
+        storeID: "123",
+        storeName: "Test Store",
+        ingredient: "apple",
+        price: 0.5,
+      })
+      .expect(201);
+
+    expect(response.body).toHaveProperty(
+      "message",
+      "Discount created successfully"
+    );
+    expect(response.body).toHaveProperty("discountID", discountID);
+    expect(DiscountHelpers.addDiscountToDb).toHaveBeenCalled();
+    expect(NotificationHelper.getAllTokensFromDb).toHaveBeenCalled();
+    expect(
+      require("firebase-admin").messaging().sendEachForMulticast
+    ).not.toHaveBeenCalled();
+  });
+
+  // Mocked behavior: DiscountHelpers.addDiscountToDb returns a discountID, getAllTokensFromDb
+  //                  returns fcm tokens for notifications, sendEachForMulticast fails to send
+  // Input: valid discount
+  // Expected status code: 201
+  // Expected behavior: discount is created and stored in db and notifications fail to send
+  // Expected output: success message and discountID
+  test("Valid discount, notifications fail to send", async () => {
+    const discountID = new ObjectId().toHexString();
+    jest
+      .spyOn(DiscountHelpers, "addDiscountToDb")
+      .mockResolvedValue(discountID);
+    jest
+      .spyOn(NotificationHelper, "getAllTokensFromDb")
+      .mockResolvedValue(["token1", "token2"]);
+    jest
+      .spyOn(require("firebase-admin").messaging(), "sendEachForMulticast")
+      .mockResolvedValue({ failureCount: 1 });
+
+    const response = await request(app)
+      .post("/discounts")
+      .send({
+        storeID: "123",
+        storeName: "Test Store",
+        ingredient: "apple",
+        price: 0.5,
+      })
+      .expect(201);
+
+    expect(response.body).toHaveProperty(
+      "message",
+      "Discount created successfully"
+    );
+    expect(response.body).toHaveProperty("discountID", discountID);
+    expect(DiscountHelpers.addDiscountToDb).toHaveBeenCalled();
+    expect(NotificationHelper.getAllTokensFromDb).toHaveBeenCalled();
+    expect(
+      require("firebase-admin").messaging().sendEachForMulticast
+    ).toHaveBeenCalled();
   });
 
   // Mocked behavior: DiscountHelpers.addDiscountToDb with empty imlementation
   // Input: discount with missing fields
   // Expected status code: 400
-  // Expected behavior: error is handled gracefully
+  // Expected behavior: error is handled gracefully and no notifications are sent
   // Expected output: error message
   test("Missing discount parameters", async () => {
     jest.spyOn(DiscountHelpers, "addDiscountToDb").mockImplementation();
@@ -118,6 +224,9 @@ describe("Mocked: POST /discounts", () => {
       )
     ).toBe(true);
     expect(DiscountHelpers.addDiscountToDb).not.toHaveBeenCalled();
+    expect(
+      require("firebase-admin").messaging().sendEachForMulticast
+    ).not.toHaveBeenCalled();
   });
 });
 
