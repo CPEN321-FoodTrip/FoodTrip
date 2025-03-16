@@ -12,7 +12,7 @@ import { ObjectId } from "mongodb";
 export class RouteController {
   // create a new route
   // POST /routes
-  createRoute = async (req: Request, res: Response, next: NextFunction) => {
+  async createRoute(req: Request, res: Response, next: NextFunction) {
     // validation of params performed by express-validator middleware
     const { userID, origin, destination, numStops } = req.body;
 
@@ -70,7 +70,7 @@ export class RouteController {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
   // get information about a particular route
   // GET /routes/:id
