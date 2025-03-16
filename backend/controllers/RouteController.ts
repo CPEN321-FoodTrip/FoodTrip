@@ -60,7 +60,7 @@ export class RouteController {
           latitude: end.latitude,
           longitude: end.longitude,
         },
-        stops: stops,
+        stops,
       };
 
       const tripID = await saveRouteToDb(userID, route);

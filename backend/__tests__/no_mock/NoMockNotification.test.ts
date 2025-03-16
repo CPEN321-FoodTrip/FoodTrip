@@ -16,7 +16,7 @@ describe("Unmocked: POST /notifications", () => {
     const fcmToken = "real-token";
     const response = await request(app)
       .post("/notifications")
-      .send({ userID: userID, fcmToken: fcmToken })
+      .send({ userID, fcmToken: fcmToken })
       .expect(201);
 
     expect(response.body).toHaveProperty("message", "Subscribed successfully");
@@ -25,7 +25,7 @@ describe("Unmocked: POST /notifications", () => {
     const result = await client
       .db(DB_NAME)
       .collection(COLLECTION_NAME)
-      .findOne({ userID: userID });
+      .findOne({ userID });
     expect(result).not.toBeNull();
     expect(result?.fcmToken).toBe(fcmToken);
 
@@ -77,7 +77,7 @@ describe("Unmocked: POST /notifications", () => {
     await client
       .db(DB_NAME)
       .collection(COLLECTION_NAME)
-      .insertOne({ userID: userID, fcmToken: fcmtTken });
+      .insertOne({ userID, fcmToken: fcmtTken });
 
     const countBefore = await client
       .db(DB_NAME)
@@ -86,7 +86,7 @@ describe("Unmocked: POST /notifications", () => {
 
     const response = await request(app)
       .post("/notifications")
-      .send({ userID: userID, fcmToken: fcmtTken })
+      .send({ userID, fcmToken: fcmtTken })
       .expect(400);
 
     expect(response.body).toHaveProperty("error", "Already subscribed");
@@ -114,7 +114,7 @@ describe("Unmocked: DELETE /notifications/:id", () => {
     await client
       .db(DB_NAME)
       .collection(COLLECTION_NAME)
-      .insertOne({ userID: userID, fcmToken: fcmToken });
+      .insertOne({ userID, fcmToken: fcmToken });
     const countBefore = await client
       .db(DB_NAME)
       .collection(COLLECTION_NAME)
@@ -155,7 +155,7 @@ describe("Unmocked: DELETE /notifications/:id", () => {
     await client
       .db(DB_NAME)
       .collection(COLLECTION_NAME)
-      .insertOne({ userID: userID1, fcmToken: fcmToken });
+      .insertOne({ userID: userID1, fcmToken });
     const countBefore = await client
       .db(DB_NAME)
       .collection(COLLECTION_NAME)
@@ -196,7 +196,7 @@ describe("Unmocked: DELETE /notifications/:id", () => {
     await client
       .db(DB_NAME)
       .collection(COLLECTION_NAME)
-      .insertOne({ userID: "12345", fcmToken: fcmToken });
+      .insertOne({ userID: "12345", fcmToken });
     const countBefore = await client
       .db(DB_NAME)
       .collection(COLLECTION_NAME)

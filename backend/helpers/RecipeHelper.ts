@@ -92,8 +92,8 @@ export async function saveRecipesToDb(
   const collection = db.collection(RECIPE_COLLECTION_NAME);
 
   const result = await collection.insertOne({
-    tripID: tripID,
-    recipes: recipes,
+    tripID,
+    recipes,
   });
   return result.insertedId;
 }
@@ -102,7 +102,7 @@ export async function getRecipesFromDb(tripID: string): Promise<{} | null> {
   const recipes = await client
     .db(RECIPE_DB_NAME)
     .collection(RECIPE_COLLECTION_NAME)
-    .findOne({ tripID: tripID });
+    .findOne({ tripID });
   return recipes;
 }
 
@@ -110,6 +110,6 @@ export async function deleteRecipesFromDb(tripID: string): Promise<number> {
   const result = await client
     .db(RECIPE_DB_NAME)
     .collection(RECIPE_COLLECTION_NAME)
-    .deleteOne({ tripID: tripID });
+    .deleteOne({ tripID });
   return result.deletedCount;
 }

@@ -12,7 +12,7 @@ export async function addTokenToDb(
   const result = await client
     .db(DB_NAME)
     .collection(COLLECTION_NAME)
-    .insertOne({ userID: userID, fcmToken: fcmToken });
+    .insertOne({ userID, fcmToken: fcmToken });
 
   return result.insertedId;
 }
@@ -22,7 +22,7 @@ export async function removeTokenFromDb(userID: string): Promise<number> {
   const result = await client
     .db(DB_NAME)
     .collection(COLLECTION_NAME)
-    .deleteOne({ userID: userID });
+    .deleteOne({ userID });
 
   return result.deletedCount;
 }
@@ -32,7 +32,7 @@ export async function getTokenFromDb(userID: string): Promise<{} | null> {
   const result = await client
     .db(DB_NAME)
     .collection(COLLECTION_NAME)
-    .findOne({ userID: userID });
+    .findOne({ userID });
 
   return result;
 }
