@@ -28,3 +28,7 @@ jobs:
       - name: Run Jest tests with coverage
         working-directory: backend
         run: npm run test:coverage
+        env:
+          EDAMAM_APP_ID: ${{ secrets.EDAMAM_APP_ID }}
+          EDAMAM_API_KEY: ${{ secrets.EDAMAM_API_KEY }}
+          FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
