@@ -409,6 +409,8 @@ class PastTripActivityTestPersonTest {
         Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
     }
 
+
+    //Test that verifies if recipe from past trips gets displayed properly
     @Test fun GeneralRecipeViewPastTrip() {
         Thread.sleep(1000)
         onView(withId(R.id.past_trip_list_layout)).check(matches(isDisplayed()))
@@ -446,18 +448,21 @@ class GroceryActivityTest {
         Intents.release()
     }
 
+    //Test to verify all ui elements are present
     @Test fun checkElements() {
         onView(withId(R.id.back_button)).check(matches(withText("Back")))
         onView(withId(R.id.grocery_title_text_view)).check(matches(withText("Grocery")))
         onView(withId(R.id.recipe_list_layout)).check(matches(isDisplayed()))
     }
 
+    //Test to check if back button on Grocery Activity properly returns to main page
     @Test fun backButton() {
         onView(withId(R.id.back_button)).perform(click())
         Thread.sleep(5000)
         Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
     }
 
+    //Test to verify if a discounted item is properly displayed
     @Test fun discountSuccessTest() {
         onView(withTagValue(`is`("ingred 1")))
             .check(matches(isDisplayed()))
@@ -469,6 +474,7 @@ class GroceryActivityTest {
             .check(matches(isDisplayed()))
     }
 
+    //Test to check if an item with no discounts properly displays
     @Test fun discountEmptyTest() {
         onView(withTagValue(`is`("ingred 2")))
             .check(matches(isDisplayed()))
