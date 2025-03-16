@@ -409,7 +409,6 @@ class PastTripActivityTestPersonTest {
         Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
     }
 
-
     //Test that verifies if recipe from past trips gets displayed properly
     @Test fun GeneralRecipeViewPastTrip() {
         Thread.sleep(1000)
