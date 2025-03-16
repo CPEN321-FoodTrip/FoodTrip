@@ -38,6 +38,7 @@ import android.view.WindowManager
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Root
+import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import com.google.android.gms.maps.GoogleMap
@@ -367,6 +368,8 @@ class PastTripActivityEmptyTest {
 
     @Test fun backButton() {
         onView(withId(R.id.back_button_past)).perform(click())
+
+        Thread.sleep(1000)
         Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
     }
 
@@ -377,7 +380,7 @@ class PastTripActivityEmptyTest {
 
 @RunWith(AndroidJUnit4::class)
 class PastTripActivityTestPersonTest {
-    // @get:Rule
+     @get:Rule
     val activityRule = ActivityScenarioRule(PastTripActivity::class.java)
 
     @Before
@@ -401,6 +404,8 @@ class PastTripActivityTestPersonTest {
 
     @Test fun backButton() {
         onView(withId(R.id.back_button_past)).perform(click())
+
+        Thread.sleep(1000)
         Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
     }
 
@@ -426,18 +431,229 @@ class PastTripActivityTestPersonTest {
     }
 }
 
-//@RunWith(AndroidJUnit4::class)
-//class GroceryActivityTest {
-//    @Rule
-//    val activityRule = ActivityScenarioRule(GroceryActivity::class.java)
-//}
-//
-//@RunWith(AndroidJUnit4::class)
-//class GroceryStoreActivityTest {
-//    @Rule
-//    val activityRule = ActivityScenarioRule(GroceryStoreActivity::class.java)
-//}
-//
+@RunWith(AndroidJUnit4::class)
+class GroceryActivityTest {
+    @get:Rule
+    val activityRule = ActivityScenarioRule(GroceryActivity::class.java)
+
+    @Before
+    fun setup() {
+        Intents.init()
+    }
+
+    @After
+    fun tearDown() {
+        Intents.release()
+    }
+
+    @Test fun checkElements() {
+        onView(withId(R.id.back_button)).check(matches(withText("Back")))
+        onView(withId(R.id.grocery_title_text_view)).check(matches(withText("Grocery")))
+        onView(withId(R.id.recipe_list_layout)).check(matches(isDisplayed()))
+    }
+
+    @Test fun backButton() {
+        onView(withId(R.id.back_button)).perform(click())
+        Thread.sleep(5000)
+        Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
+    }
+
+    @Test fun discountSuccessTest() {
+        onView(withTagValue(`is`("ingred 1")))
+            .check(matches(isDisplayed()))
+            .perform(click())
+
+        Thread.sleep(1000)
+        Intents.intended(IntentMatchers.hasComponent(PopActivity::class.java.name))
+        onView(withTagValue(`is`("discount 1")))
+            .check(matches(isDisplayed()))
+    }
+
+    @Test fun discountEmptyTest() {
+        onView(withTagValue(`is`("ingred 2")))
+            .check(matches(isDisplayed()))
+            .perform(click())
+
+        Thread.sleep(1000)
+        onView(withText("No available discounts"))
+            .check(matches(isDisplayed()))
+    }
+}
+
+@RunWith(AndroidJUnit4::class)
+class GroceryStoreActivityTest {
+    val sampleIngredient1 = "snack"
+    val samplePrice1 = "10"
+    val sampleIngredient2 = "apple"
+    val samplePrice2 = "20"
+
+    @get:Rule
+    val activityRule = ActivityScenarioRule(GroceryStoreActivity::class.java)
+
+    @Before
+    fun setup() {
+        Intents.init()
+    }
+
+    @After
+    fun tearDown() {
+        Intents.release()
+    }
+
+    @Test fun checkElements() {
+        onView(withId(R.id.back_button_grocery_store)).check(matches(withText("Back")))
+        onView(withId(R.id.grocery_store_title_text_view)).check(matches(isDisplayed()))
+        onView(withId(R.id.discount_list_layout_store)).check(matches(isDisplayed()))
+        onView(withId(R.id.ingredient_input)).check(matches(isDisplayed()))
+        onView(withId(R.id.price_input)).check(matches(isDisplayed()))
+        onView(withId(R.id.post_button_grocery_store)).check(matches(isDisplayed()))
+        onView(withId(R.id.delete_button_grocery_store)).check(matches(isDisplayed()))
+    }
+
+    @Test fun backButtonTest() {
+        onView(withId(R.id.back_button_grocery_store)).perform(click())
+        Thread.sleep(7000)
+        Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
+    }
+
+    @Test fun postAndDeleteDiscountTest() {
+        onView(withId(R.id.ingredient_input)).perform(typeText(sampleIngredient1), closeSoftKeyboard())
+        onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient1)))
+
+        onView(withId(R.id.price_input)).perform(typeText(samplePrice1), closeSoftKeyboard())
+        onView(withId(R.id.price_input)).check(matches(withText(samplePrice1)))
+
+        onView(withId(R.id.post_button_grocery_store)).perform(click())
+        Thread.sleep(3000)
+
+        onView(withText("$sampleIngredient1: $$samplePrice1"))
+            .check(matches(isDisplayed()))
+            .perform(click())
+
+        onView(withId(R.id.delete_button_grocery_store)).perform(click())
+        Thread.sleep(3000)
+
+        onView(withText("$sampleIngredient1: $$samplePrice1"))
+            .check(doesNotExist())
+    }
+
+    @Test fun deleteTest() {
+        onView(withId(R.id.ingredient_input)).perform(typeText(sampleIngredient1), closeSoftKeyboard())
+        onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient1)))
+        onView(withId(R.id.price_input)).perform(typeText(samplePrice1), closeSoftKeyboard())
+        onView(withId(R.id.price_input)).check(matches(withText(samplePrice1)))
+        onView(withId(R.id.post_button_grocery_store)).perform(click())
+        Thread.sleep(3000)
+
+        onView(withId(R.id.delete_button_grocery_store)).perform(click())
+        onView(withText("Please select discount to be deleted"))
+            .check(matches(isDisplayed()))
+
+        onView(withText("$sampleIngredient1: $$samplePrice1"))
+            .perform(click())
+            .perform(click())
+
+        onView(withId(R.id.delete_button_grocery_store)).perform(click())
+        onView(withText("Please select discount to be deleted"))
+            .check(matches(isDisplayed()))
+
+        onView(withText("$sampleIngredient1: $$samplePrice1"))
+            .perform(click())
+        onView(withId(R.id.delete_button_grocery_store)).perform(click())
+        Thread.sleep(3000)
+        onView(withText("$sampleIngredient1: $$samplePrice1"))
+            .check(doesNotExist())
+    }
+
+    @Test fun changeSelectedTest() {
+        onView(withId(R.id.ingredient_input)).perform(typeText(sampleIngredient1), closeSoftKeyboard())
+        onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient1)))
+        onView(withId(R.id.price_input)).perform(typeText(samplePrice1), closeSoftKeyboard())
+        onView(withId(R.id.price_input)).check(matches(withText(samplePrice1)))
+        onView(withId(R.id.post_button_grocery_store)).perform(click())
+        Thread.sleep(3000)
+
+        onView(withId(R.id.ingredient_input)).perform(replaceText(sampleIngredient2), closeSoftKeyboard())
+        onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient2)))
+        onView(withId(R.id.price_input)).perform(replaceText(samplePrice2), closeSoftKeyboard())
+        onView(withId(R.id.price_input)).check(matches(withText(samplePrice2)))
+        onView(withId(R.id.post_button_grocery_store)).perform(click())
+        Thread.sleep(3000)
+
+        onView(withText("$sampleIngredient2: $$samplePrice2"))
+            .check(matches(isDisplayed()))
+            .perform(click())
+
+        onView(withText("$sampleIngredient1: $$samplePrice1"))
+            .check(matches(isDisplayed()))
+            .perform(click())
+        onView(withId(R.id.delete_button_grocery_store)).perform(click())
+        Thread.sleep(3000)
+        onView(withText("$sampleIngredient1: $$samplePrice1"))
+            .check(doesNotExist())
+        onView(withText("$sampleIngredient2: $$samplePrice2"))
+            .check(matches(isDisplayed()))
+
+        onView(withText("$sampleIngredient2: $$samplePrice2"))
+            .check(matches(isDisplayed()))
+            .perform(click())
+        onView(withId(R.id.delete_button_grocery_store)).perform(click())
+        Thread.sleep(3000)
+        onView(withText("$sampleIngredient2: $$samplePrice2"))
+            .check(doesNotExist())
+    }
+
+    @Test fun emptyIngredientTest() {
+        onView(withId(R.id.price_input)).perform(typeText(samplePrice1), closeSoftKeyboard())
+        onView(withId(R.id.price_input)).check(matches(withText(samplePrice1)))
+
+        onView(withId(R.id.post_button_grocery_store)).perform(click())
+        Thread.sleep(1000)
+        onView(withText("Please enter valid ingredient and price"))
+            .check(matches(isDisplayed()))
+
+        onView(withText(": $$samplePrice1"))
+            .check(doesNotExist())
+    }
+
+    @Test fun emptyPriceTest() {
+        onView(withId(R.id.ingredient_input)).perform(typeText(sampleIngredient1), closeSoftKeyboard())
+        onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient1)))
+
+        onView(withId(R.id.post_button_grocery_store)).perform(click())
+        Thread.sleep(1000)
+        onView(withText("Please enter valid ingredient and price"))
+            .check(matches(isDisplayed()))
+
+        onView(withText("$sampleIngredient1: $"))
+            .check(doesNotExist())
+    }
+
+    @Test fun zeroPriceTest() {
+        onView(withId(R.id.ingredient_input)).perform(typeText(sampleIngredient1), closeSoftKeyboard())
+        onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient1)))
+
+        onView(withId(R.id.price_input)).perform(typeText("0"), closeSoftKeyboard())
+        onView(withId(R.id.price_input)).check(matches(withText("0")))
+
+        onView(withId(R.id.post_button_grocery_store)).perform(click())
+        Thread.sleep(1000)
+        onView(withText("Please enter valid ingredient and price"))
+            .check(matches(isDisplayed()))
+
+        onView(withText("$sampleIngredient1: $0"))
+            .check(doesNotExist())
+    }
+
+    @Test fun negativePriceTest() {
+        onView(withId(R.id.ingredient_input)).perform(typeText(sampleIngredient1), closeSoftKeyboard())
+        onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient1)))
+
+        onView(withId(R.id.price_input)).perform(typeText("-100"), closeSoftKeyboard())
+        onView(withId(R.id.price_input)).check(matches(withText("100")))
+    }
+}
+
 //@RunWith(AndroidJUnit4::class)
 //class RecipeActivityTest {
 //    @Rule
