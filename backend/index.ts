@@ -25,7 +25,7 @@ const Routes = [
 ];
 
 Routes.forEach((route) => {
-  (app as any)[route.method](
+  (app as express.Application)[route.method as keyof express.Application](
     route.route,
     route.validation || [],
     async (req: Request, res: Response, next: NextFunction) => {
