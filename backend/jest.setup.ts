@@ -8,7 +8,7 @@ dotenv.config();
 let mongoServer: MongoMemoryServer;
 let client: MongoClient;
 
-const testDbs = ["recipes", "route_data", "discounts"];
+const testDbs = ["recipes", "route_data", "discounts", "preferences"];
 
 beforeAll(async () => {
   // start in-memory MongoDB server
