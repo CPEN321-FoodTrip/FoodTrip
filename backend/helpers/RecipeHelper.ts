@@ -35,7 +35,6 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
     }
 
     const data: EdamamResponse = await response.json();
-    console.log(data);
 
     return data.hits.map((hit) => ({
       recipeName: hit.recipe.label || "",

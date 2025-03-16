@@ -49,13 +49,13 @@ function startServer() {
   client
     .connect()
     .then(async () => {
-      console.log("Connected to MongoDB");
+      console.debug("Connected to MongoDB");
 
       initializeFirebaseAdmin();
       await initializeGeoNamesDatabase();
 
       app.listen(process.env.PORT, () => {
-        console.log(`Server is running on port ${process.env.PORT}`);
+        console.debug(`Server is running on port ${process.env.PORT}`);
       });
     })
     .catch((err: Error) => {

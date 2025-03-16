@@ -28,10 +28,10 @@ export async function initializeGeoNamesDatabase() {
   const count = await collection.countDocuments();
 
   if (count === 0) {
-    console.log("No data in database, importing cities");
+    console.debug("No data in database, importing cities");
     await importGeoNamesToMongoDB();
   } else {
-    console.log(`Database already contains ${count} cities`);
+    console.debug(`Database already contains ${count} cities`);
   }
 }
 
