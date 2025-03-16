@@ -28,10 +28,10 @@ export async function initializeGeoNamesDatabase() {
   const count = await collection.countDocuments();
 
   if (count === 0) {
-    console.log("No data in database, importing cities");
+    console.debug("No data in database, importing cities");
     await importGeoNamesToMongoDB();
   } else {
-    console.log(`Database already contains ${count} cities`);
+    console.debug(`Database already contains ${count} cities`);
   }
 }
 
@@ -46,7 +46,6 @@ async function importGeoNamesToMongoDB(): Promise<void> {
   });
 
   const cities: GeoNameCity[] = [];
-  let lineCount = 0;
 
   for await (const line of rl) {
     if (line.trim() === "") continue;
@@ -81,7 +80,6 @@ async function importGeoNamesToMongoDB(): Promise<void> {
     };
 
     cities.push(city);
-    lineCount++;
 
     // insert in batches of 1000
     if (cities.length >= 1000) {

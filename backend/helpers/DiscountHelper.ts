@@ -16,19 +16,21 @@ export async function addDiscountToDb(discount: Discount): Promise<string> {
 }
 
 // get all discounts for a store
-export async function getDiscountsFromDb(storeID: string): Promise<{}> {
+export async function getDiscountsFromDb(storeID: string): Promise<object> {
   const discounts = await client
     .db(DB_NAME)
     .collection(COLLECTION_NAME)
-    .find({ storeID: storeID })
+    .find({ storeID })
     .toArray();
 
   return discounts.map(({ _id, ...rest }) => ({ discountID: _id, ...rest }));
 }
 
 // get all discounts from the database, with optional ingredient filter
-export async function getAllDiscountsFromDb(ingredient: string): Promise<{}> {
-  const query = ingredient ? { ingredient: ingredient } : {};
+export async function getAllDiscountsFromDb(
+  ingredient: string
+): Promise<object> {
+  const query = ingredient ? { ingredient } : {};
 
   const discounts = await client
     .db(DB_NAME)

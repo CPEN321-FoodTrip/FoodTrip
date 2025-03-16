@@ -35,13 +35,12 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
     }
 
     const data: EdamamResponse = await response.json();
-    console.log(data);
 
     return data.hits.map((hit) => ({
       recipeName: hit.recipe.label || "",
       recipeID: parseInt(hit.recipe.uri.split("_")[1] || "0", 10),
       url: hit.recipe.url,
-      ingredients: hit.recipe.ingredientLines || [],
+      ingredients: hit.recipe.ingredientLines,
     }));
   } catch (error) {
     console.error("Detailed recipe fetch error:", error);
@@ -69,7 +68,7 @@ export async function createRecipesfromRoute(
       stopNames.push(stopName);
     });
 
-    if (!stopNames) {
+    if (stopNames.length === 0) {
       throw new Error("No stops found in route");
     }
 
@@ -92,17 +91,17 @@ export async function saveRecipesToDb(
   const collection = db.collection(RECIPE_COLLECTION_NAME);
 
   const result = await collection.insertOne({
-    tripID: tripID,
-    recipes: recipes,
+    tripID,
+    recipes,
   });
   return result.insertedId;
 }
 
-export async function getRecipesFromDb(tripID: string): Promise<{} | null> {
+export async function getRecipesFromDb(tripID: string): Promise<object | null> {
   const recipes = await client
     .db(RECIPE_DB_NAME)
     .collection(RECIPE_COLLECTION_NAME)
-    .findOne({ tripID: tripID });
+    .findOne({ tripID });
   return recipes;
 }
 
@@ -110,6 +109,6 @@ export async function deleteRecipesFromDb(tripID: string): Promise<number> {
   const result = await client
     .db(RECIPE_DB_NAME)
     .collection(RECIPE_COLLECTION_NAME)
-    .deleteOne({ tripID: tripID });
+    .deleteOne({ tripID });
   return result.deletedCount;
 }
