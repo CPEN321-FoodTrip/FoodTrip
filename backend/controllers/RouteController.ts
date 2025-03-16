@@ -12,12 +12,7 @@ import { ObjectId } from "mongodb";
 export class RouteController {
   // create a new route
   // POST /routes
-  async createRoute(
-    this: void,
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  createRoute = async (req: Request, res: Response, next: NextFunction) => {
     // validation of params performed by express-validator middleware
     const { userID, origin, destination, numStops } = req.body;
 
@@ -75,11 +70,11 @@ export class RouteController {
     } catch (error) {
       next(error);
     }
-  }
+  };
 
   // get information about a particular route
   // GET /routes/:id
-  async getRoute(this: void, req: Request, res: Response, next: NextFunction) {
+  async getRoute(req: Request, res: Response, next: NextFunction) {
     try {
       const tripID = req.params.id;
 
@@ -101,12 +96,7 @@ export class RouteController {
 
   // delete a route
   // DELETE /routes/:id
-  async deleteRoute(
-    this: void,
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  async deleteRoute(req: Request, res: Response, next: NextFunction) {
     try {
       const tripID = req.params.id;
 

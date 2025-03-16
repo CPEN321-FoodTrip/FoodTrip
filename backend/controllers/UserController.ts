@@ -4,12 +4,7 @@ import { getUserRoutesFromDb } from "../helpers/UserHelper";
 export class UserController {
   // get all routes for a user
   // GET /users/:userID/routes
-  async getUserRoutes(
-    this: void,
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  async getUserRoutes(req: Request, res: Response, next: NextFunction) {
     try {
       const userID = req.params.userID;
 

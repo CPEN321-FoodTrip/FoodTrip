@@ -8,7 +8,7 @@ import {
 
 export class NotificationController {
   // POST /notifications
-  async subscribe(this: void, req: Request, res: Response, next: NextFunction) {
+  async subscribe(req: Request, res: Response, next: NextFunction) {
     // validation of params performed by express-validator middleware
     const { userID, fcmToken }: UserNotificationData = req.body;
 
@@ -30,12 +30,7 @@ export class NotificationController {
   }
 
   // DELETE /notifications/:id
-  async unsubscribe(
-    this: void,
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  async unsubscribe(req: Request, res: Response, next: NextFunction) {
     const userID = req.params.id;
 
     try {
