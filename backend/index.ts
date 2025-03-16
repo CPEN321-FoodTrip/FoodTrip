@@ -44,7 +44,7 @@ Routes.forEach((route) => {
   );
 });
 
-async function startServer() {
+function startServer() {
   initializeClient();
   client
     .connect()
