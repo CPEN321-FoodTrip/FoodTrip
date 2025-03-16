@@ -12,11 +12,11 @@ describe("Mocked: POST /notifications/subscribe", () => {
     jest.restoreAllMocks();
   });
 
-  // Mocked behavior:
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: NotificationHelper.addTokenToDb throws an error
+  // Input: valid userID and fcmToken
+  // Expected status code: 500
+  // Expected behavior: error handled gracefully
+  // Expected output: error message
   test("Database connection failure on insert", async () => {
     jest.spyOn(NotificationHelper, "addTokenToDb").mockImplementation(() => {
       throw new Error("Forced error");
@@ -31,11 +31,11 @@ describe("Mocked: POST /notifications/subscribe", () => {
     expect(NotificationHelper.addTokenToDb).toHaveBeenCalled();
   });
 
-  // Mocked behavior:
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: NotificationHelper.getTokenFromDb throws an error
+  // Input: valid userID and fcmToken
+  // Expected status code: 500
+  // Expected behavior: error handled gracefully
+  // Expected output: error message
   test("Database connection failure on check existing", async () => {
     jest.spyOn(NotificationHelper, "getTokenFromDb").mockImplementation(() => {
       throw new Error("Forced error");
@@ -52,13 +52,13 @@ describe("Mocked: POST /notifications/subscribe", () => {
     expect(NotificationHelper.addTokenToDb).not.toHaveBeenCalled();
   });
 
-  // Mocked behavior:
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: NotificationHelper.addTokenToDb returns null for insertedId
+  // Input: valid userID and fcmToken
+  // Expected status code: 500
+  // Expected behavior: error handled gracefully
+  // Expected output: error message
   test("Database failure on insert", async () => {
-    jest.spyOn(NotificationHelper, "addTokenToDb").mockResolvedValue(false);
+    jest.spyOn(NotificationHelper, "addTokenToDb").mockResolvedValue(null);
 
     const response = await request(app)
       .post("/notifications/subscribe")
@@ -69,11 +69,12 @@ describe("Mocked: POST /notifications/subscribe", () => {
     expect(NotificationHelper.addTokenToDb).toHaveBeenCalled();
   });
 
-  // Mocked behavior:
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: NotificationHelper.getTokenFromDb returns a value for existing user and
+  //                  NotificationHelper.addTokenToDb has empty implementation
+  // Input: valid userID and fcmToken
+  // Expected status code: 400
+  // Expected behavior: NotificationHelper.addTokenToDb not called
+  // Expected output: error message
   test("User already subscribed", async () => {
     jest
       .spyOn(NotificationHelper, "getTokenFromDb")
@@ -90,11 +91,11 @@ describe("Mocked: POST /notifications/subscribe", () => {
     expect(NotificationHelper.addTokenToDb).not.toHaveBeenCalled();
   });
 
-  // Mocked behavior:
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: NotificationHelper.getTokenFromDb returns null for new user
+  // Input: valid userID and fcmToken
+  // Expected status code: 201
+  // Expected behavior: NotificationHelper.addTokenToDb called
+  // Expected output: success message
   test("Valid subscription", async () => {
     jest.spyOn(NotificationHelper, "getTokenFromDb").mockResolvedValue(null);
 
@@ -118,11 +119,11 @@ describe("Mocked: POST /notifications/unsubscribe", () => {
     jest.restoreAllMocks();
   });
 
-  // Mocked behavior:
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: NotificationHelper.removeTokenFromDb throws an error
+  // Input: valid userID
+  // Expected status code: 500
+  // Expected behavior: error handled gracefully
+  // Expected output: error message
   test("Database connection failure", async () => {
     jest
       .spyOn(NotificationHelper, "removeTokenFromDb")
@@ -139,11 +140,11 @@ describe("Mocked: POST /notifications/unsubscribe", () => {
     expect(NotificationHelper.removeTokenFromDb).toHaveBeenCalled();
   });
 
-  // Mocked behavior:
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: NotificationHelper.removeTokenFromDb returns 0
+  // Input: valid userID
+  // Expected status code: 400
+  // Expected behavior: NotificationHelper.removeTokenFromDb called
+  // Expected output: error message
   test("User not subscribed", async () => {
     jest.spyOn(NotificationHelper, "removeTokenFromDb").mockResolvedValue(0);
 
@@ -156,13 +157,13 @@ describe("Mocked: POST /notifications/unsubscribe", () => {
     expect(NotificationHelper.removeTokenFromDb).toHaveBeenCalled();
   });
 
-  // Mocked behavior:
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: in-memory database is empty
+  // Input: valid userID
+  // Expected status code: 400
+  // Expected behavior: none
+  // Expected output: error message
   test("Empty database", async () => {
-    // in-memeroy database is empty, cleared in jest setup afterEach
+    // in-memory database is empty, cleared in jest setup afterEach
     const response = await request(app)
       .post("/notifications/unsubscribe")
       .send({ userID: "12345" })
@@ -171,11 +172,11 @@ describe("Mocked: POST /notifications/unsubscribe", () => {
     expect(response.body).toHaveProperty("error", "Not subscribed");
   });
 
-  // Mocked behavior:
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: NotificationHelper.removeTokenFromDb returns 1
+  // Input: valid userID
+  // Expected status code: 201
+  // Expected behavior: NotificationHelper.removeTokenFromDb called
+  // Expected output: success message
   test("Unsubscribe success", async () => {
     jest.spyOn(NotificationHelper, "removeTokenFromDb").mockResolvedValue(1);
 

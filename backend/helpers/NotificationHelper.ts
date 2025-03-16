@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { client } from "../services";
 
 const DB_NAME = "discounts";
@@ -7,13 +8,13 @@ const COLLECTION_NAME = "notifications";
 export async function addTokenToDb(
   userID: string,
   fcmToken: string
-): Promise<{}> {
+): Promise<ObjectId | null> {
   const result = await client
     .db(DB_NAME)
     .collection(COLLECTION_NAME)
     .insertOne({ userID: userID, fcmToken: fcmToken });
 
-  return result;
+  return result.insertedId;
 }
 
 // remove user fcm token from database

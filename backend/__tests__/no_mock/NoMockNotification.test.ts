@@ -7,10 +7,10 @@ const COLLECTION_NAME = "notifications";
 
 // Interface POST /notifications/subscribe
 describe("Unmocked: POST /notifications/subscribe", () => {
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid userID and fcmToken
+  // Expected status code: 201
+  // Expected behavior: add token to db
+  // Expected output: success message
   test("Subscribe success", async () => {
     const userID = "12345";
     const fcmToken = "real-token";
@@ -32,10 +32,10 @@ describe("Unmocked: POST /notifications/subscribe", () => {
     // db cleanup happens in afterEach in jest.setup.ts
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: missing userID and fcmToken
+  // Expected status code: 400
+  // Expected behavior: database unchanged
+  // Expected output: error message
   test("Missing parameters", async () => {
     const countBefore = await client
       .db(DB_NAME)
@@ -67,10 +67,10 @@ describe("Unmocked: POST /notifications/subscribe", () => {
     expect(countAfter).toBe(countBefore);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid userID and fcmToken
+  // Expected status code: 400
+  // Expected behavior: database unchanged
+  // Expected output: error message
   test("Duplicate subscribe", async () => {
     const userID = "12345";
     const fcmtTken = "real-token";
@@ -104,10 +104,10 @@ describe("Unmocked: POST /notifications/subscribe", () => {
 
 // Interface POST /notifications/unsubscribe
 describe("Unmocked: POST /notifications/unsubscribe", () => {
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid userID
+  // Expected status code: 201
+  // Expected behavior: remove token from db
+  // Expected output: success message
   test("Unsubscribe success", async () => {
     const userID = "12345";
     const fcmToken = "real-token";
@@ -124,7 +124,8 @@ describe("Unmocked: POST /notifications/unsubscribe", () => {
       .post("/notifications/unsubscribe")
       .send({
         userID: userID,
-      });
+      })
+      .expect(201);
 
     expect(response.text).toBe("Unsubscribed successfully");
 
@@ -144,17 +145,17 @@ describe("Unmocked: POST /notifications/unsubscribe", () => {
     // db cleanup happens in afterEach in jest.setup.ts
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: missing userID and fcmToken from request
+  // Expected status code: 400
+  // Expected behavior: database unchanged
+  // Expected output: error message
   test("Missing parameter", async () => {
     const userID = "12345";
-    const fcmToken = "real-token";
+    const fcmToken = "12345";
     await client
       .db(DB_NAME)
       .collection(COLLECTION_NAME)
-      .insertOne({ userID: userID, fcmToken: fcmToken });
+      .insertOne({ userID: "12345", fcmToken: fcmToken });
     const countBefore = await client
       .db(DB_NAME)
       .collection(COLLECTION_NAME)
@@ -185,14 +186,15 @@ describe("Unmocked: POST /notifications/unsubscribe", () => {
       .collection(COLLECTION_NAME)
       .findOne({ userID: userID });
     expect(result).not.toBeNull();
+    expect(result?.fcmToken).toBe(fcmToken);
 
     // db cleanup happens in afterEach in jest.setup.ts
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid userID, but user not found in db
+  // Expected status code: 400
+  // Expected behavior: database unchanged
+  // Expected output: error message
   test("User not found", async () => {
     const userID1 = "12345";
     const fcmToken = "real-token";
