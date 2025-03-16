@@ -57,18 +57,20 @@ class LoginActivityTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(LoginActivity::class.java)
 
+    //Needed for activity switching tests
     @Before
     fun setup() {
         Intents.init()
     }
 
+    //Needed for activity switching tests
     @After
     fun tearDown() {
         Intents.release()
     }
 
 
-    //Checks if the login page featurs both a sign in for genera users and admins (grocery stores)
+    //Checks if the login page features both a sign in for genera users and admins (grocery stores)
     @Test
     fun checkElements() {
 
@@ -82,13 +84,21 @@ class LoginActivityTest {
 @RunWith(AndroidJUnit4::class)
 class MainActivityTest {
 
-    //Needed for activity switching tests
+    /**
+     * Initialization for intent checking
+     *
+     * Needed for switching activities
+     */
     @Before
     fun setup() {
         Intents.init()
     }
 
-    //Needed for activity switching tests
+    /**
+     * Cleanup for intent checking
+     *
+     * Needed for switching activities
+     */
     @After
     fun tearDown() {
         Intents.release()
@@ -97,7 +107,11 @@ class MainActivityTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(MainActivity::class.java)
 
-    //Verify main activity features the main use case buttons
+    /**
+     * Ui Test for the Main Activity
+     *
+     * Verifies that the 4 main buttons are displayed
+     */
     @Test fun checkElements() {
         onView(withId(R.id.PastTrips)).check(matches(withText("View Past Trips")))
         onView(withId(R.id.ManageTrip)).check(matches(withText("Manage Trip")))
@@ -105,30 +119,59 @@ class MainActivityTest {
         onView(withId(R.id.ManageAccount)).check(matches(withText("Manage Account")))
     }
 
-    //Verifies manage trip goes to the correct activity
+    /**
+     * Functionality Test for the Main Activity
+     *
+     * Verifies that the manage trip button correctly switches to
+     * the manage trip activity
+     */
     @Test fun checkManageTrip() {
         onView(withId(R.id.ManageTrip)).perform(click())
         Intents.intended(IntentMatchers.hasComponent(TripActivity::class.java.name))
     }
 
+    /**
+     * Functionality Test for the Main Activity
+     *
+     * Verifies that the past trip button correctly switches to
+     * the past trip activity
+     */
     @Test fun checkPastTrips() {
         onView(withId(R.id.PastTrips)).perform(click())
         Intents.intended(IntentMatchers.hasComponent(PastTripActivity::class.java.name))
 
     }
 
+    /**
+     * Functionality Test for the Main Activity
+     *
+     * Verifies that the view recipe button correctly switches to
+     * the view recipe activity
+     */
     @Test fun checkViewRecipe() {
         onView(withId(R.id.viewRecipes)).perform(click())
         Intents.intended(IntentMatchers.hasComponent(GroceryActivity::class.java.name))
 
     }
 
+    /**
+     * Functionality Test for the Main Activity
+     *
+     * Verifies that the manage account button correctly switches to
+     * the manage account activity
+     */
     @Test fun checkAccount() {
         onView(withId(R.id.ManageAccount)).perform(click())
         Intents.intended(IntentMatchers.hasComponent(AccountActivity::class.java.name))
 
     }
 
+    /**
+     * Functionality Test for the Main Activity
+     *
+     * Verifies that the sign out button correctly
+     * returns to the login page
+     */
     @Test fun signOut() {
         onView(withId(R.id.sign_out_button)).check(matches(withText("Sign Out")))
 
@@ -141,6 +184,7 @@ class MainActivityTest {
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityAdminTest {
+    
     @Before
     fun setup() {
         Intents.init()
