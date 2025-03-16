@@ -7,13 +7,13 @@ const COLLECTION_NAME = "notifications";
 export async function addTokenToDb(
   userID: string,
   fcmToken: string
-): Promise<boolean> {
+): Promise<{}> {
   const result = await client
     .db(DB_NAME)
     .collection(COLLECTION_NAME)
     .insertOne({ userID: userID, fcmToken: fcmToken });
 
-  return result ? true : false;
+  return result;
 }
 
 // remove user fcm token from database
@@ -27,13 +27,13 @@ export async function removeTokenFromDb(userID: string): Promise<number> {
 }
 
 // get user fcm token from database
-export async function getTokenFromDb(userID: string): Promise<string | null> {
+export async function getTokenFromDb(userID: string): Promise<{} | null> {
   const result = await client
     .db(DB_NAME)
     .collection(COLLECTION_NAME)
     .findOne({ userID: userID });
 
-  return result ? result.fcmToken : null;
+  return result;
 }
 
 // get all fcm tokens from database
