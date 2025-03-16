@@ -693,7 +693,7 @@ class RecipeTests {
 
         onView(withId(R.id.startLocation)).perform(typeText("Calgary"), closeSoftKeyboard())
 
-        onView(withId(R.id.endLocation)).perform(typeText("Austin"), closeSoftKeyboard())
+        onView(withId(R.id.endLocation)).perform(typeText("Reno"), closeSoftKeyboard())
 
         onView(withId(R.id.numstops)).perform(typeText("3"), closeSoftKeyboard())
 
@@ -707,7 +707,7 @@ class RecipeTests {
 
         Intents.intended(hasComponent(PastTripActivity::class.java.name))
 
-        onView(allOf(withText("Calgary -> Austin"), isDisplayed()))
+        onView(allOf(withText("Calgary -> Reno"), isDisplayed()))
             .perform(click())
 
         Intents.intended(hasComponent(PopTripActivity::class.java.name))
@@ -716,8 +716,8 @@ class RecipeTests {
 
         Intents.intended(hasComponent(PopRecipeActivity::class.java.name))
 
-        onView(withText("https://")).check(matches(isDisplayed()))
-
+        onView(allOf(withTagValue(`is`("url")), isDisplayed()))
+            .perform(click())
     }
 }
 
