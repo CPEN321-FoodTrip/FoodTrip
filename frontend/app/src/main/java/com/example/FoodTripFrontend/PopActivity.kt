@@ -39,6 +39,7 @@ class PopActivity : Activity() {
                     val newTextView = TextView(this)
                     newTextView.textSize = 25f
                     newTextView.text = "${names[i]} $${prices[i]}"
+                    newTextView.tag = "discount ${i+1}"
 
                     discountList.addView(newTextView);
                 }

@@ -15,6 +15,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.FoodTripFrontend.GroceryActivity.Companion
 import com.example.FoodTripFrontend.GroceryActivity.DiscountItem
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -83,12 +84,21 @@ class GroceryStoreActivity : AppCompatActivity() {
             val price = inputPrice.text.toString()
 //            Log.d(TAG, "${ingredient} $${price}")
 
-            postDiscount(sampleID, sampleName, ingredient, price)
+            if (ingredient == "" ||
+                !price.matches(Regex("^[0-9]+$")) || price == "0") {
+                Snackbar.make(findViewById(android.R.id.content),
+                    "Please enter valid ingredient and price",
+                    Snackbar.LENGTH_SHORT).show()
+            } else {
+                postDiscount(sampleID, sampleName, ingredient, price)
+            }
         }
 
         deleteBtn.setOnClickListener {
             if (selectedDiscountID == "") {
-                // TODO: indicate no discounts are selected or "please select something"
+                Snackbar.make(findViewById(android.R.id.content),
+                    "Please select discount to be deleted",
+                    Snackbar.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -211,10 +221,12 @@ class GroceryStoreActivity : AppCompatActivity() {
 //                Log.d(TAG, "item $i (ID:${discount.discountID}) is clicked")
                 if (selectedDiscountID == discount.discountID) {
                     selectedDiscountID = ""
-                    itemView.setBackgroundColor(Color.parseColor(unselectedColor))
+                    itemView.setBackgroundColor(Color.TRANSPARENT)
+//                    itemView.setBackgroundColor(Color.parseColor(unselectedColor))
                 } else {
                     if (selectedDiscountID != "") {
-                        selectedDiscountView.setBackgroundColor(Color.parseColor(unselectedColor))
+                        selectedDiscountView.setBackgroundColor(Color.TRANSPARENT)
+//                        selectedDiscountView.setBackgroundColor(Color.parseColor(unselectedColor))
                     }
 
                     selectedDiscountID = discount.discountID

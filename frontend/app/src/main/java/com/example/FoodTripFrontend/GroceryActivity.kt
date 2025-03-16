@@ -64,6 +64,7 @@ class GroceryActivity : AppCompatActivity() {
         val _textView1 = TextView(this)
         _textView1.textSize = 25f
         _textView1.text = "beef"
+        _textView1.tag = "ingred 1"
 
         _textView1.setOnClickListener {
             val ingredient = (it as TextView).text.toString()
@@ -84,6 +85,7 @@ class GroceryActivity : AppCompatActivity() {
         val _textView2 = TextView(this)
         _textView2.textSize = 25f
         _textView2.text = "pork"
+        _textView2.tag = "ingred 2"
 
         _textView2.setOnClickListener {
             val ingredient = (it as TextView).text.toString()
