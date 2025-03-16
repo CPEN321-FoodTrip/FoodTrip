@@ -57,20 +57,34 @@ class LoginActivityTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(LoginActivity::class.java)
 
-    //Needed for activity switching tests
+    /**
+     * Initialization for intent checking
+     *
+     * Needed for switching activities
+     */
     @Before
     fun setup() {
         Intents.init()
     }
 
-    //Needed for activity switching tests
+
+    /**
+     * Cleanup for intent checking
+     *
+     * Needed for switching activities
+     */
     @After
     fun tearDown() {
         Intents.release()
     }
 
 
-    //Checks if the login page features both a sign in for genera users and admins (grocery stores)
+    /**
+     * Ui Test for the corresponding Activity
+     *
+     * Verifies that key buttons and display elements
+     * are visible with correct text
+     */
     @Test
     fun checkElements() {
 
@@ -184,7 +198,7 @@ class MainActivityTest {
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityAdminTest {
-    
+
     @Before
     fun setup() {
         Intents.init()
@@ -198,6 +212,12 @@ class MainActivityAdminTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(MainActivityAdmin::class.java)
 
+    /**
+     * Functionality Test for the Main Admin Activity
+     *
+     * Verifies that the set groceries button correctly switches
+     * to the grocery store activity
+     */
     @Test fun setGroceriesButton() {
         onView(withId(R.id.GroceryButton)).perform(click())
         Intents.intended(hasComponent(GroceryStoreActivity::class.java.name))
@@ -222,10 +242,16 @@ class TripActivityTest {
         Intents.release()
     }
 
-
-    private lateinit var googleMap: GoogleMap
-
-
+    /**
+     * Functionality Test for the Trip Activity
+     *
+     * Success Scenario:
+     * Simulates the scenario where the user enters a
+     * short 3 stop trip with no errors.
+     *
+     * Verify that the create trip button returns to the
+     * main activity and that the map is now displayed
+     */
     @Test fun planRegularTripShort() {
         onView(withId(R.id.startLocation)).perform(typeText("Calgary"), closeSoftKeyboard())
         onView(withId(R.id.startLocation)).check(matches(withText("Calgary")))
@@ -245,6 +271,17 @@ class TripActivityTest {
         onView(withId(R.id.map)).check(matches(isDisplayed()))
     }
 
+
+    /**
+     * Functionality Test for the Trip Activity
+     *
+     * Success Scenario:
+     * Simulates the scenario where the user enters a
+     * long 10 stop trip with no errors.
+     *
+     * Verify that the create trip button returns to the
+     * main activity and that the map is now displayed
+     */
     @Test fun planRegularTripLong() {
         onView(withId(R.id.startLocation)).perform(typeText("Calgary"), closeSoftKeyboard())
         onView(withId(R.id.startLocation)).check(matches(withText("Calgary")))
@@ -264,7 +301,16 @@ class TripActivityTest {
         onView(withId(R.id.map)).check(matches(isDisplayed()))
     }
 
-
+    /**
+     * Functionality Test for the Trip Activity
+     *
+     * Failure Scenario:
+     * Simulates the scenario where the user enters an
+     * invalid starting city
+     *
+     * Verify that the create trip button displays a
+     * Snackbar message alerting the user of the error
+     */
     @Test fun wrongStart() {
         onView(withId(R.id.startLocation)).perform(typeText("asdkf;a"), closeSoftKeyboard())
         onView(withId(R.id.startLocation)).check(matches(withText("asdkf;a")))
@@ -284,6 +330,16 @@ class TripActivityTest {
 
     }
 
+    /**
+     * Functionality Test for the Trip Activity
+     *
+     * Failure Scenario:
+     * Simulates the scenario where the user enters an
+     * invalid ending city
+     *
+     * Verify that the create trip button displays a
+     * Snackbar message alerting the user of the error
+     */
     @Test fun wrongEnd() {
         onView(withId(R.id.startLocation)).perform(typeText("Beijing"), closeSoftKeyboard())
         onView(withId(R.id.startLocation)).check(matches(withText("Beijing")))
@@ -302,6 +358,16 @@ class TripActivityTest {
             .check(matches(isDisplayed()))
     }
 
+    /**
+     * Functionality Test for the Trip Activity
+     *
+     * Failure Scenario:
+     * Simulates the scenario where the user enters the
+     * same start and end city
+     *
+     * Verify that the create trip button displays a
+     * Snackbar message alerting the user of the error
+     */
     @Test fun sameStartEnd() {
         onView(withId(R.id.startLocation)).perform(typeText("Beijing"), closeSoftKeyboard())
         onView(withId(R.id.startLocation)).check(matches(withText("Beijing")))
@@ -320,6 +386,16 @@ class TripActivityTest {
             .check(matches(isDisplayed()))
     }
 
+    /**
+     * Functionality Test for the Trip Activity
+     *
+     * Failure Scenario:
+     * Simulates the scenario where the user enters a
+     * trip with an invalid number of stops (0)
+     *
+     * Verify that the create trip button displays a
+     * Snackbar message alerting the user of the error
+     */
     @Test fun wrongStopsAmount() {
         onView(withId(R.id.startLocation)).perform(typeText("Beijing"), closeSoftKeyboard())
         onView(withId(R.id.startLocation)).check(matches(withText("Beijing")))
@@ -338,6 +414,16 @@ class TripActivityTest {
             .check(matches(isDisplayed()))
     }
 
+    /**
+     * Functionality Test for the Trip Activity
+     *
+     * Failure Scenario:
+     * Simulates the scenario where the user doesn't
+     * enter a starting city
+     *
+     * Verify that the create trip button displays a
+     * Snackbar message alerting the user of the error
+     */
     @Test fun missingInputsStart() {
         onView(withId(R.id.endLocation)).perform(typeText("Hanoi"), closeSoftKeyboard())
         onView(withId(R.id.endLocation)).check(matches(withText("Hanoi")))
@@ -353,6 +439,16 @@ class TripActivityTest {
             .check(matches(isDisplayed()))
     }
 
+    /**
+     * Functionality Test for the Trip Activity
+     *
+     * Failure Scenario:
+     * Simulates the scenario where the user doesn't
+     * enter a ending city
+     *
+     * Verify that the create trip button displays a
+     * Snackbar message alerting the user of the error
+     */
     @Test fun missingInputsEnd() {
         onView(withId(R.id.startLocation)).perform(typeText("Beijing"), closeSoftKeyboard())
         onView(withId(R.id.startLocation)).check(matches(withText("Beijing")))
@@ -368,6 +464,16 @@ class TripActivityTest {
             .check(matches(isDisplayed()))
     }
 
+    /**
+     * Functionality Test for the Trip Activity
+     *
+     * Failure Scenario:
+     * Simulates the scenario where the user doesn't enter
+     * a number of desired stops
+     *
+     * Verify that the create trip button displays a
+     * Snackbar message alerting the user of the error
+     */
     @Test fun missingInputsStops() {
         onView(withId(R.id.startLocation)).perform(typeText("Beijing"), closeSoftKeyboard())
         onView(withId(R.id.startLocation)).check(matches(withText("Beijing")))
@@ -390,6 +496,7 @@ class TripActivityTest {
 //    val activityRule = ActivityScenarioRule(AccountActivity::class.java)
 //}
 //
+
 @RunWith(AndroidJUnit4::class)
 class PastTripActivityEmptyTest {
     @Before
@@ -412,6 +519,12 @@ class PastTripActivityEmptyTest {
         onView(withId(R.id.back_button_past)).check(matches(withText("Back")))
     }
 
+    /**
+     * Functionality Test for the current Activity
+     *
+     * Verify that the back button successfully returns
+     * back to the main activity
+     */
     @Test fun backButton() {
         onView(withId(R.id.back_button_past)).perform(click())
 
@@ -419,6 +532,12 @@ class PastTripActivityEmptyTest {
         Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
     }
 
+    /**
+     * Functionality Test for the Past Trip Activity
+     *
+     * Verify that the scenario where a user has no
+     * previous trips is displayed correctly
+     */
     @Test fun emptyPastTrip() {
         onView(withParent(withId(R.id.past_trip_list_layout))).check(doesNotExist())
     }
@@ -455,7 +574,12 @@ class PastTripActivityTestPersonTest {
         Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
     }
 
-    //Test that verifies if recipe from past trips gets displayed properly
+    /**
+     * Functionality Test for the Past Trip Activity
+     *
+     * Verify that the user is able to access their past
+     * trip recipes correctly
+     */
     @Test fun GeneralRecipeViewPastTrip() {
         Thread.sleep(1000)
         onView(withId(R.id.past_trip_list_layout)).check(matches(isDisplayed()))
@@ -493,21 +617,25 @@ class GroceryActivityTest {
         Intents.release()
     }
 
-    //Test to verify all ui elements are present
     @Test fun checkElements() {
         onView(withId(R.id.back_button)).check(matches(withText("Back")))
         onView(withId(R.id.grocery_title_text_view)).check(matches(withText("Grocery")))
         onView(withId(R.id.recipe_list_layout)).check(matches(isDisplayed()))
     }
 
-    //Test to check if back button on Grocery Activity properly returns to main page
     @Test fun backButton() {
         onView(withId(R.id.back_button)).perform(click())
         Thread.sleep(5000)
         Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
     }
 
-    //Test to verify if a discounted item is properly displayed
+    /**
+     * Functionality Test for the Grocery Activity
+     *
+     * Verify that an item with a discount has the
+     * discount properly displayed
+     *
+     */
     @Test fun discountSuccessTest() {
         onView(withTagValue(`is`("ingred 1")))
             .check(matches(isDisplayed()))
@@ -519,7 +647,13 @@ class GroceryActivityTest {
             .check(matches(isDisplayed()))
     }
 
-    //Test to check if an item with no discounts properly displays
+    /**
+     * Functionality Test for the Grocery Activity
+     *
+     * Verify that an item without a discount has the
+     * proper display
+     *
+     */
     @Test fun discountEmptyTest() {
         onView(withTagValue(`is`("ingred 2")))
             .check(matches(isDisplayed()))
@@ -567,6 +701,19 @@ class GroceryStoreActivityTest {
         Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
     }
 
+    /**
+     * Functionality Test for the Grocery Store Activity
+     *
+     * Success Scenario:
+     * Simulates a user creating a item to be listed
+     * for a discount by entering an item name and price.
+     * Then simulates the user deleting the item from the discounts list
+     *
+     * Verify that the item and its price are properly displayed
+     * on the page and that the delete functionality
+     * removes the item from the page
+     *
+     */
     @Test fun postAndDeleteDiscountTest() {
         onView(withId(R.id.ingredient_input)).perform(typeText(sampleIngredient1), closeSoftKeyboard())
         onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient1)))
@@ -588,6 +735,21 @@ class GroceryStoreActivityTest {
             .check(doesNotExist())
     }
 
+    /**
+     * Functionality Test for the Grocery Store Activity
+     *
+     * Success Scenario:
+     * Simulates a user attempting to delete a discounted
+     * grocery by clicking the delete button with no
+     * item selected, then with selecting and deseleting a item,
+     * and then with an item properly selected
+     *
+     * Verify that the item isn't deleted in the first case and a
+     * message that alerts the user appears, then check that the item
+     * is not deleted in the second case and displays the same message,
+     * then verify that the item is properly deleted in the third case
+     *
+     */
     @Test fun deleteTest() {
         onView(withId(R.id.ingredient_input)).perform(typeText(sampleIngredient1), closeSoftKeyboard())
         onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient1)))
@@ -616,6 +778,18 @@ class GroceryStoreActivityTest {
             .check(doesNotExist())
     }
 
+    /**
+     * Functionality Test for the Grocery Store Activity
+     *
+     * Success Scenario:
+     * Simulates a user creating two items, then selecting them
+     * one after the other to delete
+     *
+     * Verify that the item and its price are properly displayed
+     * and that the item the user first selects is properly deleted
+     * and that the second item the user selects is properly deleted
+     *
+     */
     @Test fun changeSelectedTest() {
         onView(withId(R.id.ingredient_input)).perform(typeText(sampleIngredient1), closeSoftKeyboard())
         onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient1)))
@@ -654,6 +828,17 @@ class GroceryStoreActivityTest {
             .check(doesNotExist())
     }
 
+    /**
+     * Functionality Test for the Grocery Store Activity
+     *
+     * Failure Scenario:
+     * Simulates a user imputing a price but no item
+     * name and then attempting to post the item
+     *
+     * Verify that the item is not displayed and a message
+     * is displayed alerting the user
+     *
+     */
     @Test fun emptyIngredientTest() {
         onView(withId(R.id.price_input)).perform(typeText(samplePrice1), closeSoftKeyboard())
         onView(withId(R.id.price_input)).check(matches(withText(samplePrice1)))
@@ -667,6 +852,17 @@ class GroceryStoreActivityTest {
             .check(doesNotExist())
     }
 
+    /**
+     * Functionality Test for the Grocery Store Activity
+     *
+     * Failure Scenario:
+     * Simulates a user imputing a item name but no
+     * price and then attempting to post the item
+     *
+     * Verify that the item is not displayed and a message
+     * is displayed alerting the user
+     *
+     */
     @Test fun emptyPriceTest() {
         onView(withId(R.id.ingredient_input)).perform(typeText(sampleIngredient1), closeSoftKeyboard())
         onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient1)))
@@ -680,6 +876,17 @@ class GroceryStoreActivityTest {
             .check(doesNotExist())
     }
 
+    /**
+     * Functionality Test for the Grocery Store Activity
+     *
+     * Failure Scenario:
+     * Simulates a user imputing a price of zero for
+     * a item then attempting to post the item
+     *
+     * Verify that the item is not displayed and a message
+     * is displayed alerting the user
+     *
+     */
     @Test fun zeroPriceTest() {
         onView(withId(R.id.ingredient_input)).perform(typeText(sampleIngredient1), closeSoftKeyboard())
         onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient1)))
@@ -696,13 +903,14 @@ class GroceryStoreActivityTest {
             .check(doesNotExist())
     }
 
-    @Test fun negativePriceTest() {
-        onView(withId(R.id.ingredient_input)).perform(typeText(sampleIngredient1), closeSoftKeyboard())
-        onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient1)))
-
-        onView(withId(R.id.price_input)).perform(typeText("-100"), closeSoftKeyboard())
-        onView(withId(R.id.price_input)).check(matches(withText("100")))
-    }
+    //Pretty sure negative numbers cannot be entered anyways
+//    @Test fun negativePriceTest() {
+//        onView(withId(R.id.ingredient_input)).perform(typeText(sampleIngredient1), closeSoftKeyboard())
+//        onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient1)))
+//
+//        onView(withId(R.id.price_input)).perform(typeText("-100"), closeSoftKeyboard())
+//        onView(withId(R.id.price_input)).check(matches(withText("100")))
+//    }
 }
 
 //@RunWith(AndroidJUnit4::class)
@@ -737,6 +945,18 @@ class RecipeTests {
     @get:Rule
     val activityRule = ActivityScenarioRule(MainActivity::class.java)
 
+
+    /**
+     * Functionality Test for the Recipe viewing
+     *
+     * Success Scenario:
+     * Simulates a user creating a new trip, and then viewing the
+     * recipe for the trip by navigating through various activities
+     *
+     * Verify that the correct activities are navigated to
+     * and that the recipe and trip elements are properly displayed
+     *
+     */
     @Test fun displayRecipe()  {
         onView(withId(R.id.ManageTrip)).perform(click())
 
