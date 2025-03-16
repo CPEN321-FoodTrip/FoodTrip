@@ -46,7 +46,6 @@ async function importGeoNamesToMongoDB(): Promise<void> {
   });
 
   const cities: GeoNameCity[] = [];
-  let lineCount = 0;
 
   for await (const line of rl) {
     if (line.trim() === "") continue;
