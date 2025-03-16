@@ -85,7 +85,7 @@ describe("Mocked: POST /notifications/subscribe", () => {
       .send({ userID: "12345", fcmToken: "real-token" })
       .expect(400);
 
-    expect(response.body).toBe("Already subscribed");
+    expect(response.body).toHaveProperty("error", "Already subscribed");
     expect(NotificationHelper.getTokenFromDb).toHaveBeenCalled();
     expect(NotificationHelper.addTokenToDb).not.toHaveBeenCalled();
   });
@@ -103,7 +103,7 @@ describe("Mocked: POST /notifications/subscribe", () => {
       .send({ userID: "12345", fcmToken: "real-token" })
       .expect(201);
 
-    expect(response.body).toBe("Subscribed successfully");
+    expect(response.body).toHaveProperty("message", "Subscribed successfully");
     expect(NotificationHelper.getTokenFromDb).toHaveBeenCalled();
   });
 });
@@ -152,7 +152,7 @@ describe("Mocked: POST /notifications/unsubscribe", () => {
       .send({ userID: "12345" })
       .expect(400);
 
-    expect(response.body).toBe("Not subscribed");
+    expect(response.body).toHaveProperty("error", "Not subscribed");
     expect(NotificationHelper.removeTokenFromDb).toHaveBeenCalled();
   });
 
@@ -168,7 +168,7 @@ describe("Mocked: POST /notifications/unsubscribe", () => {
       .send({ userID: "12345" })
       .expect(400);
 
-    expect(response.body).toBe("Not subscribed");
+    expect(response.body).toHaveProperty("error", "Not subscribed");
   });
 
   // Mocked behavior:
@@ -184,7 +184,10 @@ describe("Mocked: POST /notifications/unsubscribe", () => {
       .send({ userID: "12345" })
       .expect(201);
 
-    expect(response.body).toBe("Unsubscribed successfully");
+    expect(response.body).toHaveProperty(
+      "message",
+      "Unsubscribed successfully"
+    );
     expect(NotificationHelper.removeTokenFromDb).toHaveBeenCalled();
   });
 });
