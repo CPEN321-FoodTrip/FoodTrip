@@ -137,11 +137,12 @@ describe("Mocked: POST /routes", () => {
       // vancover
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
+        json: async () =>
+          Promise.resolve([{ lat: "49.2827", lon: "-123.1207" }]),
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [],
+        json: async () => Promise.resolve([]),
       });
     jest.spyOn(RouteHelpers, "saveRouteToDb").mockImplementation();
 
@@ -196,11 +197,13 @@ describe("Mocked: POST /routes", () => {
       // vancover
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
+        json: async () =>
+          Promise.resolve([{ lat: "49.2827", lon: "-123.1207" }]),
       }) // vancover
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
+        json: async () =>
+          Promise.resolve([{ lat: "49.2827", lon: "-123.1207" }]),
       });
     jest.spyOn(RouteHelpers, "saveRouteToDb").mockImplementation();
 
@@ -335,12 +338,14 @@ describe("Mocked: POST /routes", () => {
       // vancover
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
+        json: async () =>
+          Promise.resolve([{ lat: "49.2827", lon: "-123.1207" }]),
       })
       // nanaimo
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [{ lat: "49.1638", lon: "-123.9381" }],
+        json: async () =>
+          Promise.resolve([{ lat: "49.1638", lon: "-123.9381" }]),
       });
 
     const response = await request(app)
