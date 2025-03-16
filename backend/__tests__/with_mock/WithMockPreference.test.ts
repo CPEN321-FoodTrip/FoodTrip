@@ -1,7 +1,6 @@
 import request from "supertest";
 import app from "../../index";
 import * as PreferenceHelper from "../../helpers/PreferenceHelper";
-import { client } from "../../services";
 
 // Interface POST /preferences/allergies
 describe("Mocked: POST /preferences/allergies", () => {
