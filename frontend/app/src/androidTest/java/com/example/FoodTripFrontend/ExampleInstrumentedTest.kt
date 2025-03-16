@@ -44,6 +44,7 @@ import androidx.test.espresso.intent.matcher.IntentMatchers
 import com.google.android.gms.maps.GoogleMap
 import androidx.test.espresso.matcher.ViewMatchers.withParent
 import androidx.test.espresso.matcher.ViewMatchers.withTagValue
+import com.google.android.gms.maps.model.LatLng
 import org.hamcrest.Description
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.anyOf
@@ -218,11 +219,21 @@ class MainActivityTest {
 @RunWith(AndroidJUnit4::class)
 class MainActivityAdminTest {
 
+    /**
+     * Initialization for intent checking
+     *
+     * Needed for switching activities
+     */
     @Before
     fun setup() {
         Intents.init()
     }
 
+    /**
+     * Cleanup for intent checking
+     *
+     * Needed for switching activities
+     */
     @After
     fun tearDown() {
         Intents.release()
@@ -257,12 +268,21 @@ class TripActivityTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(TripActivity::class.java)
 
-
+    /**
+     * Initialization for intent checking
+     *
+     * Needed for switching activities
+     */
     @Before
     fun setup() {
         Intents.init()
     }
 
+    /**
+     * Cleanup for intent checking
+     *
+     * Needed for switching activities
+     */
     @After
     fun tearDown() {
         Intents.release()
@@ -279,6 +299,9 @@ class TripActivityTest {
      * main activity and that the map is now displayed
      */
     @Test fun planRegularTripShort() {
+        val expectedCoordinatesList = mutableListOf<LatLng>()
+        val expectedCitiesList = mutableListOf<String>()
+
         onView(withId(R.id.startLocation)).perform(typeText("Calgary"), closeSoftKeyboard())
         onView(withId(R.id.startLocation)).check(matches(withText("Calgary")))
 
@@ -293,6 +316,20 @@ class TripActivityTest {
         Thread.sleep(5000)
 
         Intents.intended(hasComponent(MainActivity::class.java.name))
+
+        val capturedIntent = Intents.getIntents().last()
+
+        val bundle = capturedIntent.extras
+        assertNotNull(bundle)
+
+        val coordinates =
+            bundle?.getParcelableArrayList<LatLng>("coordinates")
+        assertNotNull(coordinates)
+        assertEquals(expectedCoordinatesList, coordinates)
+
+        val cities = bundle?.getStringArrayList("cities")
+        assertNotNull(cities)
+        assertEquals(expectedCitiesList, cities)
 
         onView(withId(R.id.map)).check(matches(isDisplayed()))
     }
@@ -533,6 +570,14 @@ class TripActivityTest {
  */
 @RunWith(AndroidJUnit4::class)
 class PastTripActivityEmptyTest {
+
+    /**
+     * Initialization for intent checking
+     * and Test username creation
+     *
+     * Needed for switching activities
+     * and past trip tests
+     */
     @Before
     fun setup() {
         Intents.init()
@@ -541,6 +586,11 @@ class PastTripActivityEmptyTest {
         sharedPreferences.edit().putString("userEmail", "").apply()
     }
 
+    /**
+     * Cleanup for intent checking
+     *
+     * Needed for switching activities
+     */
     @After
     fun tearDown() {
         Intents.release()
@@ -549,6 +599,11 @@ class PastTripActivityEmptyTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(PastTripActivity::class.java)
 
+    /**
+     * UI Test for the current Activity
+     *
+     * Checks if all required elements are present
+     */
     @Test fun checkElements() {
         onView(withId(R.id.back_button_past)).check(matches(withText("Back")))
     }
@@ -590,6 +645,11 @@ class PastTripActivityTestPersonTest {
      @get:Rule
     val activityRule = ActivityScenarioRule(PastTripActivity::class.java)
 
+    /**
+     * Initialization for intent checking
+     *
+     * Needed for switching activities
+     */
     @Before
     fun setup() {
         Intents.init()
@@ -600,6 +660,11 @@ class PastTripActivityTestPersonTest {
         ActivityScenario.launch(PastTripActivity::class.java)
     }
 
+    /**
+     * Cleanup for intent checking
+     *
+     * Needed for switching activities
+     */
     @After
     fun tearDown() {
         Intents.release()
@@ -609,6 +674,12 @@ class PastTripActivityTestPersonTest {
         onView(withId(R.id.back_button_past)).check(matches(withText("Back")))
     }
 
+    /**
+     * Functionality Test for the current Activity
+     *
+     * Verify that the back button successfully returns
+     * back to the main activity
+     */
     @Test fun backButton() {
         onView(withId(R.id.back_button_past)).perform(click())
 
@@ -657,11 +728,21 @@ class GroceryActivityTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(GroceryActivity::class.java)
 
+    /**
+     * Initialization for intent checking
+     *
+     * Needed for switching activities
+     */
     @Before
     fun setup() {
         Intents.init()
     }
 
+    /**
+     * Cleanup for intent checking
+     *
+     * Needed for switching activities
+     */
     @After
     fun tearDown() {
         Intents.release()
@@ -673,6 +754,12 @@ class GroceryActivityTest {
         onView(withId(R.id.recipe_list_layout)).check(matches(isDisplayed()))
     }
 
+    /**
+     * Functionality Test for the current Activity
+     *
+     * Verify that the back button successfully returns
+     * back to the main activity
+     */
     @Test fun backButton() {
         onView(withId(R.id.back_button)).perform(click())
         Thread.sleep(5000)
@@ -740,11 +827,21 @@ class GroceryStoreActivityTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(GroceryStoreActivity::class.java)
 
+    /**
+     * Initialization for intent checking
+     *
+     * Needed for switching activities
+     */
     @Before
     fun setup() {
         Intents.init()
     }
 
+    /**
+     * Cleanup for intent checking
+     *
+     * Needed for switching activities
+     */
     @After
     fun tearDown() {
         Intents.release()
@@ -760,6 +857,12 @@ class GroceryStoreActivityTest {
         onView(withId(R.id.delete_button_grocery_store)).check(matches(isDisplayed()))
     }
 
+    /**
+     * Functionality Test for the current Activity
+     *
+     * Verify that the back button successfully returns
+     * back to the main activity
+     */
     @Test fun backButtonTest() {
         onView(withId(R.id.back_button_grocery_store)).perform(click())
         Thread.sleep(7000)
@@ -983,11 +1086,22 @@ class GroceryStoreActivityTest {
  */
 @RunWith(AndroidJUnit4::class)
 class RecipeTests {
+
+    /**
+     * Initialization for intent checking
+     *
+     * Needed for switching activities
+     */
     @Before
     fun setup() {
         Intents.init()
     }
 
+    /**
+     * Cleanup for intent checking
+     *
+     * Needed for switching activities
+     */
     @After
     fun tearDown() {
         Intents.release()
