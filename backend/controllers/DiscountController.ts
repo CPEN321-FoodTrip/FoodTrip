@@ -7,6 +7,8 @@ import {
 } from "../helpers/DiscountHelper";
 import { ObjectId } from "mongodb";
 import { Discount } from "../interfaces/DiscountInterfaces";
+import { getAllTokensFromDb } from "../helpers/NotificationHelper";
+import * as admin from "firebase-admin";
 
 export class DiscountController {
   // add a new discount
@@ -24,6 +26,24 @@ export class DiscountController {
 
     try {
       const discountID = await addDiscountToDb(discount);
+
+      const tokens = await getAllTokensFromDb();
+      const payload = {
+        notification: {
+          title: "New Discount Available!",
+          body: `Get ${discount.ingredient} for only $${discount.price}% at ${discount.storeName}!`,
+        },
+      };
+
+      // send notification using firebase
+      if (tokens.length !== 0) {
+        const response = await admin
+          .messaging()
+          .sendEachForMulticast({ tokens, notification: payload.notification });
+        if (response.failureCount > 0) {
+          console.error("Failed to send notifications to some devices");
+        }
+      }
 
       res
         .status(201)

@@ -1,6 +1,9 @@
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { MongoClient } from "mongodb";
-import { initializeClient } from "./services";
+import { initializeClient, initializeFirebaseAdmin } from "./services";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 let mongoServer: MongoMemoryServer;
 let client: MongoClient;
@@ -15,6 +18,8 @@ beforeAll(async () => {
   client = new MongoClient(uri);
   await client.connect();
   initializeClient(client); // inject test client
+
+  initializeFirebaseAdmin();
 });
 
 afterEach(async () => {
