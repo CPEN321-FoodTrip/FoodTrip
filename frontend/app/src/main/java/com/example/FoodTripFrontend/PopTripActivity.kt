@@ -26,12 +26,27 @@ import okhttp3.Response
 import okio.IOException
 import java.util.ArrayList
 
+/**
+ * Activity showing details of selected trip from PastTripActivity
+ */
 class PopTripActivity : Activity() {
 
+    /**
+     * Companion object for PopTripActivity.
+     * Stores static constants related to the activity.
+     */
     companion object {
         private const val TAG = "PastTripActivity"
     }
 
+    /**
+     * class of sub-element in class Stop
+     *
+     * @property name: city name of the stop
+     * @property latitude: latitude coordinate of the city
+     * @property longitude: longitude coordinate of the city
+     * @property population: population of the city
+     */
     data class StopLocation(
         val name: String,
         val latitude: String,
@@ -39,6 +54,15 @@ class PopTripActivity : Activity() {
         val population: String
     )
 
+    /**
+     * class of sub-element in class Route
+     *
+     * @property location: location of the stop
+     * @property distanceFromStart: straight distance from the starting point
+     * @property cumulativeDistance: total distance from the starting point
+     * @property segmentPercentage: progress percentage of the current stop in the trip
+     *                              from the starting point
+     */
     data class Stop(
         val location: StopLocation,
         val distanceFromStart: Float,
@@ -46,6 +70,15 @@ class PopTripActivity : Activity() {
         val segmentPercentage: Float
     )
 
+    /**
+     * JSON format for API response in getTrip()
+     *
+     * @property _id: unique ID of the trip
+     * @property userID: unique ID of the user create the trip
+     * @property start_location: starting location of the trip
+     * @property end_location: destination of the trip
+     * @property stops: list of intermediate stops
+     */
     data class Route(
         val _id: String,
         val userID: String,
@@ -54,6 +87,14 @@ class PopTripActivity : Activity() {
         val stops: List<Stop>
     )
 
+    /**
+     * class of sub-element in class EdamamResponse
+     *
+     * @property recipeName: name of the recipe
+     * @property recipeID: unique identifier of the recipe
+     * @property url: link to the recipe
+     * @property ingredients: list of ingredients needed for the recipe
+     */
     data class Recipe(
         val recipeName: String,
         val recipeID: String,
@@ -61,6 +102,11 @@ class PopTripActivity : Activity() {
         val ingredients: List<String>,
     )
 
+    /**
+     * JSON format for API response in getRecipes()
+     *
+     * @property hits: list of recipes
+     */
     data class EdamamResponse (
         val hits: List<Recipe>
     )

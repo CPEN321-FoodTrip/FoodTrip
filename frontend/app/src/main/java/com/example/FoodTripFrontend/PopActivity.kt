@@ -11,8 +11,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
+/**
+ * Activity showing available discounts to the selected ingredient
+ */
 class PopActivity : Activity() {
 
+    /**
+     * Companion object for GroceryActivity.
+     * Stores static constants related to the activity.
+     */
     companion object {
         private const val TAG = "GroceryActivity"
     }

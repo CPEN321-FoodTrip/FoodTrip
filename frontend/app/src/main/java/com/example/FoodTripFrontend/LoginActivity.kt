@@ -25,8 +25,17 @@ import kotlinx.coroutines.launch
 import java.security.MessageDigest
 import java.util.UUID
 
+/**
+ * Activity handles google sign-in functionality
+ * If sign-in as user, direct to regular user mode
+ * If sign-in as admin, direct to admin mode
+ */
 class LoginActivity : AppCompatActivity() {
 
+    /**
+     * Companion object for LoginActivity.
+     * Stores static constants related to the activity.
+     */
     companion object {
         private const val TAG = "LoginActivity"
     }

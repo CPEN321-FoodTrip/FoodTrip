@@ -50,7 +50,12 @@ import org.hamcrest.Matchers.anyOf
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.TypeSafeMatcher
 
-
+/**
+ * Test of LoginActivity-related functionality.
+ *
+ * Test cases include:
+ * - Testing sign-in functionality as user/admin.
+ */
 @RunWith(AndroidJUnit4::class)
 class LoginActivityTest {
 
@@ -81,6 +86,14 @@ class LoginActivityTest {
     }
 }
 
+/**
+ * Test of GroceryActivity-related functionality.
+ *
+ * Test cases include:
+ * - Checking the display of key UI elements.
+ * - Verifying the activity-directing button functionality.
+ * - Testing sign out functionality.
+ */
 @RunWith(AndroidJUnit4::class)
 class MainActivityTest {
 
@@ -137,6 +150,12 @@ class MainActivityTest {
 
 }
 
+/**
+ * Test of MainActivityAdmin-related functionality.
+ *
+ * Test cases include:
+ * - Verifying the button to grocery store activity functionality.
+ */
 @RunWith(AndroidJUnit4::class)
 class MainActivityAdminTest {
     @Before
@@ -159,6 +178,13 @@ class MainActivityAdminTest {
 
 }
 
+/**
+ * Test of TripActivity-related functionality
+ *
+ * Test cases include:
+ * - regular cases of creating trips
+ * - testing rejection and notification to invalid input
+ */
 @RunWith(AndroidJUnit4::class)
 class TripActivityTest {
 
@@ -344,6 +370,15 @@ class TripActivityTest {
 //    val activityRule = ActivityScenarioRule(AccountActivity::class.java)
 //}
 //
+
+/**
+ * Test with PastTripActivity on "no past trip record"
+ *
+ * Test cases included:
+ * - checking UI elements
+ * - verifying back button functionality
+ * - verifying case of no past trip record
+ */
 @RunWith(AndroidJUnit4::class)
 class PastTripActivityEmptyTest {
     @Before
@@ -378,6 +413,14 @@ class PastTripActivityEmptyTest {
     }
 }
 
+/**
+ * Test with PastTripActivity with "userEmail=test_person"
+ *
+ * Test cases included:
+ * - checking UI elements
+ * - verifying back button functionality
+ * - Testing viewing details of a past trip and included recipes
+ */
 @RunWith(AndroidJUnit4::class)
 class PastTripActivityTestPersonTest {
      @get:Rule
@@ -431,6 +474,14 @@ class PastTripActivityTestPersonTest {
     }
 }
 
+/**
+ * Test of GroceryActivity-related functionality.
+ *
+ * Test cases include:
+ * - Checking the display of key UI elements.
+ * - Verifying the back button functionality.
+ * - Testing success and failure scenarios for discount functionality.
+ */
 @RunWith(AndroidJUnit4::class)
 class GroceryActivityTest {
     @get:Rule
@@ -480,12 +531,27 @@ class GroceryActivityTest {
     }
 }
 
+/**
+ * Test with PastTripActivity on "no past trip record"
+ *
+ * Test cases included:
+ * - Checking UI elements
+ * - Verifying back button functionality
+ * - Testing success/failure discount delete cases
+ * - Testing success/failure discount pose cases
+ * - Testing select/unselect discount
+ */
 @RunWith(AndroidJUnit4::class)
 class GroceryStoreActivityTest {
     val sampleIngredient1 = "snack"
     val samplePrice1 = "10"
+    val sample1 = "snack: $10"
     val sampleIngredient2 = "apple"
     val samplePrice2 = "20"
+    val sample2 = "apple: $20"
+
+    val discountErrorText = "Please select discount to be deleted"
+    val inputErrorText = "Please enter valid ingredient and price"
 
     @get:Rule
     val activityRule = ActivityScenarioRule(GroceryStoreActivity::class.java)
@@ -526,14 +592,14 @@ class GroceryStoreActivityTest {
         onView(withId(R.id.post_button_grocery_store)).perform(click())
         Thread.sleep(3000)
 
-        onView(withText("$sampleIngredient1: $$samplePrice1"))
+        onView(withText(sample1))
             .check(matches(isDisplayed()))
             .perform(click())
 
         onView(withId(R.id.delete_button_grocery_store)).perform(click())
         Thread.sleep(3000)
 
-        onView(withText("$sampleIngredient1: $$samplePrice1"))
+        onView(withText(sample1))
             .check(doesNotExist())
     }
 
@@ -546,22 +612,22 @@ class GroceryStoreActivityTest {
         Thread.sleep(3000)
 
         onView(withId(R.id.delete_button_grocery_store)).perform(click())
-        onView(withText("Please select discount to be deleted"))
+        onView(withText(discountErrorText))
             .check(matches(isDisplayed()))
 
-        onView(withText("$sampleIngredient1: $$samplePrice1"))
+        onView(withText(sample1))
             .perform(click())
             .perform(click())
 
         onView(withId(R.id.delete_button_grocery_store)).perform(click())
-        onView(withText("Please select discount to be deleted"))
+        onView(withText(discountErrorText))
             .check(matches(isDisplayed()))
 
-        onView(withText("$sampleIngredient1: $$samplePrice1"))
+        onView(withText(sample1))
             .perform(click())
         onView(withId(R.id.delete_button_grocery_store)).perform(click())
         Thread.sleep(3000)
-        onView(withText("$sampleIngredient1: $$samplePrice1"))
+        onView(withText(sample1))
             .check(doesNotExist())
     }
 
@@ -580,26 +646,26 @@ class GroceryStoreActivityTest {
         onView(withId(R.id.post_button_grocery_store)).perform(click())
         Thread.sleep(3000)
 
-        onView(withText("$sampleIngredient2: $$samplePrice2"))
+        onView(withText(sample2))
             .check(matches(isDisplayed()))
             .perform(click())
 
-        onView(withText("$sampleIngredient1: $$samplePrice1"))
+        onView(withText(sample1))
             .check(matches(isDisplayed()))
             .perform(click())
         onView(withId(R.id.delete_button_grocery_store)).perform(click())
         Thread.sleep(3000)
-        onView(withText("$sampleIngredient1: $$samplePrice1"))
+        onView(withText(sample1))
             .check(doesNotExist())
-        onView(withText("$sampleIngredient2: $$samplePrice2"))
+        onView(withText(sample2))
             .check(matches(isDisplayed()))
 
-        onView(withText("$sampleIngredient2: $$samplePrice2"))
+        onView(withText(sample2))
             .check(matches(isDisplayed()))
             .perform(click())
         onView(withId(R.id.delete_button_grocery_store)).perform(click())
         Thread.sleep(3000)
-        onView(withText("$sampleIngredient2: $$samplePrice2"))
+        onView(withText(sample2))
             .check(doesNotExist())
     }
 
@@ -609,7 +675,7 @@ class GroceryStoreActivityTest {
 
         onView(withId(R.id.post_button_grocery_store)).perform(click())
         Thread.sleep(1000)
-        onView(withText("Please enter valid ingredient and price"))
+        onView(withText(inputErrorText))
             .check(matches(isDisplayed()))
 
         onView(withText(": $$samplePrice1"))
@@ -622,7 +688,7 @@ class GroceryStoreActivityTest {
 
         onView(withId(R.id.post_button_grocery_store)).perform(click())
         Thread.sleep(1000)
-        onView(withText("Please enter valid ingredient and price"))
+        onView(withText(inputErrorText))
             .check(matches(isDisplayed()))
 
         onView(withText("$sampleIngredient1: $"))
@@ -638,7 +704,7 @@ class GroceryStoreActivityTest {
 
         onView(withId(R.id.post_button_grocery_store)).perform(click())
         Thread.sleep(1000)
-        onView(withText("Please enter valid ingredient and price"))
+        onView(withText(inputErrorText))
             .check(matches(isDisplayed()))
 
         onView(withText("$sampleIngredient1: $0"))
@@ -654,23 +720,9 @@ class GroceryStoreActivityTest {
     }
 }
 
-//@RunWith(AndroidJUnit4::class)
-//class RecipeActivityTest {
-//    @Rule
-//    val activityRule = ActivityScenarioRule(PopRecipeActivity::class.java)
-//}
-//@RunWith(AndroidJUnit4::class)
-//class GroceryActivityTest {
-//    @Rule
-//    val activityRule = ActivityScenarioRule(GroceryActivity::class.java)
-//}
-//
-//@RunWith(AndroidJUnit4::class)
-//class GroceryStoreActivityTest {
-//    @Rule
-//    val activityRule = ActivityScenarioRule(GroceryStoreActivity::class.java)
-//}
-//
+/**
+ * Test to display a recipe from a past trip.
+ */
 @RunWith(AndroidJUnit4::class)
 class RecipeTests {
     @Before

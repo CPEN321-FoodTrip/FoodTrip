@@ -26,10 +26,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
+/**
+ * Home page of the app in user mode
+ *
+ * Direction of buttons:
+ * - Manage Trip -> TripActivity
+ * - View Past Trip -> PastTripActivity
+ * - Manage Account -> AccountActivity
+ * - View Recipes -> Grocery Activity
+ * - Sign Out: log out and back to LoginActivity
+ */
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
 
+    /**
+     * Companion object for MainActivity.
+     * Stores static constants related to the activity.
+     */
     companion object {
         private const val TAG = "MainActivity"
     }

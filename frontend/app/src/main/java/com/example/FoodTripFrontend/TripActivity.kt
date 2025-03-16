@@ -30,10 +30,21 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar
 import java.util.ArrayList
 
+/**
+ * Activity that manages current trip.
+ *
+ * This activity handles generation of a new trip with start/end locations
+ * and number of intermediate stops.
+ *
+ */
 class TripActivity : AppCompatActivity() {
 
     private val client = OkHttpClient()
 
+    /**
+     * Companion object for TripActivity.
+     * Stores static constants related to the activity.
+     */
     companion object {
         private const val TAG = "TripActivity"
     }

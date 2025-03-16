@@ -22,12 +22,30 @@ import okhttp3.Request
 import okhttp3.Response
 import okio.IOException
 
+/**
+ * Activity to view the ingredients required for the recipes
+ * and able to view the available discount to related ingredients
+ * (can only be accessed in user mode)
+ */
 class GroceryActivity : AppCompatActivity() {
 
+    /**
+     * Companion object for GroceryActivity.
+     * Stores static constants related to the activity.
+     */
     companion object {
         private const val TAG = "GroceryActivity"
     }
 
+    /**
+     * JSON format for API response in getDiscount()
+     *
+     * @property discountID: unique identifier of the discount
+     * @property storeID: unique identifier of the store offers the discount
+     * @property storeName: name of the store offers the discount
+     * @property ingredient: product having the discount
+     * @property price: discounted price
+     */
     data class DiscountItem(
         val discountID: String,
         val storeID: String,

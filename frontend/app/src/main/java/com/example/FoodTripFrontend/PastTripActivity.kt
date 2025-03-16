@@ -24,16 +24,35 @@ import okio.IOException
 
 class PastTripActivity : AppCompatActivity() {
 
+    /**
+     * Companion object for PastTripActivity.
+     * Stores static constants related to the activity.
+     */
     companion object {
         private const val TAG = "PastTripActivity"
     }
 
+    /**
+     * class of sub-element in class TripItem
+     *
+     * @property name: city name of the stop
+     * @property latitude: latitude coordinate of the city
+     * @property longitude: longitude coordinate of the city
+     */
     data class LocationItem(
         val name: String,
         val latitude: Float,
         val longitude: Float
     )
 
+    /**
+     * JSON format for API response in getTrip()
+     *
+     * @property userID: unique ID of the user create the trip
+     * @property start_location: starting location of the trip
+     * @property end_location: destination of the trip
+     * @property tripID: unique ID of the trip
+     */
     data class TripItem(
         val userID: String,
         val start_location: LocationItem,

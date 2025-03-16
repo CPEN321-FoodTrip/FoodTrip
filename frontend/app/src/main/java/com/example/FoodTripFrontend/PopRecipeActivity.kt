@@ -11,6 +11,9 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
+/**
+ * Activity showing details of the selected recipe from PopTripActivity
+ */
 class PopRecipeActivity : Activity() {
 
     lateinit var webView: WebView

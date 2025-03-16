@@ -1,27 +1,21 @@
 package com.example.FoodTripFrontend
 
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.FoodTripFrontend.GroceryActivity.Companion
-import com.example.FoodTripFrontend.GroceryActivity.DiscountItem
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import okhttp3.Call
 import okhttp3.Callback
-import okhttp3.FormBody
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -29,12 +23,29 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okio.IOException
 
+/**
+ * Activity to manage the discount of the store
+ * (can only be accessed in admin mode)
+ */
 class GroceryStoreActivity : AppCompatActivity() {
 
+    /**
+     * Companion object for GroceryStoreActivity.
+     * Stores static constants related to the activity.
+     */
     companion object {
         private const val TAG = "GroceryStoreActivity"
     }
 
+    /**
+     * JSON format for API response in getDiscount()
+     *
+     * @property discountID: unique identifier of the discount
+     * @property storeID: unique identifier of the store offers the discount
+     * @property storeName: name of the store offers the discount
+     * @property ingredient: product having the discount
+     * @property price: discounted price
+     */
     data class DiscountItem(
         val discountID: String,
         val storeID: String,
@@ -46,7 +57,6 @@ class GroceryStoreActivity : AppCompatActivity() {
     val sampleID = "1"
     val sampleName = "store 0"
 
-    val unselectedColor = "#FFFFFF"
     val selectedColor = "#A5E6D9"
 
     lateinit var client: OkHttpClient
