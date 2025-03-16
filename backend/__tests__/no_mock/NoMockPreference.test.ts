@@ -7,10 +7,10 @@ const COLLECTION_NAME = "allergies";
 
 // Interface POST /preferences/allergies
 describe("Unmocked: POST /preferences/allergies", () => {
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid userID and allergy
+  // Expected status code: 201
+  // Expected behavior: allergy added to db
+  // Expected output: success message
   test("Valid allergy", async () => {
     const userID = "1";
     const allergy = "peanut";
@@ -33,10 +33,10 @@ describe("Unmocked: POST /preferences/allergies", () => {
     // db cleanup done by afterEach in jest.setup.ts
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: missing parameters
+  // Expected status code: 400
+  // Expected behavior: no db update
+  // Expected output: error message mentioning missing parameters
   test("Missing parameters", async () => {
     const countBefore = await client
       .db(DB_NAME)
@@ -71,10 +71,10 @@ describe("Unmocked: POST /preferences/allergies", () => {
 
 // Interface GET /preferences/allergies/:id
 describe("Unmocked: GET /preferences/allergies/:id", () => {
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid userID with allergies
+  // Expected status code: 200
+  // Expected behavior: allergies retrieved from db
+  // Expected output: list of allergies
   test("Valid allergies retrieved", async () => {
     const userID = "1";
     const allergies = ["peanut", "shellfish", "soy"];
@@ -94,10 +94,10 @@ describe("Unmocked: GET /preferences/allergies/:id", () => {
     // db cleanup done by afterEach in jest.setup.ts
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid userID with no allergies
+  // Expected status code: 404
+  // Expected behavior: no allergies found in db
+  // Expected output: error message
   test("No allergies", async () => {
     const userID = "1";
 
@@ -111,10 +111,10 @@ describe("Unmocked: GET /preferences/allergies/:id", () => {
 
 // Interface DELETE /preferences/allergies/:id/:allergy
 describe("Unmocked: DELETE /preferences/allergies/:id/:allergy", () => {
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid userID and allergy
+  // Expected status code: 200
+  // Expected behavior: allergy deleted from db
+  // Expected output: success message
   test("Valid deletion", async () => {
     const userID = "1";
     const allergy = "peanut";
@@ -142,11 +142,16 @@ describe("Unmocked: DELETE /preferences/allergies/:id/:allergy", () => {
     // db cleanup done by afterEach in jest.setup.ts
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Input: valid userID with no allergies
+  // Expected status code: 404
+  // Expected behavior: db not updated
+  // Expected output: error message
   test("No allergies", async () => {
+    const countBefore = await client
+      .db(DB_NAME)
+      .collection(COLLECTION_NAME)
+      .countDocuments();
+
     const userID = "1";
     const allergy = "peanut";
 
@@ -155,5 +160,12 @@ describe("Unmocked: DELETE /preferences/allergies/:id/:allergy", () => {
       .expect(404);
 
     expect(response.body.error).toBe("Allergy not found");
+
+    // no db update
+    const countAfter = await client
+      .db(DB_NAME)
+      .collection(COLLECTION_NAME)
+      .countDocuments();
+    expect(countAfter).toBe(countBefore);
   });
 });

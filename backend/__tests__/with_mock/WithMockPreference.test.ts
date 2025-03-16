@@ -13,10 +13,11 @@ describe("Mocked: POST /preferences/allergies", () => {
     jest.restoreAllMocks();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: addAllergyToDb throws an error
+  // Input: valid userID and allergy
+  // Expected status code: 500
+  // Expected behavior: error handled gracefully
+  // Expected output: error message
   test("Database failure", async () => {
     jest.spyOn(PreferenceHelper, "addAllergyToDb").mockImplementation(() => {
       throw new Error("Forced error");
@@ -34,10 +35,11 @@ describe("Mocked: POST /preferences/allergies", () => {
     expect(PreferenceHelper.addAllergyToDb).toHaveBeenCalledTimes(1);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: getAllergiesFromDb has empty implementation
+  // Input: valid userID and allergy
+  // Expected status code: 201
+  // Expected behavior: PreferenceHelper.addAllergyToDb called
+  // Expected output: success message
   test("Valid insert, spy db helper", async () => {
     jest.spyOn(PreferenceHelper, "addAllergyToDb").mockImplementation();
 
@@ -56,10 +58,11 @@ describe("Mocked: POST /preferences/allergies", () => {
     expect(PreferenceHelper.addAllergyToDb).toHaveBeenCalledTimes(1);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: in-memory db is empty
+  // Input: valid userID and allergy
+  // Expected status code: 201
+  // Expected behavior: allergy added to in-memory db
+  // Expected output: success message
   test("Valid insert, in-mem db", async () => {
     const response = await request(app)
       .post("/preferences/allergies")
@@ -83,10 +86,11 @@ describe("Mocked: GET /preferences/allergies/:id", () => {
     jest.restoreAllMocks();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: getAllergiesFromDb throws an error
+  // Input: valid userID
+  // Expected status code: 500
+  // Expected behavior: error handled gracefully
+  // Expected output: error message
   test("Database failure", async () => {
     jest
       .spyOn(PreferenceHelper, "getAllergiesFromDb")
@@ -102,10 +106,11 @@ describe("Mocked: GET /preferences/allergies/:id", () => {
     expect(PreferenceHelper.getAllergiesFromDb).toHaveBeenCalledTimes(1);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: getAllergiesFromDb returns empty list
+  // Input: valid userID
+  // Expected status code: 404
+  // Expected behavior: PreferenceHelper.getAllergiesFromDb called
+  // Expected output: error message
   test("No allergies", async () => {
     jest.spyOn(PreferenceHelper, "getAllergiesFromDb").mockResolvedValue([]);
 
@@ -117,10 +122,11 @@ describe("Mocked: GET /preferences/allergies/:id", () => {
     expect(PreferenceHelper.getAllergiesFromDb).toHaveBeenCalledTimes(1);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: getAllergiesFromDb returns list of allergies
+  // Input: valid userID
+  // Expected status code: 200
+  // Expected behavior: PreferenceHelper.getAllergiesFromDb called
+  // Expected output: list of allergies
   test("Valid allergy", async () => {
     jest
       .spyOn(PreferenceHelper, "getAllergiesFromDb")
@@ -134,10 +140,11 @@ describe("Mocked: GET /preferences/allergies/:id", () => {
     expect(PreferenceHelper.getAllergiesFromDb).toHaveBeenCalledTimes(1);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: in-memory db is empty
+  // Input: valid userID
+  // Expected status code: 404
+  // Expected behavior: in-memory db is empty
+  // Expected output: error message
   test("Empty database", async () => {
     // in-memory db is empty
     const response = await request(app)
@@ -157,10 +164,11 @@ describe("Mocked: DELETE /preferences/allergies/:id/:allergy", () => {
     jest.restoreAllMocks();
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: deleteAllergyFromDb throws an error
+  // Input: valid userID and allergy
+  // Expected status code: 500
+  // Expected behavior: error handled gracefully
+  // Expected output: error message
   test("Database failure", async () => {
     jest
       .spyOn(PreferenceHelper, "deleteAllergyFromDb")
@@ -176,10 +184,11 @@ describe("Mocked: DELETE /preferences/allergies/:id/:allergy", () => {
     expect(PreferenceHelper.deleteAllergyFromDb).toHaveBeenCalledTimes(1);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: deleteAllergyFromDb returns 0
+  // Input: valid userID and allergy
+  // Expected status code: 404
+  // Expected behavior: PreferenceHelper.deleteAllergyFromDb called
+  // Expected output: error message
   test("No allergies", async () => {
     jest.spyOn(PreferenceHelper, "deleteAllergyFromDb").mockResolvedValue(0);
 
@@ -191,10 +200,11 @@ describe("Mocked: DELETE /preferences/allergies/:id/:allergy", () => {
     expect(PreferenceHelper.deleteAllergyFromDb).toHaveBeenCalledTimes(1);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: deleteAllergyFromDb returns 1
+  // Input: valid userID and allergy
+  // Expected status code: 200
+  // Expected behavior: PreferenceHelper.deleteAllergyFromDb called
+  // Expected output: success message
   test("Valid allergy", async () => {
     jest.spyOn(PreferenceHelper, "deleteAllergyFromDb").mockResolvedValue(1);
 
@@ -209,10 +219,11 @@ describe("Mocked: DELETE /preferences/allergies/:id/:allergy", () => {
     expect(PreferenceHelper.deleteAllergyFromDb).toHaveBeenCalledTimes(1);
   });
 
-  // Input:
-  // Expected status code:
-  // Expected behavior:
-  // Expected output:
+  // Mocked behavior: in-memory db is empty
+  // Input: valid userID and allergy
+  // Expected status code: 404
+  // Expected behavior: in-memory db is empty
+  // Expected output: error message
   test("Empty database", async () => {
     // in-memory db is empty
     const response = await request(app)
