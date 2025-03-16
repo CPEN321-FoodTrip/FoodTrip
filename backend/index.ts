@@ -37,7 +37,7 @@ Routes.forEach((route) => {
       try {
         await route.action(req, res, next);
       } catch (err) {
-        console.log(err);
+        console.error(err);
         res.status(500);
       }
     }
@@ -55,7 +55,7 @@ function startServer() {
       await initializeGeoNamesDatabase();
 
       app.listen(process.env.PORT, () => {
-        console.log("Server is running on port " + process.env.PORT);
+        console.log(`Server is running on port ${process.env.PORT}`);
       });
     })
     .catch((err: Error) => {
