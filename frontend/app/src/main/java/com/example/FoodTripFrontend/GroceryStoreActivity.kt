@@ -22,6 +22,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okio.IOException
+import kotlin.math.E
 
 /**
  * Activity to manage the discount of the store
@@ -36,6 +37,8 @@ class GroceryStoreActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "GroceryStoreActivity"
     }
+
+    private val ERROR_MESSAGE = "Unexpected code"
 
     /**
      * JSON format for API response in getDiscount()
@@ -109,10 +112,10 @@ class GroceryStoreActivity : AppCompatActivity() {
                 Snackbar.make(findViewById(android.R.id.content),
                     "Please select discount to be deleted",
                     Snackbar.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
 
-            deleteDiscount(selectedDiscountID)
+            } else {
+                deleteDiscount(selectedDiscountID)
+            }
         }
 
         selectedDiscountID = ""
@@ -137,7 +140,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE: $response")
 
                     val json = response.body!!.string()
                     val listType = object : TypeToken<List<DiscountItem>>() {}.type
@@ -175,7 +178,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE:  $response")
 
                     getDiscount(sampleID) {discountList -> processDiscount(discountList)}
                 }
@@ -198,7 +201,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE:    $response")
 
                     getDiscount(sampleID) {discountList -> processDiscount(discountList)}
                 }

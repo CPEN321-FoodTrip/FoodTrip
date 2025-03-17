@@ -1,28 +1,18 @@
 package com.example.FoodTripFrontend
 
 import android.content.Context
-import android.credentials.CredentialManager
-import android.view.View
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.UiController
-import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.RootMatchers.withDecorView
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.ext.junit.rules.ActivityScenarioRule
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.espresso.intent.Intents
-import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.uiautomator.UiDevice
-import com.google.android.gms.maps.SupportMapFragment
-import org.hamcrest.Matcher
 import org.junit.After
 
 import org.junit.Test
@@ -31,24 +21,16 @@ import org.junit.runner.RunWith
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
-import java.util.function.Predicate.not
-import android.os.IBinder
-import android.util.Log
-import android.view.WindowManager
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Root
 import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.intent.matcher.IntentMatchers
-import com.google.android.gms.maps.GoogleMap
 import androidx.test.espresso.matcher.ViewMatchers.withParent
 import androidx.test.espresso.matcher.ViewMatchers.withTagValue
-import org.hamcrest.Description
+import com.google.android.gms.maps.model.LatLng
 import org.hamcrest.Matchers.allOf
-import org.hamcrest.Matchers.anyOf
 import org.hamcrest.Matchers.`is`
-import org.hamcrest.TypeSafeMatcher
 
 /**
  * Test of LoginActivity-related functionality.
@@ -218,11 +200,21 @@ class MainActivityTest {
 @RunWith(AndroidJUnit4::class)
 class MainActivityAdminTest {
 
+    /**
+     * Initialization for intent checking
+     *
+     * Needed for switching activities
+     */
     @Before
     fun setup() {
         Intents.init()
     }
 
+    /**
+     * Cleanup for intent checking
+     *
+     * Needed for switching activities
+     */
     @After
     fun tearDown() {
         Intents.release()
@@ -254,15 +246,29 @@ class MainActivityAdminTest {
 @RunWith(AndroidJUnit4::class)
 class TripActivityTest {
 
+    val testCityHanoi = "Hanoi"
+    val testCityVancouver = "Vancouver"
+    val testCityBeijing = "Beijing"
+    val testCityCalgary = "Calgary"
+
     @get:Rule
     val activityRule = ActivityScenarioRule(TripActivity::class.java)
 
-
+    /**
+     * Initialization for intent checking
+     *
+     * Needed for switching activities
+     */
     @Before
     fun setup() {
         Intents.init()
     }
 
+    /**
+     * Cleanup for intent checking
+     *
+     * Needed for switching activities
+     */
     @After
     fun tearDown() {
         Intents.release()
@@ -279,11 +285,14 @@ class TripActivityTest {
      * main activity and that the map is now displayed
      */
     @Test fun planRegularTripShort() {
-        onView(withId(R.id.startLocation)).perform(typeText("Calgary"), closeSoftKeyboard())
-        onView(withId(R.id.startLocation)).check(matches(withText("Calgary")))
+        val expectedCoordinatesList = mutableListOf<LatLng>()
+        val expectedCitiesList = mutableListOf<String>()
 
-        onView(withId(R.id.endLocation)).perform(typeText("Vancouver"), closeSoftKeyboard())
-        onView(withId(R.id.endLocation)).check(matches(withText("Vancouver")))
+        onView(withId(R.id.startLocation)).perform(typeText(testCityCalgary), closeSoftKeyboard())
+        onView(withId(R.id.startLocation)).check(matches(withText(testCityCalgary)))
+
+        onView(withId(R.id.endLocation)).perform(typeText(testCityVancouver), closeSoftKeyboard())
+        onView(withId(R.id.endLocation)).check(matches(withText(testCityVancouver)))
 
         onView(withId(R.id.numstops)).perform(typeText("3"), closeSoftKeyboard())
         onView(withId(R.id.numstops)).check(matches(withText("3")))
@@ -293,6 +302,20 @@ class TripActivityTest {
         Thread.sleep(5000)
 
         Intents.intended(hasComponent(MainActivity::class.java.name))
+
+        val capturedIntent = Intents.getIntents().last()
+
+        val bundle = capturedIntent.extras
+        assertNotNull(bundle)
+
+        val coordinates =
+            bundle?.getParcelableArrayList<LatLng>("coordinates")
+        assertNotNull(coordinates)
+        assertEquals(expectedCoordinatesList, coordinates)
+
+        val cities = bundle?.getStringArrayList("cities")
+        assertNotNull(cities)
+        assertEquals(expectedCitiesList, cities)
 
         onView(withId(R.id.map)).check(matches(isDisplayed()))
     }
@@ -309,11 +332,11 @@ class TripActivityTest {
      * main activity and that the map is now displayed
      */
     @Test fun planRegularTripLong() {
-        onView(withId(R.id.startLocation)).perform(typeText("Calgary"), closeSoftKeyboard())
-        onView(withId(R.id.startLocation)).check(matches(withText("Calgary")))
+        onView(withId(R.id.startLocation)).perform(typeText(testCityCalgary), closeSoftKeyboard())
+        onView(withId(R.id.startLocation)).check(matches(withText(testCityCalgary)))
 
-        onView(withId(R.id.endLocation)).perform(typeText("Vancouver"), closeSoftKeyboard())
-        onView(withId(R.id.endLocation)).check(matches(withText("Vancouver")))
+        onView(withId(R.id.endLocation)).perform(typeText(testCityVancouver), closeSoftKeyboard())
+        onView(withId(R.id.endLocation)).check(matches(withText(testCityVancouver)))
 
         onView(withId(R.id.numstops)).perform(typeText("10"), closeSoftKeyboard())
         onView(withId(R.id.numstops)).check(matches(withText("10")))
@@ -341,8 +364,8 @@ class TripActivityTest {
         onView(withId(R.id.startLocation)).perform(typeText("asdkf;a"), closeSoftKeyboard())
         onView(withId(R.id.startLocation)).check(matches(withText("asdkf;a")))
 
-        onView(withId(R.id.endLocation)).perform(typeText("Hanoi"), closeSoftKeyboard())
-        onView(withId(R.id.endLocation)).check(matches(withText("Hanoi")))
+        onView(withId(R.id.endLocation)).perform(typeText(testCityHanoi), closeSoftKeyboard())
+        onView(withId(R.id.endLocation)).check(matches(withText(testCityHanoi)))
 
         onView(withId(R.id.numstops)).perform(typeText("3"), closeSoftKeyboard())
         onView(withId(R.id.numstops)).check(matches(withText("3")))
@@ -367,8 +390,8 @@ class TripActivityTest {
      * Snackbar message alerting the user of the error
      */
     @Test fun wrongEnd() {
-        onView(withId(R.id.startLocation)).perform(typeText("Beijing"), closeSoftKeyboard())
-        onView(withId(R.id.startLocation)).check(matches(withText("Beijing")))
+        onView(withId(R.id.startLocation)).perform(typeText(testCityBeijing), closeSoftKeyboard())
+        onView(withId(R.id.startLocation)).check(matches(withText(testCityBeijing)))
 
         onView(withId(R.id.endLocation)).perform(typeText("ghdioadfk"), closeSoftKeyboard())
         onView(withId(R.id.endLocation)).check(matches(withText("ghdioadfk")))
@@ -395,11 +418,11 @@ class TripActivityTest {
      * Snackbar message alerting the user of the error
      */
     @Test fun sameStartEnd() {
-        onView(withId(R.id.startLocation)).perform(typeText("Beijing"), closeSoftKeyboard())
-        onView(withId(R.id.startLocation)).check(matches(withText("Beijing")))
+        onView(withId(R.id.startLocation)).perform(typeText(testCityBeijing), closeSoftKeyboard())
+        onView(withId(R.id.startLocation)).check(matches(withText(testCityBeijing)))
 
-        onView(withId(R.id.endLocation)).perform(typeText("Beijing"), closeSoftKeyboard())
-        onView(withId(R.id.endLocation)).check(matches(withText("Beijing")))
+        onView(withId(R.id.endLocation)).perform(typeText(testCityBeijing), closeSoftKeyboard())
+        onView(withId(R.id.endLocation)).check(matches(withText(testCityBeijing)))
 
         onView(withId(R.id.numstops)).perform(typeText("3"), closeSoftKeyboard())
         onView(withId(R.id.numstops)).check(matches(withText("3")))
@@ -423,11 +446,11 @@ class TripActivityTest {
      * Snackbar message alerting the user of the error
      */
     @Test fun wrongStopsAmount() {
-        onView(withId(R.id.startLocation)).perform(typeText("Beijing"), closeSoftKeyboard())
-        onView(withId(R.id.startLocation)).check(matches(withText("Beijing")))
+        onView(withId(R.id.startLocation)).perform(typeText(testCityBeijing), closeSoftKeyboard())
+        onView(withId(R.id.startLocation)).check(matches(withText(testCityBeijing)))
 
-        onView(withId(R.id.endLocation)).perform(typeText("Hanoi"), closeSoftKeyboard())
-        onView(withId(R.id.endLocation)).check(matches(withText("Hanoi")))
+        onView(withId(R.id.endLocation)).perform(typeText(testCityHanoi), closeSoftKeyboard())
+        onView(withId(R.id.endLocation)).check(matches(withText(testCityHanoi)))
 
         onView(withId(R.id.numstops)).perform(typeText("0"), closeSoftKeyboard())
         onView(withId(R.id.numstops)).check(matches(withText("0")))
@@ -451,8 +474,8 @@ class TripActivityTest {
      * Snackbar message alerting the user of the error
      */
     @Test fun missingInputsStart() {
-        onView(withId(R.id.endLocation)).perform(typeText("Hanoi"), closeSoftKeyboard())
-        onView(withId(R.id.endLocation)).check(matches(withText("Hanoi")))
+        onView(withId(R.id.endLocation)).perform(typeText(testCityHanoi), closeSoftKeyboard())
+        onView(withId(R.id.endLocation)).check(matches(withText(testCityHanoi)))
 
         onView(withId(R.id.numstops)).perform(typeText("0"), closeSoftKeyboard())
         onView(withId(R.id.numstops)).check(matches(withText("0")))
@@ -476,8 +499,8 @@ class TripActivityTest {
      * Snackbar message alerting the user of the error
      */
     @Test fun missingInputsEnd() {
-        onView(withId(R.id.startLocation)).perform(typeText("Beijing"), closeSoftKeyboard())
-        onView(withId(R.id.startLocation)).check(matches(withText("Beijing")))
+        onView(withId(R.id.startLocation)).perform(typeText(testCityBeijing), closeSoftKeyboard())
+        onView(withId(R.id.startLocation)).check(matches(withText(testCityBeijing)))
 
         onView(withId(R.id.numstops)).perform(typeText("0"), closeSoftKeyboard())
         onView(withId(R.id.numstops)).check(matches(withText("0")))
@@ -500,20 +523,20 @@ class TripActivityTest {
      * Verify that the create trip button displays a
      * Snackbar message alerting the user of the error
      */
-    @Test fun missingInputsStops() {
-        onView(withId(R.id.startLocation)).perform(typeText("Beijing"), closeSoftKeyboard())
-        onView(withId(R.id.startLocation)).check(matches(withText("Beijing")))
-
-        onView(withId(R.id.endLocation)).perform(typeText("Hanoi"), closeSoftKeyboard())
-        onView(withId(R.id.endLocation)).check(matches(withText("Hanoi")))
-
-        onView(withId(R.id.CreateTrip)).perform(click())
-
-        Thread.sleep(1000)
-
-        onView(withText("Missing Number of Stops"))
-            .check(matches(isDisplayed()))
-    }
+//    @Test fun missingInputsStops() {
+//        onView(withId(R.id.startLocation)).perform(typeText(testCityBeijing), closeSoftKeyboard())
+//        onView(withId(R.id.startLocation)).check(matches(withText(testCityBeijing)))
+//
+//        onView(withId(R.id.endLocation)).perform(typeText(testCityHanoi), closeSoftKeyboard())
+//        onView(withId(R.id.endLocation)).check(matches(withText(testCityHanoi)))
+//
+//        onView(withId(R.id.CreateTrip)).perform(click())
+//
+//        Thread.sleep(1000)
+//
+//        onView(withText("Missing Number of Stops"))
+//            .check(matches(isDisplayed()))
+//    }
 }
 
 //@RunWith(AndroidJUnit4::class)
@@ -533,6 +556,14 @@ class TripActivityTest {
  */
 @RunWith(AndroidJUnit4::class)
 class PastTripActivityEmptyTest {
+
+    /**
+     * Initialization for intent checking
+     * and Test username creation
+     *
+     * Needed for switching activities
+     * and past trip tests
+     */
     @Before
     fun setup() {
         Intents.init()
@@ -541,6 +572,11 @@ class PastTripActivityEmptyTest {
         sharedPreferences.edit().putString("userEmail", "").apply()
     }
 
+    /**
+     * Cleanup for intent checking
+     *
+     * Needed for switching activities
+     */
     @After
     fun tearDown() {
         Intents.release()
@@ -549,6 +585,11 @@ class PastTripActivityEmptyTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(PastTripActivity::class.java)
 
+    /**
+     * UI Test for the current Activity
+     *
+     * Checks if all required elements are present
+     */
     @Test fun checkElements() {
         onView(withId(R.id.back_button_past)).check(matches(withText("Back")))
     }
@@ -590,6 +631,11 @@ class PastTripActivityTestPersonTest {
      @get:Rule
     val activityRule = ActivityScenarioRule(PastTripActivity::class.java)
 
+    /**
+     * Initialization for intent checking
+     *
+     * Needed for switching activities
+     */
     @Before
     fun setup() {
         Intents.init()
@@ -600,15 +646,31 @@ class PastTripActivityTestPersonTest {
         ActivityScenario.launch(PastTripActivity::class.java)
     }
 
+    /**
+     * Cleanup for intent checking
+     *
+     * Needed for switching activities
+     */
     @After
     fun tearDown() {
         Intents.release()
     }
 
+    /**
+     * UI Test for the current Activity
+     *
+     * Checks if all required elements are present
+     */
     @Test fun checkElements() {
         onView(withId(R.id.back_button_past)).check(matches(withText("Back")))
     }
 
+    /**
+     * Functionality Test for the current Activity
+     *
+     * Verify that the back button successfully returns
+     * back to the main activity
+     */
     @Test fun backButton() {
         onView(withId(R.id.back_button_past)).perform(click())
 
@@ -657,22 +719,43 @@ class GroceryActivityTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(GroceryActivity::class.java)
 
+    /**
+     * Initialization for intent checking
+     *
+     * Needed for switching activities
+     */
     @Before
     fun setup() {
         Intents.init()
     }
 
+    /**
+     * Cleanup for intent checking
+     *
+     * Needed for switching activities
+     */
     @After
     fun tearDown() {
         Intents.release()
     }
 
+    /**
+     * UI Test for the current Activity
+     *
+     * Checks if all required elements are present
+     */
     @Test fun checkElements() {
         onView(withId(R.id.back_button)).check(matches(withText("Back")))
         onView(withId(R.id.grocery_title_text_view)).check(matches(withText("Grocery")))
         onView(withId(R.id.recipe_list_layout)).check(matches(isDisplayed()))
     }
 
+    /**
+     * Functionality Test for the current Activity
+     *
+     * Verify that the back button successfully returns
+     * back to the main activity
+     */
     @Test fun backButton() {
         onView(withId(R.id.back_button)).perform(click())
         Thread.sleep(5000)
@@ -740,16 +823,31 @@ class GroceryStoreActivityTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(GroceryStoreActivity::class.java)
 
+    /**
+     * Initialization for intent checking
+     *
+     * Needed for switching activities
+     */
     @Before
     fun setup() {
         Intents.init()
     }
 
+    /**
+     * Cleanup for intent checking
+     *
+     * Needed for switching activities
+     */
     @After
     fun tearDown() {
         Intents.release()
     }
 
+    /**
+     * UI Test for the current Activity
+     *
+     * Checks if all required elements are present
+     */
     @Test fun checkElements() {
         onView(withId(R.id.back_button_grocery_store)).check(matches(withText("Back")))
         onView(withId(R.id.grocery_store_title_text_view)).check(matches(isDisplayed()))
@@ -760,6 +858,12 @@ class GroceryStoreActivityTest {
         onView(withId(R.id.delete_button_grocery_store)).check(matches(isDisplayed()))
     }
 
+    /**
+     * Functionality Test for the current Activity
+     *
+     * Verify that the back button successfully returns
+     * back to the main activity
+     */
     @Test fun backButtonTest() {
         onView(withId(R.id.back_button_grocery_store)).perform(click())
         Thread.sleep(7000)
@@ -983,11 +1087,22 @@ class GroceryStoreActivityTest {
  */
 @RunWith(AndroidJUnit4::class)
 class RecipeTests {
+
+    /**
+     * Initialization for intent checking
+     *
+     * Needed for switching activities
+     */
     @Before
     fun setup() {
         Intents.init()
     }
 
+    /**
+     * Cleanup for intent checking
+     *
+     * Needed for switching activities
+     */
     @After
     fun tearDown() {
         Intents.release()

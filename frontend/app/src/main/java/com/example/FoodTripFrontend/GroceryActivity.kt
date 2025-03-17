@@ -29,7 +29,6 @@ import okio.IOException
  * (can only be accessed in user mode)
  */
 class GroceryActivity : AppCompatActivity() {
-
     /**
      * Companion object for GroceryActivity.
      * Stores static constants related to the activity.
