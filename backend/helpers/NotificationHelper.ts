@@ -24,7 +24,7 @@ export async function removeTokenFromDb(userID: string): Promise<number> {
     .collection(COLLECTION_NAME)
     .deleteOne({ userID });
 
-  return result.deletedCount;
+  return result?.deletedCount ?? 0;
 }
 
 // get user fcm token from database
