@@ -12,7 +12,11 @@ import { ObjectId } from "mongodb";
 export class RouteController {
   // create a new route
   // POST /routes
-  async createRoute(req: Request, res: Response, next: NextFunction) {
+  async createRoute(
+    req: Request<{}, {}, RouteRequest>,
+    res: Response,
+    next: NextFunction
+  ) {
     // validation of params performed by express-validator middleware
     const { userID, origin, destination, numStops }: RouteRequest = req.body;
 
