@@ -7,7 +7,7 @@ import {
 
 export class PreferenceController {
   // POST /preferences/allergies
-  addAllergy = async(req: Request, res: Response, next: NextFunction) => {
+  async addAllergy(this:void, req: Request, res: Response, next: NextFunction) {
     // validation of params performed by express-validator middleware
     const { userID, allergy } = req.body;
 
@@ -20,7 +20,7 @@ export class PreferenceController {
   }
 
   // GET /preferences/allergies/:id
-  getAllergies = async(req: Request, res: Response, next: NextFunction) => {
+  async getAllergies(this:void, req: Request, res: Response, next: NextFunction) {
     const userID = req.params.id;
 
     try {
@@ -37,7 +37,7 @@ export class PreferenceController {
   }
 
   // DELETE /preferences/allergies/:id/:allergy
-  deleteAllergy = async(req: Request, res: Response, next: NextFunction) => {
+  async deleteAllergy(this:void, req: Request, res: Response, next: NextFunction) {
     const { id: userID, allergy } = req.params;
 
     try {
