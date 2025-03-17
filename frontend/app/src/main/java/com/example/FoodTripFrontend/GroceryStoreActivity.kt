@@ -37,6 +37,8 @@ class GroceryStoreActivity : AppCompatActivity() {
         private const val TAG = "GroceryStoreActivity"
     }
 
+    private val ERROR_MESSAGE = "Unexpected code"
+
     /**
      * JSON format for API response in getDiscount()
      *
@@ -137,7 +139,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE $response")
 
                     val json = response.body!!.string()
                     val listType = object : TypeToken<List<DiscountItem>>() {}.type
@@ -175,7 +177,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE $response")
 
                     getDiscount(sampleID) {discountList -> processDiscount(discountList)}
                 }
@@ -198,7 +200,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE $response")
 
                     getDiscount(sampleID) {discountList -> processDiscount(discountList)}
                 }
