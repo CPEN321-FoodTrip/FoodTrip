@@ -1,7 +1,5 @@
 import { body } from "express-validator";
-import { PreferenceController } from "../controllers/PreferenceController";
-
-const controller = new PreferenceController();
+import { addAllergy, deleteAllergy, getAllergies } from "../controllers/PreferenceController";
 
 export const PreferenceRoutes = [
   {
@@ -17,16 +15,16 @@ export const PreferenceRoutes = [
         .isString()
         .withMessage("allergy is required and must be a string"),
     ],
-    action: controller.addAllergy,
+    action: addAllergy,
   },
   {
     method: "get",
     route: "/preferences/allergies/:id",
-    action: controller.getAllergies,
+    action: getAllergies,
   },
   {
     method: "delete",
     route: "/preferences/allergies/:id/:allergy",
-    action: controller.deleteAllergy,
+    action: deleteAllergy,
   },
 ];
