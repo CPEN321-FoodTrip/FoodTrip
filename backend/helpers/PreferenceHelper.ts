@@ -1,4 +1,5 @@
 import { client } from "../services";
+import { Document } from "bson";
 
 const DB_NAME = "preferences";
 const COLLECTION_NAME = "allergies";
@@ -15,7 +16,7 @@ export async function addAllergyToDb(
 }
 
 // retrieve all allergies for a user
-export async function getAllergiesFromDb(userID: string): Promise<any[]> {
+export async function getAllergiesFromDb(userID: string): Promise<Document[]> {
   const db = client.db(DB_NAME);
   const collection = db.collection(COLLECTION_NAME);
 
