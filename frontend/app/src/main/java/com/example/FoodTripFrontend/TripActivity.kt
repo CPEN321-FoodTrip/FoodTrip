@@ -142,7 +142,7 @@ class TripActivity : AppCompatActivity() {
                 val jsonArray = JSONArray(jsonResponse)
 
                 jsonArray.length() > 0
-            } catch (e: Exception) {
+            } catch (e: IOException) {
                 e.printStackTrace()
                 false
             }

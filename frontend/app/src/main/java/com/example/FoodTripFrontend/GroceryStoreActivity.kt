@@ -111,10 +111,10 @@ class GroceryStoreActivity : AppCompatActivity() {
                 Snackbar.make(findViewById(android.R.id.content),
                     "Please select discount to be deleted",
                     Snackbar.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
 
-            deleteDiscount(selectedDiscountID)
+            } else {
+                deleteDiscount(selectedDiscountID)
+            }
         }
 
         selectedDiscountID = ""

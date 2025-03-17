@@ -28,7 +28,6 @@ import okio.IOException
  * (can only be accessed in user mode)
  */
 class GroceryActivity : AppCompatActivity() {
-
     /**
      * Companion object for GroceryActivity.
      * Stores static constants related to the activity.
@@ -92,10 +91,9 @@ class GroceryActivity : AppCompatActivity() {
                     runOnUiThread {
                         Toast.makeText(this, "No discount available", Toast.LENGTH_SHORT).show()
                     }
-                    return@getDiscount
+                } else {
+                    showDiscount(discounts)
                 }
-
-                showDiscount(discounts)
             }
         }
         recipeList.addView(_textView1)
@@ -108,12 +106,14 @@ class GroceryActivity : AppCompatActivity() {
         _textView2.setOnClickListener {
             val ingredient = (it as TextView).text.toString()
             Log.d(TAG, ingredient)
+
             getDiscount(ingredient) {discounts ->
                 if (discounts.isEmpty()) {
                     runOnUiThread {
                         Toast.makeText(this, "No discount available", Toast.LENGTH_SHORT).show()
                     }
-                    return@getDiscount
+                } else {
+                    showDiscount(discounts)
                 }
             }
         }
