@@ -13,7 +13,7 @@ export class RouteController {
   // create a new route
   // POST /routes
   async createRoute(
-    req: Request<{}, {}, RouteRequest>,
+    req: Request<object, {}, RouteRequest>,
     res: Response,
     next: NextFunction
   ) {
