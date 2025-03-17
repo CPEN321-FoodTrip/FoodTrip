@@ -1,23 +1,33 @@
 import express, { NextFunction, Request, Response } from "express";
-import { client } from "./services";
+import { client, initializeClient, initializeFirebaseAdmin } from "./services";
 import { RouteRoutes } from "./routes/RouteRoutes";
 import { DiscountRoutes } from "./routes/DiscountRoutes";
 import { validationResult } from "express-validator";
 import morgan from "morgan";
 import { initializeGeoNamesDatabase } from "./helpers/RouteHelpers";
 import { RecipeRoutes } from "./routes/RecipesRoutes";
+import { UserRoutes } from "./routes/UserRoutes";
+import { NotificationRoutes } from "./routes/NotificationRoutes";
+import { PreferenceRoutes } from "./routes/PreferenceRoutes";
 
 const app = express();
 
 app.use(express.json());
 app.use(morgan("tiny"));
 
-const Routes = [...RouteRoutes, ...DiscountRoutes,...RecipeRoutes];
+const Routes = [
+  ...RouteRoutes,
+  ...DiscountRoutes,
+  ...RecipeRoutes,
+  ...UserRoutes,
+  ...NotificationRoutes,
+  ...PreferenceRoutes,
+];
 
 Routes.forEach((route) => {
-  (app as any)[route.method](
+  (app as express.Application)[route.method as keyof express.Application](
     route.route,
-    route.validation || [],
+    route.validation ?? [],
     async (req: Request, res: Response, next: NextFunction) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -27,31 +37,50 @@ Routes.forEach((route) => {
       try {
         await route.action(req, res, next);
       } catch (err) {
-        console.log(err);
+        console.error(err);
         res.status(500);
       }
     }
   );
 });
 
-client
-  .connect()
-  .then(async () => {
-    console.log("Connected to MongoDB");
+function startServer() {
+  initializeClient();
+  client
+    .connect()
+    .then(async () => {
+      console.debug("Connected to MongoDB");
 
-    await initializeGeoNamesDatabase();
+      initializeFirebaseAdmin();
+      await initializeGeoNamesDatabase();
 
-    app.listen(process.env.PORT, () => {
-      console.log("Server is running on port " + process.env.PORT);
+      app.listen(process.env.PORT, () => {
+        console.debug(`Server is running on port ${process.env.PORT}`);
+      });
+    })
+    .catch((err: Error) => {
+      console.error(err);
+      client.close();
     });
-  })
-  .catch((err: Error) => {
-    console.error(err);
-    client.close();
-  });
+}
 
-const errorHandle = (req: Request, res: Response) => {
-  console.error(res.status);
+if (process.env.NODE_ENV !== "test") {
+  startServer();
+}
+
+const errorHandle = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.error("Error:", err.message);
+  console.error("Stack trace:", err.stack);
+
+  res.status(500).json({ error: "Internal server error" });
+  next(err);
 };
 
 app.use(errorHandle);
+
+export default app; // needed for testing

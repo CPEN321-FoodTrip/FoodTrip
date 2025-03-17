@@ -106,8 +106,6 @@ class TripActivity : AppCompatActivity() {
 
             // If all fields are valid, proceed to the next activity
             if (isValid) {
-
-
                 //Use "test_person" for developing and debugging
                 //val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
                 //val userEmail = sharedPref.getString("userEmail", "No email found")

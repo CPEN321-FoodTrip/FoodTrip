@@ -1,34 +1,41 @@
 import { body } from "express-validator";
-import { RouteController as RouteController } from "../controllers/RouteController";
+import { RouteController } from "../controllers/RouteController";
 
 const controller = new RouteController();
 
 export const RouteRoutes = [
   {
     method: "post",
-    route: "/generate-route",
-    action: controller.generateRoute,
+    route: "/routes",
+    action: controller.createRoute,
     validation: [
-      body("origin").exists().isString(),
-      body("destination").exists().isString(),
-      body("numStops").exists().isInt(),
+      body("userID")
+        .exists()
+        .isString()
+        .withMessage("userID is required and must be a string"),
+      body("origin")
+        .exists()
+        .isString()
+        .withMessage("origin is required and must be a string"),
+      body("destination")
+        .exists()
+        .isString()
+        .withMessage("destination is required and must be a string"),
+      body("numStops")
+        .exists()
+        .isInt()
+        .withMessage("numStops is required and must be an integer"),
     ],
   },
   {
     method: "get",
-    route: "/get-route",
+    route: "/routes/:id",
     action: controller.getRoute,
     validation: [],
   },
   {
-    method: "get",
-    route: "/get-routes",
-    action: controller.getRoutes,
-    validation: [],
-  },
-  {
     method: "delete",
-    route: "/delete-route",
+    route: "/routes/:id",
     action: controller.deleteRoute,
     validation: [],
   },

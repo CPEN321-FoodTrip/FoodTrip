@@ -2,6 +2,11 @@ import fs from "fs";
 import readline from "readline";
 import { client } from "../services";
 import { ObjectId } from "mongodb";
+import {
+  GeoNameCity,
+  Location,
+  RouteStop,
+} from "../interfaces/RouteInterfaces";
 
 // constants for GeoNames data
 const CITIES_DB_NAME = "geonames";
@@ -16,47 +21,6 @@ const SEARCH_RADIUS = 1000 * 1000; // meters
 const ROUTES_DB_NAME = "route_data";
 const ROUTES_COLLECTION_NAME = "routes";
 
-interface GeoNameCity {
-  geonameId: number;
-  name: string;
-  asciiName: string;
-  alternateNames: string[];
-  latitude: number;
-  longitude: number;
-  featureClass: string;
-  featureCode: string;
-  countryCode: string;
-  cc2: string;
-  admin1Code: string;
-  admin2Code: string;
-  admin3Code: string;
-  admin4Code: string;
-  population: number;
-  elevation: number;
-  dem: number;
-  timezone: string;
-  modificationDate: string;
-  // added for geospace lookups
-  location: {
-    type: string;
-    coordinates: [number, number]; // [longitude, latitude]
-  };
-}
-
-export interface Location {
-  name: string;
-  latitude: number;
-  longitude: number;
-  population: number;
-}
-
-interface RouteStop {
-  location: Location;
-  distanceFromStart: number;
-  cumulativeDistance: number;
-  segmentPercentage: number;
-}
-
 // import geonames data when server starts (if needed)
 export async function initializeGeoNamesDatabase() {
   const db = client.db(CITIES_DB_NAME);
@@ -64,10 +28,10 @@ export async function initializeGeoNamesDatabase() {
   const count = await collection.countDocuments();
 
   if (count === 0) {
-    console.log("No data in database, importing cities");
+    console.debug("No data in database, importing cities");
     await importGeoNamesToMongoDB();
   } else {
-    console.log(`Database already contains ${count} cities`);
+    console.debug(`Database already contains ${count} cities`);
   }
 }
 
@@ -82,7 +46,6 @@ async function importGeoNamesToMongoDB(): Promise<void> {
   });
 
   const cities: GeoNameCity[] = [];
-  let lineCount = 0;
 
   for await (const line of rl) {
     if (line.trim() === "") continue;
@@ -106,7 +69,7 @@ async function importGeoNamesToMongoDB(): Promise<void> {
       admin4Code: fields[13],
       population: parseInt(fields[14]),
       elevation: fields[15] ? parseInt(fields[15]) : 0,
-      dem: fields[16] ? parseInt(fields[16]) : 0,
+      dem: 0, // not used
       timezone: fields[17],
       modificationDate: fields[18],
       // add GeoJSON point for geospace lookup
@@ -117,7 +80,6 @@ async function importGeoNamesToMongoDB(): Promise<void> {
     };
 
     cities.push(city);
-    lineCount++;
 
     // insert in batches of 1000
     if (cities.length >= 1000) {
@@ -133,7 +95,34 @@ async function importGeoNamesToMongoDB(): Promise<void> {
 
   await collection.createIndex({ location: "2dsphere" }); // geospatial index for closest cities
   await collection.createIndex({ population: -1 }); // allow filtering by population
-  await collection.createIndex({ countryCode: 1 }); // allow filtering by country code
+}
+
+// helper function to fetch city data from OpenStreetMap API
+export async function fetchCityData(city: string): Promise<any | null> {
+  const url = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(
+    city
+  )}&format=json&limit=1`;
+  try {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch city data: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      return null;
+    }
+
+    return data[0];
+  } catch (error) {
+    throw new Error(
+      `Error fetching city data: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
+  }
 }
 
 // calculate distance between two points using Haversine formula
@@ -296,7 +285,7 @@ export async function generateRouteStops(
 }
 
 // save route to MongoDB and return ID
-export async function saveRouteToDatabase(
+export async function saveRouteToDb(
   userID: string,
   route: {}
 ): Promise<ObjectId> {
@@ -308,27 +297,15 @@ export async function saveRouteToDatabase(
 }
 
 // get route from MongoDB by ID (or null if not found)
-export async function getRouteFromDatabase(tripID: string): Promise<{} | null> {
+export async function getRouteFromDb(tripID: string): Promise<{} | null> {
   const db = client.db(ROUTES_DB_NAME);
   const collection = db.collection(ROUTES_COLLECTION_NAME);
 
-  const result = await collection.findOne({ _id: new ObjectId(tripID) });
-  return result ? result : null;
-}
-
-// get all routes from MongoDB for user
-export async function getRoutesFromDatabase(userID: string): Promise<{}[]> {
-  const db = client.db(ROUTES_DB_NAME);
-  const collection = db.collection(ROUTES_COLLECTION_NAME);
-
-  const routes = await collection.find({ userID: userID }).toArray();
-
-  // add tripID to each route and remove _id and stops
-  return routes.map(({ _id, stops, ...rest }) => ({ ...rest, tripID: _id }));
+  return await collection.findOne({ _id: new ObjectId(tripID) });
 }
 
 // delete route from MongoDB by ID
-export async function deleteRouteFromDatabase(tripID: string): Promise<number> {
+export async function deleteRouteFromDb(tripID: string): Promise<number> {
   const db = client.db(ROUTES_DB_NAME);
   const collection = db.collection(ROUTES_COLLECTION_NAME);
 
