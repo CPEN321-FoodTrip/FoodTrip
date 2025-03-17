@@ -1,39 +1,54 @@
 package com.example.FoodTripFrontend
 
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.FoodTripFrontend.GroceryActivity.Companion
-import com.example.FoodTripFrontend.GroceryActivity.DiscountItem
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import okhttp3.Call
 import okhttp3.Callback
-import okhttp3.FormBody
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okio.IOException
+import kotlin.math.E
 
+/**
+ * Activity to manage the discount of the store
+ * (can only be accessed in admin mode)
+ */
 class GroceryStoreActivity : AppCompatActivity() {
 
+    /**
+     * Companion object for GroceryStoreActivity.
+     * Stores static constants related to the activity.
+     */
     companion object {
         private const val TAG = "GroceryStoreActivity"
     }
 
+    private val ERROR_MESSAGE = "Unexpected code"
+
+    /**
+     * JSON format for API response in getDiscount()
+     *
+     * @property discountID: unique identifier of the discount
+     * @property storeID: unique identifier of the store offers the discount
+     * @property storeName: name of the store offers the discount
+     * @property ingredient: product having the discount
+     * @property price: discounted price
+     */
     data class DiscountItem(
         val discountID: String,
         val storeID: String,
@@ -45,7 +60,6 @@ class GroceryStoreActivity : AppCompatActivity() {
     val sampleID = "1"
     val sampleName = "store 0"
 
-    val unselectedColor = "#FFFFFF"
     val selectedColor = "#A5E6D9"
 
     lateinit var client: OkHttpClient
@@ -83,16 +97,25 @@ class GroceryStoreActivity : AppCompatActivity() {
             val price = inputPrice.text.toString()
 //            Log.d(TAG, "${ingredient} $${price}")
 
-            postDiscount(sampleID, sampleName, ingredient, price)
+            if (ingredient == "" ||
+                !price.matches(Regex("^[0-9]+$")) || price == "0") {
+                Snackbar.make(findViewById(android.R.id.content),
+                    "Please enter valid ingredient and price",
+                    Snackbar.LENGTH_SHORT).show()
+            } else {
+                postDiscount(sampleID, sampleName, ingredient, price)
+            }
         }
 
         deleteBtn.setOnClickListener {
             if (selectedDiscountID == "") {
-                // TODO: indicate no discounts are selected or "please select something"
-                return@setOnClickListener
-            }
+                Snackbar.make(findViewById(android.R.id.content),
+                    "Please select discount to be deleted",
+                    Snackbar.LENGTH_SHORT).show()
 
-            deleteDiscount(selectedDiscountID)
+            } else {
+                deleteDiscount(selectedDiscountID)
+            }
         }
 
         selectedDiscountID = ""
@@ -102,7 +125,7 @@ class GroceryStoreActivity : AppCompatActivity() {
     }
 
     private fun getDiscount(storeID : String, callback: (List<DiscountItem>) -> Unit) {
-        val url = "${BuildConfig.SERVER_URL}discount?storeID=$storeID"
+        val url = "${BuildConfig.SERVER_URL}discounts/$storeID"
 //        Log.d(TAG, url)
 
         val request = Request.Builder()
@@ -117,7 +140,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE: $response")
 
                     val json = response.body!!.string()
                     val listType = object : TypeToken<List<DiscountItem>>() {}.type
@@ -129,7 +152,7 @@ class GroceryStoreActivity : AppCompatActivity() {
     }
 
     private fun postDiscount(storeID: String, storeName: String, ingredient: String, price: String) {
-        val url = "${BuildConfig.SERVER_URL}discount"
+        val url = "${BuildConfig.SERVER_URL}discounts"
 //        Log.d(TAG, url)
 
         val jsonBody = """
@@ -155,7 +178,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE:  $response")
 
                     getDiscount(sampleID) {discountList -> processDiscount(discountList)}
                 }
@@ -164,7 +187,7 @@ class GroceryStoreActivity : AppCompatActivity() {
     }
 
     private fun deleteDiscount(discountID: String) {
-        val url = "${BuildConfig.SERVER_URL}discount?discountID=$selectedDiscountID"
+        val url = "${BuildConfig.SERVER_URL}discounts/$selectedDiscountID"
 
         val request = Request.Builder()
             .url(url)
@@ -178,7 +201,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE:    $response")
 
                     getDiscount(sampleID) {discountList -> processDiscount(discountList)}
                 }
@@ -211,10 +234,12 @@ class GroceryStoreActivity : AppCompatActivity() {
 //                Log.d(TAG, "item $i (ID:${discount.discountID}) is clicked")
                 if (selectedDiscountID == discount.discountID) {
                     selectedDiscountID = ""
-                    itemView.setBackgroundColor(Color.parseColor(unselectedColor))
+                    itemView.setBackgroundColor(Color.TRANSPARENT)
+//                    itemView.setBackgroundColor(Color.parseColor(unselectedColor))
                 } else {
                     if (selectedDiscountID != "") {
-                        selectedDiscountView.setBackgroundColor(Color.parseColor(unselectedColor))
+                        selectedDiscountView.setBackgroundColor(Color.TRANSPARENT)
+//                        selectedDiscountView.setBackgroundColor(Color.parseColor(unselectedColor))
                     }
 
                     selectedDiscountID = discount.discountID

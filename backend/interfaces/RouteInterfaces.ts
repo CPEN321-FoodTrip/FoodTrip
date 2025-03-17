@@ -44,3 +44,10 @@ export interface Route {
   end_location: Location;
   stops: RouteStop[];
 }
+
+export interface RouteRequest {
+  userID: string;
+  origin: string;
+  destination: string;
+  numStops: number;
+}

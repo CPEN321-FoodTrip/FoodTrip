@@ -6,12 +6,12 @@ export interface Recipe {
 }
 
 export interface EdamamResponse {
-  hits: Array<{
+  hits: {
     recipe: {
       label: string;
       uri: string;
       url: string;
       ingredientLines: string[];
     };
-  }>;
+  }[];
 }

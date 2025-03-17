@@ -12,4 +12,5 @@
     <string name="maps_api_key">${MAPS_API_KEY}</string>
     <string name="post_button_text">Post</string>
     <string name="delete_button_text">Delete</string>
+    <string name="show_route_button_text">Show Route</string>
 </resources>

@@ -46,6 +46,7 @@ jobs:
             DB_URI=${{ secrets.PROD_DB_URI }}
             EDAMAM_APP_ID=${{ secrets.EDAMAM_APP_ID }}
             EDAMAM_API_KEY=${{ secrets.EDAMAM_API_KEY }}
+            FIREBASE_SERVICE_ACCOUNT_KEY=${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
             EOF
 
             # Give .env permissions

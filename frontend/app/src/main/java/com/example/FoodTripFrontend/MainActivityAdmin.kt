@@ -8,6 +8,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
+/**
+ * Home page of the app in admin mode
+ *
+ * Functionality:
+ * - access to grocery store
+ * - sign out
+ */
 class MainActivityAdmin : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

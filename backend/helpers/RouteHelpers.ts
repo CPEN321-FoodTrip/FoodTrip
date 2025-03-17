@@ -28,10 +28,10 @@ export async function initializeGeoNamesDatabase() {
   const count = await collection.countDocuments();
 
   if (count === 0) {
-    console.log("No data in database, importing cities");
+    console.debug("No data in database, importing cities");
     await importGeoNamesToMongoDB();
   } else {
-    console.log(`Database already contains ${count} cities`);
+    console.debug(`Database already contains ${count} cities`);
   }
 }
 
@@ -46,7 +46,6 @@ async function importGeoNamesToMongoDB(): Promise<void> {
   });
 
   const cities: GeoNameCity[] = [];
-  let lineCount = 0;
 
   for await (const line of rl) {
     if (line.trim() === "") continue;
@@ -81,7 +80,6 @@ async function importGeoNamesToMongoDB(): Promise<void> {
     };
 
     cities.push(city);
-    lineCount++;
 
     // insert in batches of 1000
     if (cities.length >= 1000) {
@@ -100,7 +98,9 @@ async function importGeoNamesToMongoDB(): Promise<void> {
 }
 
 // helper function to fetch city data from OpenStreetMap API
-export async function fetchCityData(city: string): Promise<any | null> {
+export async function fetchCityData(
+  city: string
+): Promise<{ lat: string; lon: string } | null> {
   const url = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(
     city
   )}&format=json&limit=1`;
@@ -240,7 +240,11 @@ export async function generateRouteStops(
 
     // choose city closest to ideal point
     if (nearbyCities.length > 0) {
-      const citiesWithDistance = nearbyCities.map((city) => {
+      const citiesWithDistance: {
+        location: Location;
+        distanceFromIdealPoint: number;
+        distanceFromStart: number;
+      }[] = nearbyCities.map((city) => {
         const location: Location = {
           name: city.name,
           latitude: city.latitude,
@@ -276,9 +280,9 @@ export async function generateRouteStops(
         segmentPercentage: segmentPercentage * 100,
       });
     } else {
-      console.log(
-        `No cities found for segment ${i} at ${segmentPercentage * 100}`
-      );
+      // console.debug(
+      //   `No cities found for segment ${i} at ${segmentPercentage * 100}`
+      // );
     }
   }
 
@@ -289,7 +293,7 @@ export async function generateRouteStops(
 // save route to MongoDB and return ID
 export async function saveRouteToDb(
   userID: string,
-  route: {}
+  route: object
 ): Promise<ObjectId> {
   const db = client.db(ROUTES_DB_NAME);
   const collection = db.collection(ROUTES_COLLECTION_NAME);
@@ -299,7 +303,7 @@ export async function saveRouteToDb(
 }
 
 // get route from MongoDB by ID (or null if not found)
-export async function getRouteFromDb(tripID: string): Promise<{} | null> {
+export async function getRouteFromDb(tripID: string): Promise<object | null> {
   const db = client.db(ROUTES_DB_NAME);
   const collection = db.collection(ROUTES_COLLECTION_NAME);
 

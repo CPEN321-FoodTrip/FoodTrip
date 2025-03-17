@@ -14,6 +14,12 @@ describe("Unmocked: POST /discounts", () => {
   // Expected behavior: discount is saved in db
   // Expected output: message with discountID
   test("Valid discount", async () => {
+    // add token to db for person who will receive discount notification
+    await client
+      .db(DB_NAME)
+      .collection("notifications")
+      .insertOne({ userID: "123", fcmToken: "real-token" });
+
     const discount = {
       storeID: "store1",
       storeName: "Store 1",
@@ -332,7 +338,7 @@ describe("Unmocked: GET /discounts", () => {
   });
 });
 
-// Interface PATCH /discounts/:id
+// Interface DELETE /discounts/:id
 describe("Unmocked: DELETE /discounts/:id", () => {
   // Input: valid discount saved in db
   // Expected status code: 200

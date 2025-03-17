@@ -51,7 +51,8 @@ describe("Mocked: POST /routes", () => {
       // vancover
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
+        json: async () =>
+          Promise.resolve([{ lat: "49.2827", lon: "-123.1207" }]),
       }); // no toronto
 
     const response = await request(app)
@@ -77,7 +78,7 @@ describe("Mocked: POST /routes", () => {
     global.fetch = jest.fn().mockResolvedValueOnce({
       ok: false,
       status: 500,
-      json: async () => ({ error: "Internal server error" }),
+      json: async () => Promise.resolve({ error: "Internal server error" }),
     });
 
     const response = await request(app)
@@ -103,7 +104,7 @@ describe("Mocked: POST /routes", () => {
     // cant find first city, empty response
     global.fetch = jest.fn().mockResolvedValueOnce({
       ok: true,
-      json: async () => [],
+      json: async () => Promise.resolve([]),
     });
     jest.spyOn(RouteHelpers, "saveRouteToDb").mockImplementation();
 
@@ -136,11 +137,12 @@ describe("Mocked: POST /routes", () => {
       // vancover
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
+        json: async () =>
+          Promise.resolve([{ lat: "49.2827", lon: "-123.1207" }]),
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [],
+        json: async () => Promise.resolve([]),
       });
     jest.spyOn(RouteHelpers, "saveRouteToDb").mockImplementation();
 
@@ -195,11 +197,13 @@ describe("Mocked: POST /routes", () => {
       // vancover
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
+        json: async () =>
+          Promise.resolve([{ lat: "49.2827", lon: "-123.1207" }]),
       }) // vancover
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
+        json: async () =>
+          Promise.resolve([{ lat: "49.2827", lon: "-123.1207" }]),
       });
     jest.spyOn(RouteHelpers, "saveRouteToDb").mockImplementation();
 
@@ -232,11 +236,13 @@ describe("Mocked: POST /routes", () => {
       // vancover
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
+        json: async () =>
+          Promise.resolve([{ lat: "49.2827", lon: "-123.1207" }]),
       }) // nanaimo
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [{ lat: "49.1638", lon: "-123.9381" }],
+        json: async () =>
+          Promise.resolve([{ lat: "49.1638", lon: "-123.9381" }]),
       });
     jest.spyOn(RouteHelpers, "saveRouteToDb").mockImplementation();
 
@@ -292,12 +298,14 @@ describe("Mocked: POST /routes", () => {
       // vancover
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
+        json: async () =>
+          Promise.resolve([{ lat: "49.2827", lon: "-123.1207" }]),
       })
       // toronto
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [{ lat: "43.6532", lon: "-79.3832" }],
+        json: async () =>
+          Promise.resolve([{ lat: "43.6532", lon: "-79.3832" }]),
       });
 
     // database failure
@@ -330,12 +338,14 @@ describe("Mocked: POST /routes", () => {
       // vancover
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [{ lat: "49.2827", lon: "-123.1207" }],
+        json: async () =>
+          Promise.resolve([{ lat: "49.2827", lon: "-123.1207" }]),
       })
       // nanaimo
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [{ lat: "49.1638", lon: "-123.9381" }],
+        json: async () =>
+          Promise.resolve([{ lat: "49.1638", lon: "-123.9381" }]),
       });
 
     const response = await request(app)
@@ -434,7 +444,7 @@ describe("Mocked: GET /routes/:id", () => {
       .expect(200);
 
     expect(response.body).toHaveProperty("mock", "route");
-    expect(RouteHelpers.getRouteFromDb).toHaveBeenCalled;
+    expect(RouteHelpers.getRouteFromDb).toHaveBeenCalled();
   });
 });
 
@@ -514,6 +524,6 @@ describe("Mocked: DELETE /routes/:id", () => {
       "message",
       "Route deleted successfully"
     );
-    expect(RouteHelpers.deleteRouteFromDb).toHaveBeenCalled;
+    expect(RouteHelpers.deleteRouteFromDb).toHaveBeenCalled();
   });
 });

@@ -17,6 +17,10 @@
         android:theme="@style/Theme.MyApplication"
         tools:targetApi="31">
         <activity
+            android:name=".PopRecipeActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MyApplication.PopUp"/>
+        <activity
             android:name=".PopTripActivity"
             android:exported="false"
             android:theme="@style/Theme.MyApplication.PopUp" />
@@ -31,23 +35,19 @@
             android:theme="@style/Theme.MyApplication.PopUp" />
         <activity
             android:name=".GroceryActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".GroceryStoreActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".PastTripActivity"
-            android:exported="false">
-        </activity>
+            android:exported="true" />
         <activity
             android:name=".TripActivity"
             android:exported="false" />
         <activity
             android:name=".AccountActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -59,8 +59,10 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true" />
+        <activity
+            android:name=".MainActivityAdmin"
+            android:exported="false" />
     </application>
 
 </manifest>

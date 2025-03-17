@@ -1,5 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
-import { client, initializeClient } from "./services";
+import { client, initializeClient, initializeFirebaseAdmin } from "./services";
 import { RouteRoutes } from "./routes/RouteRoutes";
 import { DiscountRoutes } from "./routes/DiscountRoutes";
 import { validationResult } from "express-validator";
@@ -7,6 +7,11 @@ import morgan from "morgan";
 import { initializeGeoNamesDatabase } from "./helpers/RouteHelpers";
 import { RecipeRoutes } from "./routes/RecipesRoutes";
 import { UserRoutes } from "./routes/UserRoutes";
+import { NotificationRoutes } from "./routes/NotificationRoutes";
+import { PreferenceRoutes } from "./routes/PreferenceRoutes";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 
@@ -18,12 +23,14 @@ const Routes = [
   ...DiscountRoutes,
   ...RecipeRoutes,
   ...UserRoutes,
+  ...NotificationRoutes,
+  ...PreferenceRoutes,
 ];
 
 Routes.forEach((route) => {
-  (app as any)[route.method](
+  (app as express.Application)[route.method as keyof express.Application](
     route.route,
-    route.validation || [],
+    route.validation ?? [],
     async (req: Request, res: Response, next: NextFunction) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -33,24 +40,25 @@ Routes.forEach((route) => {
       try {
         await route.action(req, res, next);
       } catch (err) {
-        console.log(err);
+        console.error(err);
         res.status(500);
       }
     }
   );
 });
 
-async function startServer() {
+function startServer() {
   initializeClient();
   client
     .connect()
     .then(async () => {
-      console.log("Connected to MongoDB");
+      console.debug("Connected to MongoDB");
 
+      initializeFirebaseAdmin();
       await initializeGeoNamesDatabase();
 
       app.listen(process.env.PORT, () => {
-        console.log("Server is running on port " + process.env.PORT);
+        console.debug(`Server is running on port ${process.env.PORT}`);
       });
     })
     .catch((err: Error) => {
@@ -60,7 +68,7 @@ async function startServer() {
 }
 
 if (process.env.NODE_ENV !== "test") {
-  void startServer();
+  startServer();
 }
 
 const errorHandle = (
@@ -73,6 +81,7 @@ const errorHandle = (
   console.error("Stack trace:", err.stack);
 
   res.status(500).json({ error: "Internal server error" });
+  next(err);
 };
 
 app.use(errorHandle);
