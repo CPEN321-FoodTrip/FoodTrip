@@ -22,18 +22,43 @@ import okhttp3.Request
 import okhttp3.Response
 import okio.IOException
 
+/**
+ * Activity to view all the past trips of the current user
+ * and view the stops and recipes associated with each trip.
+ * Also allows user to display the route of the trips
+ * (can only be accessed in user mode)
+ */
 class PastTripActivity : AppCompatActivity() {
 
+    /**
+     * Companion object for PastTripActivity.
+     * Stores static constants related to the activity.
+     */
     companion object {
         private const val TAG = "PastTripActivity"
     }
 
+    /**
+     * class of sub-element in class TripItem
+     *
+     * @property name: city name of the stop
+     * @property latitude: latitude coordinate of the city
+     * @property longitude: longitude coordinate of the city
+     */
     data class LocationItem(
         val name: String,
         val latitude: Float,
         val longitude: Float
     )
 
+    /**
+     * JSON format for API response in getTrip()
+     *
+     * @property userID: unique ID of the user create the trip
+     * @property start_location: starting location of the trip
+     * @property end_location: destination of the trip
+     * @property tripID: unique ID of the trip
+     */
     data class TripItem(
         val userID: String,
         val start_location: LocationItem,
@@ -66,12 +91,20 @@ class PastTripActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // TODO: get user ID from login (use "test_person" as for developing)
-        getTrip(sampleID) {trips -> processTrip(trips)}
+        //use "test_person" for developing and debugging
+        //val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
+        //val userEmail = sharedPref.getString("userEmail", "No email found")
+
+        val userEmail = "test_person"
+
+//        getTrip(sampleID) {trips -> processTrip(trips)}
+        if (userEmail != null) {
+            getTrip(userEmail) {trips -> processTrip(trips)}
+        }
     }
 
     private fun getTrip(userID : String, callback: (List<TripItem>) -> Unit) {
-        val url = "${BuildConfig.SERVER_URL}get-routes?userID=$userID"
+        val url = "${BuildConfig.SERVER_URL}users/$userID/routes"
 //        Log.d(TAG, url)
 
         val request = Request.Builder()
@@ -117,6 +150,7 @@ class PastTripActivity : AppCompatActivity() {
             val trip = trips[i]
             itemView.textSize = 25f
             itemView.text = "${trip.start_location.name} -> ${trip.end_location.name}"
+            itemView.tag = "route ${i+1}"
 
             itemView.setOnClickListener {
                 val intent = Intent(applicationContext, PopTripActivity::class.java)

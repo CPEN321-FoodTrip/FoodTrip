@@ -27,12 +27,25 @@ import java.io.IOException
 import org.json.JSONArray
 import org.json.JSONObject
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.material.snackbar.Snackbar
+import org.json.JSONException
 import java.util.ArrayList
 
+/**
+ * Activity that manages current trip.
+ *
+ * This activity handles generation of a new trip with start/end locations
+ * and number of intermediate stops.
+ *
+ */
 class TripActivity : AppCompatActivity() {
 
     private val client = OkHttpClient()
 
+    /**
+     * Companion object for TripActivity.
+     * Stores static constants related to the activity.
+     */
     companion object {
         private const val TAG = "TripActivity"
     }
@@ -76,26 +89,27 @@ class TripActivity : AppCompatActivity() {
             //Check if starting city is valid
             if (userStartInput.isNotEmpty() && !checkExistence(userStartInput)) {
                 isValid = false
-                Toast.makeText(this@TripActivity, "Invalid Start City", Toast.LENGTH_SHORT).show()
+                Snackbar.make(findViewById(android.R.id.content), "Invalid Start City", Snackbar.LENGTH_SHORT).show()
             }
 
             // Check if end city is valid
             if (userEndInput.isNotEmpty() && !checkExistence(userEndInput)) {
                 isValid = false
-                Toast.makeText(this@TripActivity, "Invalid End City", Toast.LENGTH_SHORT).show()
+                Snackbar.make(findViewById(android.R.id.content), "Invalid End City", Snackbar.LENGTH_SHORT).show()
             }
 
             // Check if the number of stops is valid (non null and at least 1 stop)
             if (userNumStops == null || userNumStops < 1) {
                 isValid = false
-                Toast.makeText(this@TripActivity, "Please Enter a Valid Number of Stops", Toast.LENGTH_SHORT).show()
+                Snackbar.make(findViewById(android.R.id.content), "Invalid Number of Stops", Snackbar.LENGTH_SHORT).show()
             }
 
             // If all fields are valid, proceed to the next activity
             if (isValid) {
-
-                val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
-                val userEmail = sharedPref.getString("userEmail", "No email found")
+                //Use "test_person" for developing and debugging
+                //val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
+                //val userEmail = sharedPref.getString("userEmail", "No email found")
+                val userEmail = "test_person"
 
                 Log.d(TAG, "User Email: $userEmail")
 
@@ -127,7 +141,7 @@ class TripActivity : AppCompatActivity() {
                 val jsonArray = JSONArray(jsonResponse)
 
                 jsonArray.length() > 0
-            } catch (e: Exception) {
+            } catch (e: IOException) {
                 e.printStackTrace()
                 false
             }
@@ -143,7 +157,7 @@ class TripActivity : AppCompatActivity() {
             val requestBody = json.toString().toRequestBody("application/json".toMediaType())
 
             val request = Request.Builder()
-                .url("${SERVER_URL}generate-route")
+                .url("${SERVER_URL}routes")
                 .post(requestBody)
                 .addHeader("Content-Type", "application/json")
                 .build()
@@ -172,6 +186,9 @@ class TripActivity : AppCompatActivity() {
     //corresponding city names. Puts them into an arraylist and sends them to the main activity
     //to be displayed on the map in MainActivity. Then returns back to main activity.
     private fun collectRoute(response : String?) {
+        val longName = "longitude"
+        val latName = "latitude"
+
         if (response != null) {
             try {
                 val jsonObject = JSONObject(response)
@@ -181,8 +198,8 @@ class TripActivity : AppCompatActivity() {
 
                 val startLocation = jsonObject.getJSONObject("start_location")
                 val startName = startLocation.getString("name")
-                val startLat = startLocation.getDouble("latitude")
-                val startLong = startLocation.getDouble("longitude")
+                val startLat = startLocation.getDouble(latName)
+                val startLong = startLocation.getDouble(longName)
                 Log.d(TAG, "Start Location: $startLat, $startLong")
 
                 coordsList.add(LatLng(startLat, startLong))
@@ -190,8 +207,8 @@ class TripActivity : AppCompatActivity() {
 
                 val endLocation = jsonObject.getJSONObject("end_location")
                 val endName = endLocation.getString("name")
-                val endLat = endLocation.getDouble("latitude")
-                val endLong = endLocation.getDouble("longitude")
+                val endLat = endLocation.getDouble(latName)
+                val endLong = endLocation.getDouble(longName)
 
                 val arrayOfStops: JSONArray = jsonObject.getJSONArray("stops")
 
@@ -199,8 +216,8 @@ class TripActivity : AppCompatActivity() {
                     val stop = arrayOfStops.getJSONObject(i)
                     val location = stop.getJSONObject("location")
                     val city = location.getString("name")
-                    val lat = location.getDouble("latitude")
-                    val long = location.getDouble("longitude")
+                    val lat = location.getDouble(latName)
+                    val long = location.getDouble(longName)
 
                     coordsList.add(LatLng(lat, long))
                     nameList.add(city)
@@ -218,7 +235,7 @@ class TripActivity : AppCompatActivity() {
                 intent.putExtras(bundle)
                 startActivity(intent)
 
-            } catch (e : Exception) {
+            } catch (e : JSONException) {
                 Log.e(TAG, "Error parsing JSON response: ${e.message}")
             }
         } else {

@@ -11,6 +11,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
+import androidx.credentials.exceptions.*
 import androidx.fragment.app.FragmentContainerView
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -26,10 +27,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
+/**
+ * Home page of the app in user mode
+ *
+ * Direction of buttons:
+ * - Manage Trip -> TripActivity
+ * - View Past Trip -> PastTripActivity
+ * - Manage Account -> AccountActivity
+ * - View Recipes -> Grocery Activity
+ * - Sign Out: log out and back to LoginActivity
+ */
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
 
+    /**
+     * Companion object for MainActivity.
+     * Stores static constants related to the activity.
+     */
     companion object {
         private const val TAG = "MainActivity"
     }
@@ -81,7 +96,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                         Toast.LENGTH_SHORT
                     ).show()
                     gotologin()
-                } catch (e: Exception) {
+                } catch (e: ClearCredentialInterruptedException) {
                     Log.e(TAG, "Error clearing credential state", e)
                     Toast.makeText(
                         this@MainActivity,
