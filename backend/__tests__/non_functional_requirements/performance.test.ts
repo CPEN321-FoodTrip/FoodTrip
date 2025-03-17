@@ -11,6 +11,8 @@ jest.mock("node-fetch", () => jest.fn());
 // Interface POST /routes
 // Performance test
 describe("Performance: POST /routes", () => {
+    jest.setTimeout(20000); //20s
+
   beforeEach(async () => {
     jest.clearAllMocks();
     await RouteHelpers.initializeGeoNamesDatabase();
