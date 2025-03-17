@@ -163,7 +163,7 @@ describe("Mocked: POST /discounts", () => {
   // Expected behavior: discount is created and stored in db and notifications fail to send
   // Expected output: success message and discountID
   test("Valid discount, notifications fail to send", async () => {
-    const discountID = new ObjectId().toHexString();
+    const discountID: string = new ObjectId().toHexString();
     jest
       .spyOn(DiscountHelpers, "addDiscountToDb")
       .mockResolvedValue(discountID);
@@ -262,7 +262,7 @@ describe("Mocked: GET /discounts/:id", () => {
   // Expected behavior: discounts are retrieved from db
   // Expected output: discounts array
   test("Valid discount mock retrieved", async () => {
-    const discountID = new ObjectId().toHexString();
+    const discountID: string = new ObjectId().toHexString();
     jest
       .spyOn(DiscountHelpers, "getDiscountsFromDb")
       .mockResolvedValue([{ discountID, storeID: "123" }]);
@@ -450,7 +450,7 @@ describe("Mocked: DELETE /discounts/:id", () => {
         throw new Error("Forced error");
       });
 
-    const discountID = new ObjectId().toHexString();
+    const discountID: string = new ObjectId().toHexString();
     const response = await request(app)
       .delete(`/discounts/${discountID}`)
       .expect(500);
@@ -467,7 +467,7 @@ describe("Mocked: DELETE /discounts/:id", () => {
   test("Valid discount deleted through mock", async () => {
     jest.spyOn(DiscountHelpers, "deleteDiscountFromDb").mockResolvedValue(1);
 
-    const discountID = new ObjectId().toHexString();
+    const discountID: string = new ObjectId().toHexString();
     const response = await request(app)
       .delete(`/discounts/${discountID}`)
       .expect(200);
@@ -483,7 +483,7 @@ describe("Mocked: DELETE /discounts/:id", () => {
   // Expected output: error message
   test("Delete from empty db", async () => {
     // in-memory db empty, cleared after each test in jest setup
-    const discountID = new ObjectId().toHexString();
+    const discountID: string = new ObjectId().toHexString();
     const response = await request(app)
       .delete(`/discounts/${discountID}`)
       .expect(404);
