@@ -303,7 +303,7 @@ export async function saveRouteToDb(
 }
 
 // get route from MongoDB by ID (or null if not found)
-export async function getRouteFromDb(tripID: string): Promise<object | null> {
+export const getRouteFromDb = async(tripID: string): Promise<object | null> => {
   const db = client.db(ROUTES_DB_NAME);
   const collection = db.collection(ROUTES_COLLECTION_NAME);
 
@@ -311,7 +311,7 @@ export async function getRouteFromDb(tripID: string): Promise<object | null> {
 }
 
 // delete route from MongoDB by ID
-export async function deleteRouteFromDb(tripID: string): Promise<number> {
+export const deleteRouteFromDb = async(tripID: string): Promise<number> => {
   const db = client.db(ROUTES_DB_NAME);
   const collection = db.collection(ROUTES_COLLECTION_NAME);
 

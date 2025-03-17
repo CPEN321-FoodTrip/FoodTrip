@@ -13,7 +13,7 @@ import * as admin from "firebase-admin";
 export class DiscountController {
   // add a new discount
   // POST /discounts
-  async addDiscount(req: Request, res: Response, next: NextFunction) {
+  addDiscount = async(req: Request, res: Response, next: NextFunction) => {
     // validation of params performed by express-validator middleware
     const { storeID, storeName, ingredient, price } = req.body;
 
@@ -55,7 +55,7 @@ export class DiscountController {
 
   // get discounts for a store
   // GET /discounts/:id
-  async getDiscounts(req: Request, res: Response, next: NextFunction) {
+  getDiscounts = async(req: Request, res: Response, next: NextFunction) => {
     try {
       // storeID validation is performed by express-validator middleware
       const storeID = req.params.id;
@@ -76,7 +76,7 @@ export class DiscountController {
 
   // access all discounts
   // GET /discounts
-  async getAllDiscounts(req: Request, res: Response, next: NextFunction) {
+  getAllDiscounts = async(req: Request, res: Response, next: NextFunction) => {
     try {
       const ingredient = (req.query.ingredient as string) || "";
 
@@ -94,7 +94,7 @@ export class DiscountController {
 
   // delete a discount
   // DELETE /discounts/:id
-  async deleteDiscount(req: Request, res: Response, next: NextFunction) {
+  deleteDiscount = async(req: Request, res: Response, next: NextFunction) => {
     try {
       const discountID = req.params.id;
 
