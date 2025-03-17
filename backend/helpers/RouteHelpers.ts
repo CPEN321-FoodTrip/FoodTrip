@@ -280,9 +280,9 @@ export async function generateRouteStops(
         segmentPercentage: segmentPercentage * 100,
       });
     } else {
-      console.debug(
-        `No cities found for segment ${i} at ${segmentPercentage * 100}`
-      );
+      // console.debug(
+      //   `No cities found for segment ${i} at ${segmentPercentage * 100}`
+      // );
     }
   }
 

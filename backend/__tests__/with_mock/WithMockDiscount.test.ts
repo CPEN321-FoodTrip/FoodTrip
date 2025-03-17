@@ -4,17 +4,15 @@ import * as DiscountHelpers from "../../helpers/DiscountHelper";
 import * as NotificationHelper from "../../helpers/NotificationHelper";
 import { ObjectId } from "mongodb";
 import { client } from "../../services";
+import admin from "firebase-admin";
 
 // mock firebase-admin messaging for new discount notifications
-jest.mock("firebase-admin", () => {
-  const actualAdmin = jest.requireActual("firebase-admin");
-  return {
-    ...actualAdmin,
-    messaging: jest.fn().mockReturnValue({
-      sendEachForMulticast: jest.fn().mockResolvedValue("Message sent"),
-    }),
-  };
-});
+jest.mock("firebase-admin", () => ({
+  initializeApp: jest.fn(),
+  messaging: jest.fn().mockReturnValue({
+    sendEachForMulticast: jest.fn().mockResolvedValue({ successCount: 1 }),
+  }),
+}));
 
 // Interface POST /discounts
 describe("Mocked: POST /discounts", () => {
@@ -48,9 +46,7 @@ describe("Mocked: POST /discounts", () => {
 
     expect(response.body).toHaveProperty("error", "Internal server error");
     expect(DiscountHelpers.addDiscountToDb).toHaveBeenCalled();
-    expect(
-      require("firebase-admin").messaging().sendEachForMulticast
-    ).not.toHaveBeenCalled();
+    expect(admin.messaging().sendEachForMulticast).not.toHaveBeenCalled();
   });
 
   // Mocked behavior: DiscountHelpers.addDiscountToDb returns a discountID and getAllTokensFromDb
@@ -85,9 +81,7 @@ describe("Mocked: POST /discounts", () => {
     expect(response.body).toHaveProperty("discountID", discountID);
     expect(DiscountHelpers.addDiscountToDb).toHaveBeenCalled();
     expect(NotificationHelper.getAllTokensFromDb).toHaveBeenCalled();
-    expect(
-      require("firebase-admin").messaging().sendEachForMulticast
-    ).toHaveBeenCalled();
+    expect(admin.messaging().sendEachForMulticast).toHaveBeenCalled();
   });
 
   // Mocked behavior: in-memory db is used for storing discounts and notifications
@@ -116,9 +110,7 @@ describe("Mocked: POST /discounts", () => {
       "Discount created successfully"
     );
     expect(response.body).toHaveProperty("discountID");
-    expect(
-      require("firebase-admin").messaging().sendEachForMulticast
-    ).toHaveBeenCalled();
+    expect(admin.messaging().sendEachForMulticast).toHaveBeenCalled();
   });
 
   // Mocked behavior: DiscountHelpers.addDiscountToDb returns a discountID and getAllTokensFromDb
@@ -151,9 +143,7 @@ describe("Mocked: POST /discounts", () => {
     expect(response.body).toHaveProperty("discountID", discountID);
     expect(DiscountHelpers.addDiscountToDb).toHaveBeenCalled();
     expect(NotificationHelper.getAllTokensFromDb).toHaveBeenCalled();
-    expect(
-      require("firebase-admin").messaging().sendEachForMulticast
-    ).not.toHaveBeenCalled();
+    expect(admin.messaging().sendEachForMulticast).not.toHaveBeenCalled();
   });
 
   // Mocked behavior: DiscountHelpers.addDiscountToDb returns a discountID, getAllTokensFromDb
@@ -191,9 +181,7 @@ describe("Mocked: POST /discounts", () => {
     expect(response.body).toHaveProperty("discountID", discountID);
     expect(DiscountHelpers.addDiscountToDb).toHaveBeenCalled();
     expect(NotificationHelper.getAllTokensFromDb).toHaveBeenCalled();
-    expect(
-      require("firebase-admin").messaging().sendEachForMulticast
-    ).toHaveBeenCalled();
+    expect(admin.messaging().sendEachForMulticast).toHaveBeenCalled();
   });
 
   // Mocked behavior: DiscountHelpers.addDiscountToDb with empty imlementation
@@ -224,9 +212,7 @@ describe("Mocked: POST /discounts", () => {
       )
     ).toBe(true);
     expect(DiscountHelpers.addDiscountToDb).not.toHaveBeenCalled();
-    expect(
-      require("firebase-admin").messaging().sendEachForMulticast
-    ).not.toHaveBeenCalled();
+    expect(admin.messaging().sendEachForMulticast).not.toHaveBeenCalled();
   });
 });
 
