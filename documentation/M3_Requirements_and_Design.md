@@ -20,7 +20,7 @@ FoodTrip is an android app that helps users explore global cuisines by planning 
 
 ## 3. Requirements Specification
 ### **3.1. Use-Case Diagram**
-![Use-Case Diagram](images/use-case-diagram.png)
+![Use-Case Diagram](images/Screenshot 2025-03-17 012533.png)
 
 
 ### **3.2. Actors Description**
