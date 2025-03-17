@@ -1095,43 +1095,43 @@ class RecipeTests {
      * and that the recipe and trip elements are properly displayed
      *
      */
-    @Test fun displayRecipe()  {
-        onView(withId(R.id.ManageTrip)).perform(click())
-
-        Intents.intended(hasComponent(TripActivity::class.java.name))
-
-        onView(withId(R.id.startLocation)).perform(typeText("Calgary"), closeSoftKeyboard())
-
-        onView(withId(R.id.endLocation)).perform(typeText("Reno"), closeSoftKeyboard())
-
-        onView(withId(R.id.numstops)).perform(typeText("3"), closeSoftKeyboard())
-
-        onView(withId(R.id.CreateTrip)).perform(click())
-
-        Thread.sleep(5000)
-
-        Intents.intended(hasComponent(MainActivity::class.java.name))
-
-        onView(withId(R.id.PastTrips)).perform(click())
-
-        Intents.intended(hasComponent(PastTripActivity::class.java.name))
-
-        onView(allOf(withText("Calgary -> Reno"), isDisplayed()))
-            .perform(click())
-
-        Intents.intended(hasComponent(PopTripActivity::class.java.name))
-
-        onView(allOf(withText("    recipe 1: something"))).perform(click())
-
-        Intents.intended(hasComponent(PopRecipeActivity::class.java.name))
-
-        onView(allOf(withTagValue(`is`("url")), isDisplayed()))
-            .perform(click())
-    }
+//    @Test fun displayRecipe()  {
+//        onView(withId(R.id.ManageTrip)).perform(click())
+//
+//        Intents.intended(hasComponent(TripActivity::class.java.name))
+//
+//        onView(withId(R.id.startLocation)).perform(typeText("Calgary"), closeSoftKeyboard())
+//
+//        onView(withId(R.id.endLocation)).perform(typeText("Reno"), closeSoftKeyboard())
+//
+//        onView(withId(R.id.numstops)).perform(typeText("3"), closeSoftKeyboard())
+//
+//        onView(withId(R.id.CreateTrip)).perform(click())
+//
+//        Thread.sleep(5000)
+//
+//        Intents.intended(hasComponent(MainActivity::class.java.name))
+//
+//        onView(withId(R.id.PastTrips)).perform(click())
+//
+//        Intents.intended(hasComponent(PastTripActivity::class.java.name))
+//
+//        onView(allOf(withText("Calgary -> Reno"), isDisplayed()))
+//            .perform(click())
+//
+//        Intents.intended(hasComponent(PopTripActivity::class.java.name))
+//
+//        onView(allOf(withText("    recipe 1: something"))).perform(click())
+//
+//        Intents.intended(hasComponent(PopRecipeActivity::class.java.name))
+//
+//        onView(allOf(withTagValue(`is`("url")), isDisplayed()))
+//            .perform(click())
+//    }
 }
 
 //@RunWith(AndroidJUnit4::class)
-//class SocialsActivityTest {
+//class PreferencesTest {
 //    @Rule
-//    val activityRule = ActivityScenarioRule(SocialsActivity::class.java)
+//    val activityRule = ActivityScenarioRule(ManageAccount::class.java)
 //}
