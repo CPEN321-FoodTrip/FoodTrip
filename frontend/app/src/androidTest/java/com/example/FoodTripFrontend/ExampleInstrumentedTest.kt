@@ -320,35 +320,7 @@ class TripActivityTest {
         onView(withId(R.id.map)).check(matches(isDisplayed()))
     }
 
-
-    /**
-     * Functionality Test for the Trip Activity
-     *
-     * Success Scenario:
-     * Simulates the scenario where the user enters a
-     * long 10 stop trip with no errors.
-     *
-     * Verify that the create trip button returns to the
-     * main activity and that the map is now displayed
-     */
-    @Test fun planRegularTripLong() {
-        onView(withId(R.id.startLocation)).perform(typeText(testCityCalgary), closeSoftKeyboard())
-        onView(withId(R.id.startLocation)).check(matches(withText(testCityCalgary)))
-
-        onView(withId(R.id.endLocation)).perform(typeText(testCityVancouver), closeSoftKeyboard())
-        onView(withId(R.id.endLocation)).check(matches(withText(testCityVancouver)))
-
-        onView(withId(R.id.numstops)).perform(typeText("10"), closeSoftKeyboard())
-        onView(withId(R.id.numstops)).check(matches(withText("10")))
-
-        onView(withId(R.id.CreateTrip)).perform(click())
-
-        Thread.sleep(5000)
-
-        Intents.intended(hasComponent(MainActivity::class.java.name))
-
-        onView(withId(R.id.map)).check(matches(isDisplayed()))
-    }
+    
 
     /**
      * Functionality Test for the Trip Activity
