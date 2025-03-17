@@ -60,7 +60,7 @@ describe("Mocked: POST /discounts", () => {
   // Expected behavior: discount is created and stored in db and notifications are sent
   // Expected output: success message and discountID
   test("Valid discount, mocked db response", async () => {
-    const discountID = new ObjectId().toHexString();
+    const discountID: string = new ObjectId().toHexString();
     jest
       .spyOn(DiscountHelpers, "addDiscountToDb")
       .mockResolvedValue(discountID);
