@@ -73,13 +73,13 @@ FoodTrip is an android app that helps users explore global cuisines by planning 
     - **Preconditions**: User has made at least one trip before
     - **Postconditions**: N/A
     - **Main Success Scenario:**:
-        1. The user opens "Past Trip" screen.
-        2. The app shows a list of "past trip" text view, and a "Back" button.
-        3. The user clicks on any past trip.
-        4. A window pops up
-        5. The window shows the starting location, intermediate stops, destination, recipes for each stop, and a "Show Route" button.
-        6. The user presses the "Show Route" button
-        7. The user clicks on the first recipe
+        \1. The user opens "Past Trip" screen.
+        \2. The app shows a list of "past trip" text view, and a "Back" button.
+        \3. The user clicks on any past trip.
+        \4. A window pops up
+        \5. The window shows the starting location, intermediate stops, destination, recipes for each stop, and a "Show Route" button.
+        \ 6. The user presses the "Show Route" button
+        \7. The user clicks on the first recipe
 
     - **Extensions:**
     * 6a. The user is directed to the main page and a map of the route is displayed
