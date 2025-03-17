@@ -1,12 +1,10 @@
-import { UserController } from "../controllers/UserController";
-
-const controller = new UserController();
+import { getUserRoutes } from "../controllers/UserController";
 
 export const UserRoutes = [
   {
     method: "get",
     route: "/users/:userID/routes",
-    action: controller.getUserRoutes,
+    action: getUserRoutes,
     validation: [],
   },
 ];
