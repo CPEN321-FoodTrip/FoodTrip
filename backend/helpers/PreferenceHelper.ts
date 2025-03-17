@@ -20,10 +20,11 @@ export async function getAllergiesFromDb(userID: string): Promise<Document[]> {
   const db = client.db(DB_NAME);
   const collection = db.collection(COLLECTION_NAME);
 
-  return await collection
+  const allergies: Document[] = await collection
     .find({ userID })
     .project({ allergy: 1, _id: 0 })
     .toArray();
+  return allergies;
 }
 
 // delete an allergy for a user
