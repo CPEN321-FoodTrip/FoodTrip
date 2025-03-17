@@ -1,5 +1,5 @@
 import { body } from "express-validator";
-import { DiscountController } from "../controllers/DiscountController";
+import { DiscountController, addDiscount } from "../controllers/DiscountController";
 
 const controller = new DiscountController();
 
@@ -7,7 +7,7 @@ export const DiscountRoutes = [
   {
     method: "post",
     route: "/discounts",
-    action: controller.addDiscount,
+    action: addDiscount,
     validation: [
       body("storeID")
         .exists()

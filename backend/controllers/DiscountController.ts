@@ -10,10 +10,9 @@ import { Discount } from "../interfaces/DiscountInterfaces";
 import { getAllTokensFromDb } from "../helpers/NotificationHelper";
 import * as admin from "firebase-admin";
 
-export class DiscountController {
   // add a new discount
   // POST /discounts
-  async addDiscount(this:void, req: Request, res: Response, next: NextFunction) {
+  export const addDiscount = async(req: Request, res: Response, next: NextFunction) => {
     // validation of params performed by express-validator middleware
     const { storeID, storeName, ingredient, price } = req.body;
 
@@ -52,6 +51,9 @@ export class DiscountController {
       next(error);
     }
   }
+
+export class DiscountController {
+
 
   // get discounts for a store
   // GET /discounts/:id
