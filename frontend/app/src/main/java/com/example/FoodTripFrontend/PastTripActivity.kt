@@ -22,6 +22,12 @@ import okhttp3.Request
 import okhttp3.Response
 import okio.IOException
 
+/**
+ * Activity to view all the past trips of the current user
+ * and view the stops and recipes associated with each trip.
+ * Also allows user to display the route of the trips
+ * (can only be accessed in user mode)
+ */
 class PastTripActivity : AppCompatActivity() {
 
     /**

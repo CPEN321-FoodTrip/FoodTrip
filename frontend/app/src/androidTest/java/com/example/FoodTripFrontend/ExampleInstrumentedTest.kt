@@ -656,6 +656,11 @@ class PastTripActivityTestPersonTest {
         Intents.release()
     }
 
+    /**
+     * UI Test for the current Activity
+     *
+     * Checks if all required elements are present
+     */
     @Test fun checkElements() {
         onView(withId(R.id.back_button_past)).check(matches(withText("Back")))
     }
@@ -734,6 +739,11 @@ class GroceryActivityTest {
         Intents.release()
     }
 
+    /**
+     * UI Test for the current Activity
+     *
+     * Checks if all required elements are present
+     */
     @Test fun checkElements() {
         onView(withId(R.id.back_button)).check(matches(withText("Back")))
         onView(withId(R.id.grocery_title_text_view)).check(matches(withText("Grocery")))
@@ -833,6 +843,11 @@ class GroceryStoreActivityTest {
         Intents.release()
     }
 
+    /**
+     * UI Test for the current Activity
+     *
+     * Checks if all required elements are present
+     */
     @Test fun checkElements() {
         onView(withId(R.id.back_button_grocery_store)).check(matches(withText("Back")))
         onView(withId(R.id.grocery_store_title_text_view)).check(matches(isDisplayed()))

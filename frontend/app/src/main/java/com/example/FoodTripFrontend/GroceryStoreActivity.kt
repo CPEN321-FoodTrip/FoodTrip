@@ -139,7 +139,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE $response")
+                    if (!response.isSuccessful) throw IOException("$response")
 
                     val json = response.body!!.string()
                     val listType = object : TypeToken<List<DiscountItem>>() {}.type
@@ -177,7 +177,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE $response")
+                    if (!response.isSuccessful) throw IOException("$response")
 
                     getDiscount(sampleID) {discountList -> processDiscount(discountList)}
                 }
@@ -200,7 +200,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE $response")
+                    if (!response.isSuccessful) throw IOException("$response")
 
                     getDiscount(sampleID) {discountList -> processDiscount(discountList)}
                 }

@@ -28,6 +28,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar
+import org.json.JSONException
 import java.util.ArrayList
 
 /**
@@ -236,7 +237,7 @@ class TripActivity : AppCompatActivity() {
                 intent.putExtras(bundle)
                 startActivity(intent)
 
-            } catch (e : Exception) {
+            } catch (e : JSONException) {
                 Log.e(TAG, "Error parsing JSON response: ${e.message}")
             }
         } else {
