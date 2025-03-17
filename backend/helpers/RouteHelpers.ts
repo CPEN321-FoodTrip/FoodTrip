@@ -311,7 +311,7 @@ export const getRouteFromDb = async(tripID: string): Promise<object | null> => {
 }
 
 // delete route from MongoDB by ID
-export const deleteRouteFromDb = async(tripID: string): Promise<number> => {
+export async function deleteRouteFromDb(this:void, tripID: string): Promise<number> {
   const db = client.db(ROUTES_DB_NAME);
   const collection = db.collection(ROUTES_COLLECTION_NAME);
 

@@ -11,11 +11,12 @@ import { ObjectId } from "mongodb";
 export class RecipeController {
   // generate a list of recipes from a route
   // POST /recipes
-  createRecipesfromRoute = async(
+  async createRecipesfromRoute(
+    this:void, 
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -43,7 +44,7 @@ export class RecipeController {
 
   // get all recipes from a trip
   // GET /recipes/:id
-  getRecipes = async(req: Request, res: Response, next: NextFunction) => {
+  async getRecipes(this:void, req: Request, res: Response, next: NextFunction) {
     try {
       const tripID = req.params.id;
       if (!ObjectId.isValid(tripID)) {
@@ -64,7 +65,7 @@ export class RecipeController {
 
   // delete all recipes from a trip
   // DELETE /recipes/:id
-  deleteRecipes = async(req: Request, res: Response, next: NextFunction) => {
+  async deleteRecipes(this:void, req: Request, res: Response, next: NextFunction) {
     try {
       const tripID = req.params.id;
       if (!ObjectId.isValid(tripID)) {
