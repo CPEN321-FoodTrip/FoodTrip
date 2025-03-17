@@ -99,10 +99,8 @@ export async function saveRecipesToDb(
   return insertedId;
 }
 
-export async function getRecipesFromDb(
-  tripID: string
-): Promise<WithId<Document> | null> {
-  const recipes: WithId<Document> | null = await client
+export async function getRecipesFromDb(tripID: string): Promise<unknown> {
+  const recipes: unknown = await client
     .db(RECIPE_DB_NAME)
     .collection(RECIPE_COLLECTION_NAME)
     .findOne({ tripID });
