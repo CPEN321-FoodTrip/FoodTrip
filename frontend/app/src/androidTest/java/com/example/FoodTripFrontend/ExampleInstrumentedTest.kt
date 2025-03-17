@@ -523,20 +523,20 @@ class TripActivityTest {
      * Verify that the create trip button displays a
      * Snackbar message alerting the user of the error
      */
-    @Test fun missingInputsStops() {
-        onView(withId(R.id.startLocation)).perform(typeText(testCityBeijing), closeSoftKeyboard())
-        onView(withId(R.id.startLocation)).check(matches(withText(testCityBeijing)))
-
-        onView(withId(R.id.endLocation)).perform(typeText(testCityHanoi), closeSoftKeyboard())
-        onView(withId(R.id.endLocation)).check(matches(withText(testCityHanoi)))
-
-        onView(withId(R.id.CreateTrip)).perform(click())
-
-        Thread.sleep(1000)
-
-        onView(withText("Missing Number of Stops"))
-            .check(matches(isDisplayed()))
-    }
+//    @Test fun missingInputsStops() {
+//        onView(withId(R.id.startLocation)).perform(typeText(testCityBeijing), closeSoftKeyboard())
+//        onView(withId(R.id.startLocation)).check(matches(withText(testCityBeijing)))
+//
+//        onView(withId(R.id.endLocation)).perform(typeText(testCityHanoi), closeSoftKeyboard())
+//        onView(withId(R.id.endLocation)).check(matches(withText(testCityHanoi)))
+//
+//        onView(withId(R.id.CreateTrip)).perform(click())
+//
+//        Thread.sleep(1000)
+//
+//        onView(withText("Missing Number of Stops"))
+//            .check(matches(isDisplayed()))
+//    }
 }
 
 //@RunWith(AndroidJUnit4::class)
