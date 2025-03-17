@@ -19,16 +19,11 @@ export async function addTokenToDb(
 
 // remove user fcm token from database
 export async function removeTokenFromDb(userID: string): Promise<number> {
-  try {
-    const result: DeleteResult = await client
-      .db(DB_NAME)
-      .collection(COLLECTION_NAME)
-      .deleteOne({ userID });
+  const result: number = (
+    await client.db(DB_NAME).collection(COLLECTION_NAME).deleteOne({ userID })
+  ).deletedCount;
 
-    return result.deletedCount;
-  } catch (error) {
-    throw error;
-  }
+  return result;
 }
 
 // get user fcm token from database
