@@ -67,22 +67,32 @@ FoodTrip is an android app that helps users explore global cuisines by planning 
                 - 1a. Some ingredients are not available.
                     - 1a1. Let user know and suggest replacement options.
 
-3. **Share on Social Media** 
-    - **Overview**:
-        1. Users can share their food trip and recipes.
-        2. View other users' trips.
-    
-    - **Detailed Flow for Each Independent Scenario**: 
-        1. **Sharing a Trip**:
-            - **Description**: Users post their completed food trips on social media.
-            - **Primary actor(s)**: App user. 
-            - **Main success scenario**:
-                1. User selects a completed trip.
-                2. The app generates a post with trip details and photos.
-                3. User shares on selected platforms (Facebook, Instagram, etc.).
-            - **Failure scenario(s)**:
-                - 1a. No internet connection.
-                    - 1a1. Let user know and allow retry later.
+3. **View Past Trips**
+   **Description**: User is able to view a list of their past trips and choose to display the trip on a map, or view the recipes correlating to the trip
+   **Primary Actor**: App User
+   **Preconditions**: User has made at least one trip before
+   **Postconditions**: N/A
+   
+    **Main Success Scenario:**
+    1. The user opens "Past Trip" screen.
+    2. The app shows a list of "past trip" text view, and a "Back" button.
+    3. The user clicks on any past trip.
+    4. A window pops up
+    5. The window shows the starting location, intermediate stops, destination, recipes for each stop, and a "Show Route" button.
+    6. The user presses the "Show Route" button
+    7. The user clicks on the first recipe
+
+    **Extensions:**
+    * 6a. The user is directed to the main page and a map of the route is displayed
+    * 7a. The window shows the details of the recipe and a recipe url
+        * 7a1. The user clicks the recipe url.
+        * 7a2. A webView shows up.
+
+    **Failure Scenarios:**
+    * 2a. The user has no past trip record
+        * 2a1. The app shows no items in the list
+    * 2b. No internet connection
+        * 2b1. The app displays an error message: "No internet connection"
 
 
 ### **3.4. Screen Mockups**
