@@ -3,6 +3,7 @@ import app from "../../index";
 import { initializeGeoNamesDatabase } from "../../helpers/RouteHelpers";
 import { client } from "../../services";
 import { ObjectId } from "mongodb";
+import { Route } from "../../interfaces/RouteInterfaces";
 
 // constants for routes saved in MongoDB
 const ROUTES_DB_NAME = "route_data";
@@ -13,11 +14,13 @@ const SAMPLE_ROUTE = {
     name: "Vancouver",
     latitude: 49.2608724,
     longitude: -123.113952,
+    population: 631486,
   },
   end_location: {
     name: "Toronto",
     latitude: 43.6534817,
     longitude: -79.3839347,
+    population: 2731571,
   },
   stops: [
     {
@@ -75,16 +78,18 @@ describe("Unmocked: POST /routes", () => {
 
     // db verification
     const db = client.db(ROUTES_DB_NAME);
-    const collection = db.collection(ROUTES_COLLECTION_NAME);
+    const collection = db.collection<{ userID: string; route: Route }>(
+      ROUTES_COLLECTION_NAME
+    );
     const tripID = response.body.tripID;
     const result = await collection.findOne({ _id: new ObjectId(tripID) });
 
     expect(result).not.toBeNull();
     expect(result).toHaveProperty("userID", "test-user");
-    expect(result?.start_location).toHaveProperty("name", "Vancouver");
-    expect(result?.end_location).toHaveProperty("name", "Toronto");
-    expect(Array.isArray(result?.stops)).toBe(true);
-    expect(result?.stops).toHaveLength(1); // 1 stop
+    expect(result?.route.start_location).toHaveProperty("name", "Vancouver");
+    expect(result?.route.end_location).toHaveProperty("name", "Toronto");
+    expect(Array.isArray(result?.route.stops)).toBe(true);
+    expect(result?.route.stops).toHaveLength(1); // 1 stop
 
     // db cleanup happens in afterEach in jest.setup.ts
   });
@@ -339,8 +344,13 @@ describe("Unmocked: GET /routes/:id", () => {
   test("Retreive valid route", async () => {
     // setup: inset sample route into db
     const db = client.db(ROUTES_DB_NAME);
-    const collection = db.collection(ROUTES_COLLECTION_NAME);
-    const result = await collection.insertOne(SAMPLE_ROUTE);
+    const collection = db.collection<{ userID: string; route: Route }>(
+      ROUTES_COLLECTION_NAME
+    );
+    const result = await collection.insertOne({
+      userID: "test-user",
+      route: SAMPLE_ROUTE,
+    });
     const tripID = result.insertedId;
 
     const response = await request(app).get(`/routes/${tripID}`).expect(200);
@@ -397,8 +407,13 @@ describe("Unmocked: DELETE /routes/:id", () => {
   test("Valid deletion", async () => {
     // setup: insert sample route
     const db = client.db(ROUTES_DB_NAME);
-    const collection = db.collection(ROUTES_COLLECTION_NAME);
-    const result = await collection.insertOne(SAMPLE_ROUTE);
+    const collection = db.collection<{ userID: string; route: Route }>(
+      ROUTES_COLLECTION_NAME
+    );
+    const result = await collection.insertOne({
+      userID: "test-user",
+      route: SAMPLE_ROUTE,
+    });
     const tripID = result.insertedId;
     const originalCount = await collection.countDocuments();
 
@@ -418,7 +433,9 @@ describe("Unmocked: DELETE /routes/:id", () => {
   // Expected output: empty object
   test("Missing tripID", async () => {
     const db = client.db(ROUTES_DB_NAME);
-    const collection = db.collection(ROUTES_COLLECTION_NAME);
+    const collection = db.collection<{ userID: string; route: Route }>(
+      ROUTES_COLLECTION_NAME
+    );
     const originalCount = await collection.countDocuments();
 
     const response = await request(app).delete("/routes/").expect(404); // malformed url
@@ -437,7 +454,9 @@ describe("Unmocked: DELETE /routes/:id", () => {
   // Expected output: error message indicating invalid tripID format
   test("Invalid tripID format", async () => {
     const db = client.db(ROUTES_DB_NAME);
-    const collection = db.collection(ROUTES_COLLECTION_NAME);
+    const collection = db.collection<{ userID: string; route: Route }>(
+      ROUTES_COLLECTION_NAME
+    );
     const originalCount = await collection.countDocuments();
 
     const tripID = "1234"; // tripID should be a valid ObjectId
@@ -456,8 +475,13 @@ describe("Unmocked: DELETE /routes/:id", () => {
   test("Delete nonexistant route", async () => {
     // setup: insert sample route
     const db = client.db(ROUTES_DB_NAME);
-    const collection = db.collection(ROUTES_COLLECTION_NAME);
-    const result = await collection.insertOne(SAMPLE_ROUTE);
+    const collection = db.collection<{ userID: string; route: Route }>(
+      ROUTES_COLLECTION_NAME
+    );
+    const result = await collection.insertOne({
+      userID: "test-user",
+      route: SAMPLE_ROUTE,
+    });
     const tripID = result.insertedId;
     const originalCount = await collection.countDocuments();
 
@@ -487,7 +511,9 @@ describe("Unmocked: DELETE /routes/:id", () => {
 
     // check db to make sure nothing was deleted
     const db = client.db(ROUTES_DB_NAME);
-    const collection = db.collection(ROUTES_COLLECTION_NAME);
+    const collection = db.collection<{ userID: string; route: Route }>(
+      ROUTES_COLLECTION_NAME
+    );
     const findResult = await collection.findOne({ _id: new ObjectId(tripID) });
     expect(findResult).toBeNull();
     const count = await collection.countDocuments();

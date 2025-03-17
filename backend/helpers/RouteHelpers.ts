@@ -5,6 +5,7 @@ import { ObjectId } from "mongodb";
 import {
   GeoNameCity,
   Location,
+  Route,
   RouteStop,
 } from "../interfaces/RouteInterfaces";
 
@@ -289,31 +290,42 @@ export async function generateRouteStops(
 // save route to MongoDB and return ID
 export async function saveRouteToDb(
   userID: string,
-  route: object
+  route: Route
 ): Promise<string> {
   const db = client.db(ROUTES_DB_NAME);
-  const collection = db.collection(ROUTES_COLLECTION_NAME);
+  const collection = db.collection<{ userID: string; route: Route }>(
+    ROUTES_COLLECTION_NAME
+  );
 
   const insertedId: string = (
-    await collection.insertOne({ userID, ...route })
+    await collection.insertOne({ userID, route })
   ).insertedId.toHexString();
   return insertedId;
 }
 
 // get route from MongoDB by ID (or null if not found)
-export async function getRouteFromDb(tripID: string): Promise<object | null> {
+export async function getRouteFromDb(tripID: string): Promise<Route | null> {
   const db = client.db(ROUTES_DB_NAME);
-  const collection = db.collection(ROUTES_COLLECTION_NAME);
+  const collection = db.collection<{ userID: string; route: Route }>(
+    ROUTES_COLLECTION_NAME
+  );
 
-  return await collection.findOne({ _id: new ObjectId(tripID) });
+  const result = await collection.findOne({ _id: new ObjectId(tripID) });
+  return result ? result.route : null;
 }
 
 // delete route from MongoDB by ID
 export async function deleteRouteFromDb(tripID: string): Promise<number> {
   const db = client.db(ROUTES_DB_NAME);
-  const collection = db.collection(ROUTES_COLLECTION_NAME);
+  const collection = db.collection<{ userID: string; route: Route }>(
+    ROUTES_COLLECTION_NAME
+  );
 
-  const result = await collection.deleteOne({ _id: new ObjectId(tripID) });
+  const deletedCount: number = (
+    await collection.deleteOne({
+      _id: new ObjectId(tripID),
+    })
+  ).deletedCount;
 
-  return result.deletedCount;
+  return deletedCount;
 }

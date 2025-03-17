@@ -1,6 +1,5 @@
 import { Allergy } from "../interfaces/PreferenceInterfaces";
 import { client } from "../services";
-import { Document } from "bson";
 
 const DB_NAME = "preferences";
 const COLLECTION_NAME = "allergies";

@@ -434,16 +434,29 @@ describe("Mocked: GET /routes/:id", () => {
   // Expected behavior: route returned successfully
   // Expected output: route object
   test("Valid tripID and route returned", async () => {
-    jest
-      .spyOn(RouteHelpers, "getRouteFromDb")
-      .mockResolvedValue({ mock: "route" });
+    const mock_route = {
+      start_location: {
+        latitude: 0,
+        longitude: 0,
+        name: "",
+        population: 0,
+      },
+      end_location: {
+        latitude: 0,
+        longitude: 0,
+        name: "",
+        population: 0,
+      },
+      stops: [],
+    };
+    jest.spyOn(RouteHelpers, "getRouteFromDb").mockResolvedValue(mock_route);
 
     const tripID = new ObjectId(123);
     const response = await request(app)
       .get(`/routes/${tripID.toHexString()}`)
       .expect(200);
 
-    expect(response.body).toHaveProperty("mock", "route");
+    expect(response.body).toEqual(mock_route);
     expect(RouteHelpers.getRouteFromDb).toHaveBeenCalled();
   });
 });
