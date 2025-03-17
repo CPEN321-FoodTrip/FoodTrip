@@ -86,24 +86,24 @@ export async function createRecipesfromRoute(
 export async function saveRecipesToDb(
   tripID: string,
   recipes: Recipe[]
-): Promise<ObjectId> {
+): Promise<string> {
   const db = client.db(RECIPE_DB_NAME);
   const collection = db.collection(RECIPE_COLLECTION_NAME);
 
-  const insertedId: ObjectId = (
+  const insertedId: string = (
     await collection.insertOne({
       tripID,
       recipes,
     })
-  ).insertedId;
+  ).insertedId.toHexString();
   return insertedId;
 }
 
-export async function getRecipesFromDb(tripID: string): Promise<unknown> {
-  const recipes: unknown = await client
+export async function getRecipesFromDb(tripID: string): Promise<object | null> {
+  const recipes: object | null = await client
     .db(RECIPE_DB_NAME)
     .collection(RECIPE_COLLECTION_NAME)
-    .findOne({ tripID });
+    .findOne<object>({ tripID });
   return recipes;
 }
 

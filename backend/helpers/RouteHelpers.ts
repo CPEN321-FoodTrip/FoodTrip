@@ -294,12 +294,14 @@ export async function generateRouteStops(
 export async function saveRouteToDb(
   userID: string,
   route: object
-): Promise<ObjectId> {
+): Promise<string> {
   const db = client.db(ROUTES_DB_NAME);
   const collection = db.collection(ROUTES_COLLECTION_NAME);
 
-  const result = await collection.insertOne({ userID, ...route });
-  return result.insertedId;
+  const insertedId: string = (
+    await collection.insertOne({ userID, ...route })
+  ).insertedId.toHexString();
+  return insertedId;
 }
 
 // get route from MongoDB by ID (or null if not found)

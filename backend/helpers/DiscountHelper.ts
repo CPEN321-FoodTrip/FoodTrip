@@ -15,10 +15,12 @@ export async function addDiscountToDb(discount: Discount): Promise<string> {
 }
 
 // get all discounts for a store
-export async function getDiscountsFromDb(storeID: string): Promise<object> {
-  const discounts = await client
+export async function getDiscountsFromDb(
+  storeID: string
+): Promise<{ discountID: string; [key: string]: any }[]> {
+  const discounts: { _id: string; [key: string]: any }[] = await client
     .db(DB_NAME)
-    .collection(COLLECTION_NAME)
+    .collection<{ _id: string; [key: string]: any }>(COLLECTION_NAME)
     .find({ storeID })
     .toArray();
 
