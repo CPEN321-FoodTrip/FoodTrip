@@ -444,7 +444,7 @@ describe("Mocked: GET /routes/:id", () => {
       .expect(200);
 
     expect(response.body).toHaveProperty("mock", "route");
-    expect(RouteHelpers.getRouteFromDb).toHaveBeenCalled;
+    expect(RouteHelpers.getRouteFromDb).toHaveBeenCalled();
   });
 });
 
@@ -524,6 +524,6 @@ describe("Mocked: DELETE /routes/:id", () => {
       "message",
       "Route deleted successfully"
     );
-    expect(RouteHelpers.deleteRouteFromDb).toHaveBeenCalled;
+    expect(RouteHelpers.deleteRouteFromDb).toHaveBeenCalled();
   });
 });

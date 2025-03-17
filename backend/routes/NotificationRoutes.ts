@@ -1,13 +1,11 @@
 import { body } from "express-validator";
-import { NotificationController } from "../controllers/NotificationController";
-
-const controller = new NotificationController();
+import { subscribe, unsubscribe } from "../controllers/NotificationController";
 
 export const NotificationRoutes = [
   {
     method: "post",
     route: "/notifications",
-    action: controller.subscribe,
+    action: subscribe,
     validation: [
       body("userID")
         .exists()
@@ -22,7 +20,7 @@ export const NotificationRoutes = [
   {
     method: "delete",
     route: "/notifications/:id",
-    action: controller.unsubscribe,
+    action: unsubscribe,
     validation: [],
   },
 ];
