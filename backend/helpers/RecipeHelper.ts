@@ -1,4 +1,4 @@
-import { ObjectId, WithId, Document } from "mongodb";
+import { ObjectId } from "mongodb";
 import { client } from "../services";
 
 import { RouteStop } from "../interfaces/RouteInterfaces";

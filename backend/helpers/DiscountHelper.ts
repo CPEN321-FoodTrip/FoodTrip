@@ -7,12 +7,11 @@ const COLLECTION_NAME = "discounts";
 
 // add a discount to the database
 export async function addDiscountToDb(discount: Discount): Promise<string> {
-  const result = await client
-    .db(DB_NAME)
-    .collection(COLLECTION_NAME)
-    .insertOne(discount);
+  const insertedId: string = (
+    await client.db(DB_NAME).collection(COLLECTION_NAME).insertOne(discount)
+  ).insertedId.toHexString();
 
-  return result.insertedId.toString();
+  return insertedId;
 }
 
 // get all discounts for a store

@@ -31,16 +31,16 @@ export async function getTokenFromDb(userID: string): Promise<string | null> {
   const result = await client
     .db(DB_NAME)
     .collection(COLLECTION_NAME)
-    .findOne({ userID });
+    .findOne<{ fcmToken: string }>({ userID });
 
   return result ? result.fcmToken : null;
 }
 
 // get all fcm tokens from database
 export async function getAllTokensFromDb(): Promise<string[]> {
-  const result = await client
+  const result: { fcmToken: string }[] = await client
     .db(DB_NAME)
-    .collection(COLLECTION_NAME)
+    .collection<{ fcmToken: string }>(COLLECTION_NAME)
     .find({})
     .toArray();
 
