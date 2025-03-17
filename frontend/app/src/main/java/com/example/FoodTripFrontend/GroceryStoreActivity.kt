@@ -22,6 +22,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okio.IOException
+import kotlin.math.E
 
 /**
  * Activity to manage the discount of the store
@@ -139,7 +140,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("$response")
+                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE: $response")
 
                     val json = response.body!!.string()
                     val listType = object : TypeToken<List<DiscountItem>>() {}.type
@@ -177,7 +178,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("$response")
+                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE:  $response")
 
                     getDiscount(sampleID) {discountList -> processDiscount(discountList)}
                 }
@@ -200,7 +201,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("$response")
+                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE:    $response")
 
                     getDiscount(sampleID) {discountList -> processDiscount(discountList)}
                 }
