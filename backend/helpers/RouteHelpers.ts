@@ -293,7 +293,7 @@ export async function generateRouteStops(
 // save route to MongoDB and return ID
 export async function saveRouteToDb(
   userID: string,
-  route: {}
+  route: object
 ): Promise<ObjectId> {
   const db = client.db(ROUTES_DB_NAME);
   const collection = db.collection(ROUTES_COLLECTION_NAME);
