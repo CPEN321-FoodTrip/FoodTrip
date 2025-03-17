@@ -1,4 +1,4 @@
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId, Document } from "mongodb";
 import { client } from "../services";
 
 import { RouteStop } from "../interfaces/RouteInterfaces";
@@ -90,15 +90,19 @@ export async function saveRecipesToDb(
   const db = client.db(RECIPE_DB_NAME);
   const collection = db.collection(RECIPE_COLLECTION_NAME);
 
-  const result = await collection.insertOne({
-    tripID,
-    recipes,
-  });
-  return result.insertedId;
+  const insertedId: ObjectId = (
+    await collection.insertOne({
+      tripID,
+      recipes,
+    })
+  ).insertedId;
+  return insertedId;
 }
 
-export async function getRecipesFromDb(tripID: string): Promise<object | null> {
-  const recipes = await client
+export async function getRecipesFromDb(
+  tripID: string
+): Promise<WithId<Document> | null> {
+  const recipes: WithId<Document> | null = await client
     .db(RECIPE_DB_NAME)
     .collection(RECIPE_COLLECTION_NAME)
     .findOne({ tripID });
@@ -106,9 +110,11 @@ export async function getRecipesFromDb(tripID: string): Promise<object | null> {
 }
 
 export async function deleteRecipesFromDb(tripID: string): Promise<number> {
-  const result = await client
-    .db(RECIPE_DB_NAME)
-    .collection(RECIPE_COLLECTION_NAME)
-    .deleteOne({ tripID });
-  return result.deletedCount;
+  const deletedCount: number = (
+    await client
+      .db(RECIPE_DB_NAME)
+      .collection(RECIPE_COLLECTION_NAME)
+      .deleteOne({ tripID })
+  ).deletedCount;
+  return deletedCount;
 }

@@ -111,7 +111,7 @@ export async function fetchCityData(
       throw new Error(`Failed to fetch city data: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data: object = await response.json();
 
     if (!Array.isArray(data) || data.length === 0) {
       return null;

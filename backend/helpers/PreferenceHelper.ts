@@ -34,6 +34,7 @@ export async function deleteAllergyFromDb(
 ): Promise<number> {
   const db = client.db(DB_NAME);
   const collection = db.collection(COLLECTION_NAME);
-
-  return (await collection.deleteOne({ userID, allergy })).deletedCount;
+  const deleteCount: number = (await collection.deleteOne({ userID, allergy }))
+    .deletedCount;
+  return deleteCount;
 }
