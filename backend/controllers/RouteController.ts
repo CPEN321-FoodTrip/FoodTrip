@@ -27,9 +27,7 @@ export class RouteController {
     }
 
     try {
-      const originCityData: { lat: string; lon: string } = await fetchCityData(
-        origin
-      );
+      const originCityData = await fetchCityData(origin);
       if (!originCityData) {
         return res.status(400).json({ error: "Origin city not found" });
       }
@@ -41,8 +39,7 @@ export class RouteController {
         population: 0, // not used for start location
       };
 
-      const destinationCityData: { lat: string; lon: string } =
-        await fetchCityData(destination);
+      const destinationCityData = await fetchCityData(destination);
       if (!destinationCityData) {
         return res.status(400).json({ error: "Destination city not found" });
       }

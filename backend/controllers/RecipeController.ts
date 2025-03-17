@@ -21,7 +21,7 @@ export class RecipeController {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { tripID } = req.body;
+    const { tripID } = req.body as { tripID: string };
 
     try {
       const recipes = await createRecipesfromRoute(tripID);

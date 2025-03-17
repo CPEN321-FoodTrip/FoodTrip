@@ -9,7 +9,7 @@ export class PreferenceController {
   // POST /preferences/allergies
   async addAllergy(req: Request, res: Response, next: NextFunction) {
     // validation of params performed by express-validator middleware
-    const { userID, allergy } = req.body;
+    const { userID, allergy } = req.body as { userID: string; allergy: string };
 
     try {
       await addAllergyToDb(userID, allergy);
