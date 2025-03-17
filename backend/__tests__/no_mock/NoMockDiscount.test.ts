@@ -338,7 +338,7 @@ describe("Unmocked: GET /discounts", () => {
   });
 });
 
-// Interface PATCH /discounts/:id
+// Interface DELETE /discounts/:id
 describe("Unmocked: DELETE /discounts/:id", () => {
   // Input: valid discount saved in db
   // Expected status code: 200

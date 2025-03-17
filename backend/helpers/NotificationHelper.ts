@@ -1,4 +1,3 @@
-import { ObjectId } from "mongodb";
 import { client } from "../services";
 
 const DB_NAME = "discounts";
@@ -8,7 +7,7 @@ const COLLECTION_NAME = "notifications";
 export async function addTokenToDb(
   userID: string,
   fcmToken: string
-): Promise<ObjectId | null> {
+): Promise<unknown> {
   const result = await client
     .db(DB_NAME)
     .collection(COLLECTION_NAME)

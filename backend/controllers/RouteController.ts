@@ -6,15 +6,19 @@ import {
   deleteRouteFromDb,
   fetchCityData,
 } from "../helpers/RouteHelpers";
-import { Location } from "../interfaces/RouteInterfaces";
+import { Location, RouteRequest } from "../interfaces/RouteInterfaces";
 import { ObjectId } from "mongodb";
 
 export class RouteController {
   // create a new route
   // POST /routes
-  async createRoute(req: Request, res: Response, next: NextFunction) {
+  async createRoute(
+    req: Request<object, object, RouteRequest>,
+    res: Response,
+    next: NextFunction
+  ) {
     // validation of params performed by express-validator middleware
-    const { userID, origin, destination, numStops } = req.body;
+    const { userID, origin, destination, numStops }: RouteRequest = req.body;
 
     if (numStops < 1) {
       return res
