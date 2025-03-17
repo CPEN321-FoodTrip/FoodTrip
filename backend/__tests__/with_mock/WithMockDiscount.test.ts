@@ -261,7 +261,15 @@ describe("Mocked: GET /discounts/:id", () => {
 
     const response = await request(app).get("/discounts/123").expect(200);
 
-    expect(response.body).toEqual([{ discountID, storeID: "123" }]);
+    expect(response.body).toEqual([
+      {
+        discountID,
+        storeID: "123",
+        storeName: "",
+        ingredient: "",
+        price: 0,
+      },
+    ]);
     expect(DiscountHelpers.getDiscountsFromDb).toHaveBeenCalled();
   });
 
@@ -393,22 +401,16 @@ describe("Mocked: GET /discounts", () => {
   // Expected behavior: discounts are retrieved from db
   // Expected output: discounts array
   test("Optional ingredient query mock implemented", async () => {
-    const mockDiscount = { storeName: "mock store" };
+    const mockDiscount = {
+      storeID: "123",
+      storeName: "mock store",
+      ingredient: "apple",
+      price: 1.5,
+    };
     jest
       .spyOn(DiscountHelpers, "getAllDiscountsFromDb")
       .mockImplementation((ingredient: string) => {
-        return Promise.resolve(
-          ingredient === "apple"
-            ? [
-                {
-                  storeID: "123",
-                  storeName: "mock store",
-                  ingredient: "apple",
-                  price: 1.5,
-                },
-              ]
-            : []
-        );
+        return Promise.resolve(ingredient === "apple" ? [mockDiscount] : []);
       });
 
     const response = await request(app)
