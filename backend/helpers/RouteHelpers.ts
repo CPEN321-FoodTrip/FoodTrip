@@ -279,10 +279,6 @@ export async function generateRouteStops(
         cumulativeDistance: bestCity.distanceFromStart,
         segmentPercentage: segmentPercentage * 100,
       });
-    } else {
-      // console.debug(
-      //   `No cities found for segment ${i} at ${segmentPercentage * 100}`
-      // );
     }
   }
 

@@ -249,9 +249,15 @@ describe("Mocked: GET /discounts/:id", () => {
   // Expected output: discounts array
   test("Valid discount mock retrieved", async () => {
     const discountID: string = new ObjectId().toHexString();
-    jest
-      .spyOn(DiscountHelpers, "getDiscountsFromDb")
-      .mockResolvedValue([{ discountID, storeID: "123" }]);
+    jest.spyOn(DiscountHelpers, "getDiscountsFromDb").mockResolvedValue([
+      {
+        discountID,
+        storeID: "123",
+        storeName: "",
+        ingredient: "",
+        price: 0,
+      },
+    ]);
 
     const response = await request(app).get("/discounts/123").expect(200);
 
@@ -329,8 +335,20 @@ describe("Mocked: GET /discounts", () => {
   // Expected output: discounts array
   test("Valid discounts mock retrieved", async () => {
     const discounts = [
-      { discountID: "123", storeID: "123" },
-      { discountID: "456", storeID: "456" },
+      {
+        discountID: "123",
+        storeID: "123",
+        storeName: "Store 1",
+        ingredient: "apple",
+        price: 1.5,
+      },
+      {
+        discountID: "456",
+        storeID: "456",
+        storeName: "Store 2",
+        ingredient: "banana",
+        price: 2.0,
+      },
     ];
     jest
       .spyOn(DiscountHelpers, "getAllDiscountsFromDb")
@@ -379,7 +397,18 @@ describe("Mocked: GET /discounts", () => {
     jest
       .spyOn(DiscountHelpers, "getAllDiscountsFromDb")
       .mockImplementation((ingredient: string) => {
-        return Promise.resolve(ingredient === "apple" ? [mockDiscount] : []);
+        return Promise.resolve(
+          ingredient === "apple"
+            ? [
+                {
+                  storeID: "123",
+                  storeName: "mock store",
+                  ingredient: "apple",
+                  price: 1.5,
+                },
+              ]
+            : []
+        );
       });
 
     const response = await request(app)

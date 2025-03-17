@@ -3,4 +3,5 @@ export interface Discount {
   storeName: string;
   ingredient: string;
   price: number;
+  discountID?: string;
 }

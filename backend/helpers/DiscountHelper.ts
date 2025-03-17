@@ -15,27 +15,28 @@ export async function addDiscountToDb(discount: Discount): Promise<string> {
 }
 
 // get all discounts for a store
-export async function getDiscountsFromDb(
-  storeID: string
-): Promise<{ discountID: string; [key: string]: any }[]> {
-  const discounts: { _id: string; [key: string]: any }[] = await client
+export async function getDiscountsFromDb(storeID: string): Promise<Discount[]> {
+  const discounts = await client
     .db(DB_NAME)
-    .collection<{ _id: string; [key: string]: any }>(COLLECTION_NAME)
+    .collection<Discount & { _id: string }>(COLLECTION_NAME)
     .find({ storeID })
     .toArray();
 
-  return discounts.map(({ _id, ...rest }) => ({ discountID: _id, ...rest }));
+  return discounts.map(({ _id, ...rest }) => ({
+    discountID: _id,
+    ...rest,
+  }));
 }
 
 // get all discounts from the database, with optional ingredient filter
 export async function getAllDiscountsFromDb(
   ingredient: string
-): Promise<object> {
+): Promise<Discount[]> {
   const query = ingredient ? { ingredient } : {};
 
   const discounts = await client
     .db(DB_NAME)
-    .collection(COLLECTION_NAME)
+    .collection<Discount & { _id: string }>(COLLECTION_NAME)
     .find(query)
     .toArray();
 
@@ -46,10 +47,12 @@ export async function getAllDiscountsFromDb(
 export async function deleteDiscountFromDb(
   discountID: string
 ): Promise<number> {
-  const result = await client
-    .db(DB_NAME)
-    .collection(COLLECTION_NAME)
-    .deleteOne({ _id: new ObjectId(discountID) });
+  const deletedCount = (
+    await client
+      .db(DB_NAME)
+      .collection(COLLECTION_NAME)
+      .deleteOne({ _id: new ObjectId(discountID) })
+  ).deletedCount;
 
-  return result.deletedCount;
+  return deletedCount;
 }
