@@ -9,16 +9,15 @@ import {
 import { Location, RouteRequest } from "../interfaces/RouteInterfaces";
 import { ObjectId } from "mongodb";
 
-export class RouteController {
-  // create a new route
-  // POST /routes
-  async createRoute(this:void, 
+// create a new route
+// POST /routes
+export const createRoute = async(
     req: Request<object, object, RouteRequest>,
     res: Response,
     next: NextFunction
-  ) {
-    // validation of params performed by express-validator middleware
-    const { userID, origin, destination, numStops }: RouteRequest = req.body;
+  ) => {
+  // validation of params performed by express-validator middleware
+  const { userID, origin, destination, numStops }: RouteRequest = req.body;
 
   if (numStops < 1) {
     return res
