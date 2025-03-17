@@ -240,7 +240,11 @@ export async function generateRouteStops(
 
     // choose city closest to ideal point
     if (nearbyCities.length > 0) {
-      const citiesWithDistance = nearbyCities.map((city) => {
+      const citiesWithDistance: {
+        location: Location;
+        distanceFromIdealPoint: number;
+        distanceFromStart: number;
+      }[] = nearbyCities.map((city) => {
         const location: Location = {
           name: city.name,
           latitude: city.latitude,
@@ -276,7 +280,7 @@ export async function generateRouteStops(
         segmentPercentage: segmentPercentage * 100,
       });
     } else {
-      console.log(
+      console.debug(
         `No cities found for segment ${i} at ${segmentPercentage * 100}`
       );
     }
