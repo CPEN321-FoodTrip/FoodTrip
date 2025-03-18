@@ -283,6 +283,8 @@ describe("Unmocked Performance test", () => {
           }),
         }
       );
+      const data = await allergy_response.json();
+      expect(data.message).toContain("Allergy added successfully")
       console.log(userID," added allergy ",allergen);
       const get_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/preferences/allergies/${userID}`,
         {
