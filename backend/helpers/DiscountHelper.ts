@@ -47,7 +47,7 @@ export async function getAllDiscountsFromDb(
 export async function deleteDiscountFromDb(
   discountID: string
 ): Promise<number> {
-  const deletedCount = (
+  const deletedCount: number = (
     await client
       .db(DB_NAME)
       .collection(COLLECTION_NAME)

@@ -108,7 +108,11 @@ export async function getRecipesFromDb(
     .db(RECIPE_DB_NAME)
     .collection<{ tripID: string; recipes: Recipe[] }>(RECIPE_COLLECTION_NAME)
     .findOne({ tripID });
-  return result?.recipes ?? null;
+
+  if (!result || !result.recipes) {
+    return null;
+  }
+  return result.recipes;
 }
 
 export async function deleteRecipesFromDb(tripID: string): Promise<number> {
