@@ -130,9 +130,7 @@ describe("Mocked: POST /recipes", () => {
     process.env.EDAMAM_API_KEY = "";
     process.env.EDAMAM_APP_ID = "";
 
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {
-      
-    });
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(jest.fn());
     await expect(RecipeHelper.fetchRecipe("query")).rejects.toThrow();
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -190,7 +188,7 @@ test('cannot reach Edamam API', async () => {
   // Mock fetch to return a non-OK response
   mocked(fetch).mockRejectedValueOnce(new Error("Network error"));
 
-  const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+  const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(jest.fn());
 
     // Act & Assert: Expect the function to throw
     await expect(RecipeHelper.fetchRecipe("invalid-query")).rejects.toThrow("Network error");
