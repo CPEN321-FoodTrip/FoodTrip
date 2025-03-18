@@ -8,15 +8,11 @@ const COLLECTION_NAME = "notifications";
 export async function addTokenToDb(
   userID: string,
   fcmToken: string
-): Promise<string> {
-  const insertedId: string = (
-    await client
-      .db(DB_NAME)
-      .collection<UserNotificationData>(COLLECTION_NAME)
-      .insertOne({ userID, fcmToken })
-  ).insertedId.toHexString();
-
-  return insertedId;
+): Promise<void> {
+  await client
+    .db(DB_NAME)
+    .collection<UserNotificationData>(COLLECTION_NAME)
+    .insertOne({ userID, fcmToken });
 }
 
 // remove user fcm token from database
