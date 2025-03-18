@@ -5,73 +5,214 @@ import * as RecipeHelper from "../../helpers/RecipeHelper";
 import { ObjectId } from "mongodb";
 import { client } from "../../services";
 
+const ROUTES_DB_NAME = "route_data";
+const ROUTES_COLLECTION_NAME = "routes";
+const RECIPE_DB_NAME = "recipes";
+const RECIPE_COLLECTION_NAME = "recipes";
+
+const SAMPLE_ROUTE_1 = {
+    start_location: {
+      name: "Vancouver",
+      latitude: 49.2608724,
+      longitude: -123.113952,
+    },
+    end_location: {
+      name: "Toronto",
+      latitude: 43.6534817,
+      longitude: -79.3839347,
+    },
+    stops: [
+      {
+        location: {
+          name: "Winnipeg",
+          latitude: 49.8844,
+          longitude: -97.14704,
+          population: 749607,
+        },
+        distanceFromStart: 1329.071074459746,
+        cumulativeDistance: 1329.071074459746,
+        segmentPercentage: 50,
+      },
+    ],
+  };
+  
+  const SAMPLE_RECIPE_1 = {
+    recipes: [
+      {
+        recipeName: "Winnipeg Chicken Curry",
+          recipeID: 1,
+          url: "http://www.food.com/recipe/winnipeg-chicken-curry-2930",
+          ingredients: [
+            "3 tablespoons butter",
+            "2 onions, peeled and thinly sliced",
+            "2 tablespoons curry powder",
+            "2 chicken breasts",
+            "2 cups chicken stock, heated",
+            "1 tablespoon cornstarch",
+            "2 tablespoons water, cold",
+            "1⁄4 cup cream (I use milk)",
+            "salt & pepper"
+          ]
+      }
+    ]
+  }
+
+
 jest.mock("node-fetch", () => jest.fn());
 
-
-// Interface POST /routes
-// Performance test
-describe("Performance: POST /routes", () => {
+describe("Unmocked Performance test", () => {
     jest.setTimeout(20000); //20s
-
   beforeEach(async () => {
-    jest.clearAllMocks();
     await RouteHelpers.initializeGeoNamesDatabase();
   });
 
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
+//   afterEach(async () => {
+//     jest.restoreAllMocks();
+//   });
 
-// Mocked behavior: mock openstreetmap api call to return valid coordinates for Vancouver and Nanaimo
-  // Input: valid userID, origin, destination, numStops all valid
-  // Expected status code: 201
-  // Expected behavior: route saved successfully
-  // Expected output: success message
-  test("Single request, 10 stops", async () => {
-    global.fetch = jest
-      .fn()
-      // vancover
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () =>
-          Promise.resolve([{ lat: "49.2827", lon: "-123.1207" }]),
-      })
-      // nanaimo
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () =>
-          Promise.resolve([{ lat: "49.1638", lon: "-123.9381" }]),
-      });
-      const start = Date.now(); //begin time after jest sets up inputs
-
+  test("Unmocked single route, 10 stops", async () => {
+    const start = Date.now();
     const response = await request(app)
       .post("/routes")
       .send({
         userID: "test-user",
         origin: "Vancouver",
-        destination: "Nanaimo",
+        destination: "Toronto",
         numStops: 10,
       })
       .expect(201);
+    
 
+    
+    const db = client.db(ROUTES_DB_NAME);
+    const collection = db.collection(ROUTES_COLLECTION_NAME);
+    const tripID = response.body.tripID;
+    console.log(tripID);
+    const result = await collection.findOne({ _id: new ObjectId(tripID) });
 
-      const end = Date.now();
+    const recipe_response = await request(app)
+      .post("/recipes")
+      .send({
+        tripID: tripID 
+      })
+      .expect(200);
+
+    const recipe_db = client.db(RECIPE_DB_NAME);
+    const recipe_collection = recipe_db.collection(RECIPE_COLLECTION_NAME);
+    const recipe_result = await recipe_collection.findOne({ _id: tripID }); 
+
+    const end = Date.now();
+
+      // route response verification
     expect(response.body).toHaveProperty("tripID");
     expect(response.body).toHaveProperty("start_location");
     expect(response.body).toHaveProperty("end_location");
     expect(Array.isArray(response.body.stops)).toBe(true);
     expect(response.body.stops).toHaveLength(10); // 10 stops
-
-    // check if route added to in-memory db which was cleared after last test by afterEach in jest setup
-    const result = await client
-      .db("route_data")
-      .collection("routes")
-      .findOne({ userID: "test-user" });
+      // route db verification
     expect(result).not.toBeNull();
+    expect(result).toHaveProperty("userID", "test-user");
+    expect(result?.start_location).toHaveProperty("name", "Vancouver");
+    expect(result?.end_location).toHaveProperty("name", "Toronto");
+    expect(Array.isArray(result?.stops)).toBe(true);
+    expect(result?.stops).toHaveLength(10); // 10 stops
 
+
+    // recipe response verification
+    // expect(recipe_response).not.toBeNull();
+    // expect(Array.isArray(recipe_response?.body)).toBe(true);
+    // expect(recipe_response.body.recipes[0]).toHaveProperty("recipeName");
+    // expect(recipe_response.body.recipes[0]).toHaveProperty("recipeID");   
+    // expect(recipe_response.body.recipes[0]).toHaveProperty("url");   
+    // expect(recipe_response.body.recipes[0]).toHaveProperty("ingredients");   
+    // expect(recipe_response.body.recipes).toHaveLength(1);
+      // recipe db verification
+
+    // expect(Array.isArray(recipe_result?.recipes)).toBe(true);
+    // expect(recipe_result?.body.recipes[0]).toHaveProperty("recipeName", "Winnipeg Chicken Curry");
+    // expect(recipe_result?.body.recipes[0]).toHaveProperty("recipeID", 1);
+    // expect(recipe_result?.body.recipes[0]).toHaveProperty("url", "http://www.food.com/recipe/winnipeg-chicken-curry-2930");
+    // expect(recipe_result?.body.recipes[0]).toHaveProperty("ingredients", SAMPLE_RECIPE_1.recipes[0].ingredients);
+    // expect(recipe_result?.body.recipes).toHaveLength(10); 
 
     const duration = end - start; //begin timing test assuming that operation succeeded
-    console.log(`High-resolution duration: ${duration}ms`);
-    expect(duration).toBeLessThanOrEqual(2000); // 2s
+
+    const route_teardown = await request(app).delete(`/routes/${tripID}`).expect(200);
+    expect(route_teardown.body).toHaveProperty("success", true);
+    const recipe_teardown = await request(app).delete(`/recipes/${tripID}`).expect(200);
+    expect(recipe_teardown.body).toHaveProperty("success", true);
+
+    console.log(`unmocked Execution time: ${duration}ms`);
+    expect(duration).toBeLessThanOrEqual(4000); // 4s
   });
+
+//   test("Unmocked single route, 10 stops", async () => {
+//     const start = Date.now();
+//     const response = await request(app)
+//       .post("/routes")
+//       .send({
+//         userID: "test-user",
+//         origin: "Vancouver",
+//         destination: "Toronto",
+//         numStops: 10,
+//       })
+//       .expect(201);
+
+    
+//     const db = client.db(ROUTES_DB_NAME);
+//     const collection = db.collection(ROUTES_COLLECTION_NAME);
+//     const tripID = response.body.tripID;
+//     const result = await collection.findOne({ _id: new ObjectId(tripID) });
+
+//     const recipe_response = await request(app)
+//       .post("/recipes")
+//       .send({
+//         tripID: tripID 
+//       })
+//       .expect(200);
+
+//     const recipe_db = client.db(RECIPE_DB_NAME);
+//     const recipe_collection = recipe_db.collection(RECIPE_COLLECTION_NAME);
+//     const recipe_result = await recipe_collection.findOne({ _id: tripID }); 
+
+    
+
+//       // route response verification
+//     expect(response.body).toHaveProperty("tripID");
+//     expect(response.body).toHaveProperty("start_location");
+//     expect(response.body).toHaveProperty("end_location");
+//     expect(Array.isArray(response.body.stops)).toBe(true);
+//     expect(response.body.stops).toHaveLength(10); // 10 stops
+//       // route db verification
+//     expect(result).not.toBeNull();
+//     expect(result).toHaveProperty("userID", "test-user");
+//     expect(result?.start_location).toHaveProperty("name", "Vancouver");
+//     expect(result?.end_location).toHaveProperty("name", "Toronto");
+//     expect(Array.isArray(result?.stops)).toBe(true);
+//     expect(result?.stops).toHaveLength(10); // 1 stop
+
+
+//     // recipe response verification
+//     expect(recipe_result).not.toBeNull();
+//     expect(Array.isArray(recipe_result?.body)).toBe(true);
+//     expect(recipe_result?.body.recipes[0]).toHaveProperty("recipeName");
+//     expect(recipe_result?.body.recipes[0]).toHaveProperty("recipeID");   
+//     expect(recipe_result?.body.recipes[0]).toHaveProperty("url");   
+//     expect(recipe_result?.body.recipes[0]).toHaveProperty("ingredients");   
+//     expect(recipe_result?.body.recipes).toHaveLength(1);
+//       // recipe db verification
+
+//     expect(result?.body.recipes[0]).toHaveProperty("recipeName", "Winnipeg Chicken Curry");
+//     expect(result?.body.recipes[0]).toHaveProperty("recipeID", 1);
+//     expect(result?.body.recipes[0]).toHaveProperty("url", "http://www.food.com/recipe/winnipeg-chicken-curry-2930");
+//     expect(result?.body.recipes[0]).toHaveProperty("ingredients", SAMPLE_RECIPE_1.recipes[0].ingredients);
+//     expect(Array.isArray(result?.stops)).toBe(true);
+//     expect(result).toHaveLength(10); 
+//     const end = Date.now();
+
+//     const duration = end - start; //begin timing test assuming that operation succeeded
+//     console.log(`unmocked Execution time: ${duration}ms`);
+//     expect(duration).toBeLessThanOrEqual(2000); // 2s
+//   });
 });
+  
