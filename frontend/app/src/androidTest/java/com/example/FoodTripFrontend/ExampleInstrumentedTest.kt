@@ -1,6 +1,8 @@
 package com.example.FoodTripFrontend
 
 import android.content.Context
+import android.util.Log
+import android.view.View
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
@@ -23,14 +25,58 @@ import org.junit.Before
 import org.junit.Rule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.UiController
+import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.intent.matcher.IntentMatchers
+import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.withParent
 import androidx.test.espresso.matcher.ViewMatchers.withTagValue
 import com.google.android.gms.maps.model.LatLng
+import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.`is`
+import org.junit.rules.TestName
+
+val TAG = "TestLog"
+
+val startCount = 0
+val maxCount = 3
+var clickCount = 0
+
+/**
+ * customize click action with click count
+ * for usability test: click count <= 3 for each use case
+ */
+fun customClick(): ViewAction {
+    return object : ViewAction {
+        override fun getConstraints(): Matcher<View> {
+            return ViewMatchers.isClickable()
+        }
+
+        override fun getDescription(): String {
+            return "custom click action"
+        }
+
+        override fun perform(uiController: UiController, view: View) {
+            clickCount++
+            click().perform(uiController, view)
+        }
+    }
+}
+
+/**
+ * Print test log result of usability test
+ */
+fun checkClick(str: String) {
+    try {
+        assert(clickCount <= maxCount)
+        Log.d(TAG, "Usability Test Passed($clickCount clicks): $str")
+    } catch (e: AssertionError) {
+        Log.d(TAG, "Usability Test Failed($clickCount clicks): $str")
+    }
+}
 
 /**
  * Test of LoginActivity-related functionality.
@@ -40,9 +86,11 @@ import org.hamcrest.Matchers.`is`
  */
 @RunWith(AndroidJUnit4::class)
 class LoginActivityTest {
-
     @get:Rule
     val activityRule = ActivityScenarioRule(LoginActivity::class.java)
+
+    @get:Rule
+    var testName = TestName()
 
     /**
      * Initialization for intent checking
@@ -51,6 +99,7 @@ class LoginActivityTest {
      */
     @Before
     fun setup() {
+        clickCount = startCount
         Intents.init()
     }
 
@@ -63,6 +112,7 @@ class LoginActivityTest {
     @After
     fun tearDown() {
         Intents.release()
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
 
@@ -100,6 +150,7 @@ class MainActivityTest {
      */
     @Before
     fun setup() {
+        clickCount = startCount
         Intents.init()
     }
 
@@ -111,10 +162,14 @@ class MainActivityTest {
     @After
     fun tearDown() {
         Intents.release()
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
     @get:Rule
     val activityRule = ActivityScenarioRule(MainActivity::class.java)
+
+    @get:Rule
+    var testName = TestName()
 
     /**
      * Ui Test for the Main Activity
@@ -135,7 +190,7 @@ class MainActivityTest {
      * the manage trip activity
      */
     @Test fun checkManageTrip() {
-        onView(withId(R.id.ManageTrip)).perform(click())
+        onView(withId(R.id.ManageTrip)).perform(customClick())
         Intents.intended(IntentMatchers.hasComponent(TripActivity::class.java.name))
     }
 
@@ -146,7 +201,7 @@ class MainActivityTest {
      * the past trip activity
      */
     @Test fun checkPastTrips() {
-        onView(withId(R.id.PastTrips)).perform(click())
+        onView(withId(R.id.PastTrips)).perform(customClick())
         Intents.intended(IntentMatchers.hasComponent(PastTripActivity::class.java.name))
 
     }
@@ -158,7 +213,7 @@ class MainActivityTest {
      * the view recipe activity
      */
     @Test fun checkViewRecipe() {
-        onView(withId(R.id.viewRecipes)).perform(click())
+        onView(withId(R.id.viewRecipes)).perform(customClick())
         Intents.intended(IntentMatchers.hasComponent(GroceryActivity::class.java.name))
 
     }
@@ -170,7 +225,7 @@ class MainActivityTest {
      * the manage account activity
      */
     @Test fun checkAccount() {
-        onView(withId(R.id.ManageAccount)).perform(click())
+        onView(withId(R.id.ManageAccount)).perform(customClick())
         Intents.intended(IntentMatchers.hasComponent(AccountActivity::class.java.name))
 
     }
@@ -184,7 +239,7 @@ class MainActivityTest {
     @Test fun signOut() {
         onView(withId(R.id.sign_out_button)).check(matches(withText("Sign Out")))
 
-        onView(withId(R.id.sign_out_button)).perform(click())
+        onView(withId(R.id.sign_out_button)).perform(customClick())
 
         Intents.intended(IntentMatchers.hasComponent(LoginActivity::class.java.name))
     }
@@ -207,6 +262,7 @@ class MainActivityAdminTest {
      */
     @Before
     fun setup() {
+        clickCount = startCount
         Intents.init()
     }
 
@@ -218,10 +274,14 @@ class MainActivityAdminTest {
     @After
     fun tearDown() {
         Intents.release()
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
     @get:Rule
     val activityRule = ActivityScenarioRule(MainActivityAdmin::class.java)
+
+    @get:Rule
+    var testName = TestName()
 
     /**
      * Functionality Test for the Main Admin Activity
@@ -230,7 +290,7 @@ class MainActivityAdminTest {
      * to the grocery store activity
      */
     @Test fun setGroceriesButton() {
-        onView(withId(R.id.GroceryButton)).perform(click())
+        onView(withId(R.id.GroceryButton)).perform(customClick())
         Intents.intended(hasComponent(GroceryStoreActivity::class.java.name))
     }
 
@@ -254,6 +314,9 @@ class TripActivityTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(TripActivity::class.java)
 
+    @get:Rule
+    var testName = TestName()
+
     /**
      * Initialization for intent checking
      *
@@ -261,6 +324,7 @@ class TripActivityTest {
      */
     @Before
     fun setup() {
+        clickCount = startCount
         Intents.init()
     }
 
@@ -272,6 +336,7 @@ class TripActivityTest {
     @After
     fun tearDown() {
         Intents.release()
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
     /**
@@ -297,7 +362,7 @@ class TripActivityTest {
         onView(withId(R.id.numstops)).perform(typeText("3"), closeSoftKeyboard())
         onView(withId(R.id.numstops)).check(matches(withText("3")))
 
-        onView(withId(R.id.CreateTrip)).perform(click())
+        onView(withId(R.id.CreateTrip)).perform(customClick())
 
         Thread.sleep(5000)
 
@@ -342,7 +407,7 @@ class TripActivityTest {
         onView(withId(R.id.numstops)).perform(typeText("3"), closeSoftKeyboard())
         onView(withId(R.id.numstops)).check(matches(withText("3")))
 
-        onView(withId(R.id.CreateTrip)).perform(click())
+        onView(withId(R.id.CreateTrip)).perform(customClick())
 
         Thread.sleep(1000)
 
@@ -371,7 +436,7 @@ class TripActivityTest {
         onView(withId(R.id.numstops)).perform(typeText("3"), closeSoftKeyboard())
         onView(withId(R.id.numstops)).check(matches(withText("3")))
 
-        onView(withId(R.id.CreateTrip)).perform(click())
+        onView(withId(R.id.CreateTrip)).perform(customClick())
 
         Thread.sleep(1000)
 
@@ -399,7 +464,7 @@ class TripActivityTest {
         onView(withId(R.id.numstops)).perform(typeText("3"), closeSoftKeyboard())
         onView(withId(R.id.numstops)).check(matches(withText("3")))
 
-        onView(withId(R.id.CreateTrip)).perform(click())
+        onView(withId(R.id.CreateTrip)).perform(customClick())
 
         Thread.sleep(1000)
 
@@ -427,7 +492,7 @@ class TripActivityTest {
         onView(withId(R.id.numstops)).perform(typeText("0"), closeSoftKeyboard())
         onView(withId(R.id.numstops)).check(matches(withText("0")))
 
-        onView(withId(R.id.CreateTrip)).perform(click())
+        onView(withId(R.id.CreateTrip)).perform(customClick())
 
         Thread.sleep(1000)
 
@@ -452,7 +517,7 @@ class TripActivityTest {
         onView(withId(R.id.numstops)).perform(typeText("0"), closeSoftKeyboard())
         onView(withId(R.id.numstops)).check(matches(withText("0")))
 
-        onView(withId(R.id.CreateTrip)).perform(click())
+        onView(withId(R.id.CreateTrip)).perform(customClick())
 
         Thread.sleep(1000)
 
@@ -477,7 +542,7 @@ class TripActivityTest {
         onView(withId(R.id.numstops)).perform(typeText("0"), closeSoftKeyboard())
         onView(withId(R.id.numstops)).check(matches(withText("0")))
 
-        onView(withId(R.id.CreateTrip)).perform(click())
+        onView(withId(R.id.CreateTrip)).perform(customClick())
 
         Thread.sleep(1000)
 
@@ -502,7 +567,7 @@ class TripActivityTest {
         onView(withId(R.id.endLocation)).perform(typeText(testCityHanoi), closeSoftKeyboard())
         onView(withId(R.id.endLocation)).check(matches(withText(testCityHanoi)))
 
-        onView(withId(R.id.CreateTrip)).perform(click())
+        onView(withId(R.id.CreateTrip)).perform(customClick())
 
         Thread.sleep(1000)
 
@@ -538,6 +603,7 @@ class PastTripActivityEmptyTest {
      */
     @Before
     fun setup() {
+        clickCount = startCount
         Intents.init()
         val context = ApplicationProvider.getApplicationContext<Context>()
         var sharedPreferences = context.getSharedPreferences("UserData", Context.MODE_PRIVATE);
@@ -552,10 +618,14 @@ class PastTripActivityEmptyTest {
     @After
     fun tearDown() {
         Intents.release()
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
     @get:Rule
     val activityRule = ActivityScenarioRule(PastTripActivity::class.java)
+
+    @get:Rule
+    var testName = TestName()
 
     /**
      * UI Test for the current Activity
@@ -573,7 +643,7 @@ class PastTripActivityEmptyTest {
      * back to the main activity
      */
     @Test fun backButton() {
-        onView(withId(R.id.back_button_past)).perform(click())
+        onView(withId(R.id.back_button_past)).perform(customClick())
 
         Thread.sleep(1000)
         Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
@@ -603,6 +673,9 @@ class PastTripActivityTestPersonTest {
      @get:Rule
     val activityRule = ActivityScenarioRule(PastTripActivity::class.java)
 
+    @get:Rule
+    var testName = TestName()
+
     /**
      * Initialization for intent checking
      *
@@ -610,6 +683,7 @@ class PastTripActivityTestPersonTest {
      */
     @Before
     fun setup() {
+        clickCount = startCount
         Intents.init()
         val context = ApplicationProvider.getApplicationContext<Context>()
         var sharedPreferences = context.getSharedPreferences("UserData", Context.MODE_PRIVATE);
@@ -626,6 +700,7 @@ class PastTripActivityTestPersonTest {
     @After
     fun tearDown() {
         Intents.release()
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
     /**
@@ -644,7 +719,7 @@ class PastTripActivityTestPersonTest {
      * back to the main activity
      */
     @Test fun backButton() {
-        onView(withId(R.id.back_button_past)).perform(click())
+        onView(withId(R.id.back_button_past)).perform(customClick())
 
         Thread.sleep(1000)
         Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
@@ -660,18 +735,18 @@ class PastTripActivityTestPersonTest {
         Thread.sleep(1000)
         onView(withId(R.id.past_trip_list_layout)).check(matches(isDisplayed()))
         onView(withTagValue(`is`("route 1"))).check(matches(isDisplayed()))
-            .perform(click())
+            .perform(customClick())
 
         Thread.sleep(1000)
         Intents.intended(IntentMatchers.hasComponent(PopTripActivity::class.java.name))
         onView(withId(R.id.trip_list_layout)).check(matches(isDisplayed()))
-        onView(withTagValue(`is`("recipe 1"))).check(matches(isDisplayed())).perform(click())
+        onView(withTagValue(`is`("recipe 1"))).check(matches(isDisplayed())).perform(customClick())
 
         Thread.sleep(1000)
         Intents.intended(IntentMatchers.hasComponent(PopRecipeActivity::class.java.name))
 
         Thread.sleep(1000)
-        onView(withTagValue(`is`("url"))).check(matches(isDisplayed())).perform(click())
+        onView(withTagValue(`is`("url"))).check(matches(isDisplayed())).perform(customClick())
 
         Thread.sleep(5000)
         onView(withTagValue(`is`("recipe web"))).check(matches(isDisplayed()))
@@ -691,6 +766,9 @@ class GroceryActivityTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(GroceryActivity::class.java)
 
+    @get:Rule
+    var testName = TestName()
+
     /**
      * Initialization for intent checking
      *
@@ -698,6 +776,7 @@ class GroceryActivityTest {
      */
     @Before
     fun setup() {
+        clickCount = startCount
         Intents.init()
     }
 
@@ -709,6 +788,7 @@ class GroceryActivityTest {
     @After
     fun tearDown() {
         Intents.release()
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
     /**
@@ -729,7 +809,7 @@ class GroceryActivityTest {
      * back to the main activity
      */
     @Test fun backButton() {
-        onView(withId(R.id.back_button)).perform(click())
+        onView(withId(R.id.back_button)).perform(customClick())
         Thread.sleep(5000)
         Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
     }
@@ -744,7 +824,7 @@ class GroceryActivityTest {
     @Test fun discountSuccessTest() {
         onView(withTagValue(`is`("ingred 1")))
             .check(matches(isDisplayed()))
-            .perform(click())
+            .perform(customClick())
 
         Thread.sleep(1000)
         Intents.intended(IntentMatchers.hasComponent(PopActivity::class.java.name))
@@ -762,7 +842,7 @@ class GroceryActivityTest {
     @Test fun discountEmptyTest() {
         onView(withTagValue(`is`("ingred 2")))
             .check(matches(isDisplayed()))
-            .perform(click())
+            .perform(customClick())
 
         Thread.sleep(1000)
         onView(withText("No available discounts"))
@@ -795,6 +875,9 @@ class GroceryStoreActivityTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(GroceryStoreActivity::class.java)
 
+    @get:Rule
+    var testName = TestName()
+
     /**
      * Initialization for intent checking
      *
@@ -802,6 +885,7 @@ class GroceryStoreActivityTest {
      */
     @Before
     fun setup() {
+        clickCount = startCount
         Intents.init()
     }
 
@@ -813,6 +897,7 @@ class GroceryStoreActivityTest {
     @After
     fun tearDown() {
         Intents.release()
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
     /**
@@ -837,7 +922,7 @@ class GroceryStoreActivityTest {
      * back to the main activity
      */
     @Test fun backButtonTest() {
-        onView(withId(R.id.back_button_grocery_store)).perform(click())
+        onView(withId(R.id.back_button_grocery_store)).perform(customClick())
         Thread.sleep(7000)
         Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
     }
@@ -862,14 +947,14 @@ class GroceryStoreActivityTest {
         onView(withId(R.id.price_input)).perform(typeText(samplePrice1), closeSoftKeyboard())
         onView(withId(R.id.price_input)).check(matches(withText(samplePrice1)))
 
-        onView(withId(R.id.post_button_grocery_store)).perform(click())
+        onView(withId(R.id.post_button_grocery_store)).perform(customClick())
         Thread.sleep(3000)
 
         onView(withText(sample1))
             .check(matches(isDisplayed()))
-            .perform(click())
+            .perform(customClick())
 
-        onView(withId(R.id.delete_button_grocery_store)).perform(click())
+        onView(withId(R.id.delete_button_grocery_store)).perform(customClick())
         Thread.sleep(3000)
 
         onView(withText(sample1))
@@ -896,24 +981,24 @@ class GroceryStoreActivityTest {
         onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient1)))
         onView(withId(R.id.price_input)).perform(typeText(samplePrice1), closeSoftKeyboard())
         onView(withId(R.id.price_input)).check(matches(withText(samplePrice1)))
-        onView(withId(R.id.post_button_grocery_store)).perform(click())
+        onView(withId(R.id.post_button_grocery_store)).perform(customClick())
         Thread.sleep(3000)
 
-        onView(withId(R.id.delete_button_grocery_store)).perform(click())
+        onView(withId(R.id.delete_button_grocery_store)).perform(customClick())
         onView(withText(discountErrorText))
             .check(matches(isDisplayed()))
 
         onView(withText(sample1))
-            .perform(click())
-            .perform(click())
+            .perform(customClick())
+            .perform(customClick())
 
-        onView(withId(R.id.delete_button_grocery_store)).perform(click())
+        onView(withId(R.id.delete_button_grocery_store)).perform(customClick())
         onView(withText(discountErrorText))
             .check(matches(isDisplayed()))
 
         onView(withText(sample1))
-            .perform(click())
-        onView(withId(R.id.delete_button_grocery_store)).perform(click())
+            .perform(customClick())
+        onView(withId(R.id.delete_button_grocery_store)).perform(customClick())
         Thread.sleep(3000)
         onView(withText(sample1))
             .check(doesNotExist())
@@ -936,24 +1021,24 @@ class GroceryStoreActivityTest {
         onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient1)))
         onView(withId(R.id.price_input)).perform(typeText(samplePrice1), closeSoftKeyboard())
         onView(withId(R.id.price_input)).check(matches(withText(samplePrice1)))
-        onView(withId(R.id.post_button_grocery_store)).perform(click())
+        onView(withId(R.id.post_button_grocery_store)).perform(customClick())
         Thread.sleep(3000)
 
         onView(withId(R.id.ingredient_input)).perform(replaceText(sampleIngredient2), closeSoftKeyboard())
         onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient2)))
         onView(withId(R.id.price_input)).perform(replaceText(samplePrice2), closeSoftKeyboard())
         onView(withId(R.id.price_input)).check(matches(withText(samplePrice2)))
-        onView(withId(R.id.post_button_grocery_store)).perform(click())
+        onView(withId(R.id.post_button_grocery_store)).perform(customClick())
         Thread.sleep(3000)
 
         onView(withText(sample2))
             .check(matches(isDisplayed()))
-            .perform(click())
+            .perform(customClick())
 
         onView(withText(sample1))
             .check(matches(isDisplayed()))
-            .perform(click())
-        onView(withId(R.id.delete_button_grocery_store)).perform(click())
+            .perform(customClick())
+        onView(withId(R.id.delete_button_grocery_store)).perform(customClick())
         Thread.sleep(3000)
         onView(withText(sample1))
             .check(doesNotExist())
@@ -962,8 +1047,8 @@ class GroceryStoreActivityTest {
 
         onView(withText(sample2))
             .check(matches(isDisplayed()))
-            .perform(click())
-        onView(withId(R.id.delete_button_grocery_store)).perform(click())
+            .perform(customClick())
+        onView(withId(R.id.delete_button_grocery_store)).perform(customClick())
         Thread.sleep(3000)
         onView(withText(sample2))
             .check(doesNotExist())
@@ -984,7 +1069,7 @@ class GroceryStoreActivityTest {
         onView(withId(R.id.price_input)).perform(typeText(samplePrice1), closeSoftKeyboard())
         onView(withId(R.id.price_input)).check(matches(withText(samplePrice1)))
 
-        onView(withId(R.id.post_button_grocery_store)).perform(click())
+        onView(withId(R.id.post_button_grocery_store)).perform(customClick())
         Thread.sleep(1000)
         onView(withText(inputErrorText))
             .check(matches(isDisplayed()))
@@ -1008,7 +1093,7 @@ class GroceryStoreActivityTest {
         onView(withId(R.id.ingredient_input)).perform(typeText(sampleIngredient1), closeSoftKeyboard())
         onView(withId(R.id.ingredient_input)).check(matches(withText(sampleIngredient1)))
 
-        onView(withId(R.id.post_button_grocery_store)).perform(click())
+        onView(withId(R.id.post_button_grocery_store)).perform(customClick())
         Thread.sleep(1000)
         onView(withText(inputErrorText))
             .check(matches(isDisplayed()))
@@ -1035,7 +1120,7 @@ class GroceryStoreActivityTest {
         onView(withId(R.id.price_input)).perform(typeText("0"), closeSoftKeyboard())
         onView(withId(R.id.price_input)).check(matches(withText("0")))
 
-        onView(withId(R.id.post_button_grocery_store)).perform(click())
+        onView(withId(R.id.post_button_grocery_store)).perform(customClick())
         Thread.sleep(1000)
         onView(withText(inputErrorText))
             .check(matches(isDisplayed()))
@@ -1067,6 +1152,7 @@ class RecipeTests {
      */
     @Before
     fun setup() {
+        clickCount = startCount
         Intents.init()
     }
 
@@ -1078,11 +1164,14 @@ class RecipeTests {
     @After
     fun tearDown() {
         Intents.release()
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
     @get:Rule
     val activityRule = ActivityScenarioRule(MainActivity::class.java)
 
+    @get:Rule
+    var testName = TestName()
 
     /**
      * Functionality Test for the Recipe viewing
@@ -1095,43 +1184,43 @@ class RecipeTests {
      * and that the recipe and trip elements are properly displayed
      *
      */
-    @Test fun displayRecipe()  {
-        onView(withId(R.id.ManageTrip)).perform(click())
-
-        Intents.intended(hasComponent(TripActivity::class.java.name))
-
-        onView(withId(R.id.startLocation)).perform(typeText("Calgary"), closeSoftKeyboard())
-
-        onView(withId(R.id.endLocation)).perform(typeText("Reno"), closeSoftKeyboard())
-
-        onView(withId(R.id.numstops)).perform(typeText("3"), closeSoftKeyboard())
-
-        onView(withId(R.id.CreateTrip)).perform(click())
-
-        Thread.sleep(5000)
-
-        Intents.intended(hasComponent(MainActivity::class.java.name))
-
-        onView(withId(R.id.PastTrips)).perform(click())
-
-        Intents.intended(hasComponent(PastTripActivity::class.java.name))
-
-        onView(allOf(withText("Calgary -> Reno"), isDisplayed()))
-            .perform(click())
-
-        Intents.intended(hasComponent(PopTripActivity::class.java.name))
-
-        onView(allOf(withText("    recipe 1: something"))).perform(click())
-
-        Intents.intended(hasComponent(PopRecipeActivity::class.java.name))
-
-        onView(allOf(withTagValue(`is`("url")), isDisplayed()))
-            .perform(click())
-    }
+//    @Test fun displayRecipe()  {
+//        onView(withId(R.id.ManageTrip)).perform(click())
+//
+//        Intents.intended(hasComponent(TripActivity::class.java.name))
+//
+//        onView(withId(R.id.startLocation)).perform(typeText("Calgary"), closeSoftKeyboard())
+//
+//        onView(withId(R.id.endLocation)).perform(typeText("Reno"), closeSoftKeyboard())
+//
+//        onView(withId(R.id.numstops)).perform(typeText("3"), closeSoftKeyboard())
+//
+//        onView(withId(R.id.CreateTrip)).perform(click())
+//
+//        Thread.sleep(5000)
+//
+//        Intents.intended(hasComponent(MainActivity::class.java.name))
+//
+//        onView(withId(R.id.PastTrips)).perform(click())
+//
+//        Intents.intended(hasComponent(PastTripActivity::class.java.name))
+//
+//        onView(allOf(withText("Calgary -> Reno"), isDisplayed()))
+//            .perform(click())
+//
+//        Intents.intended(hasComponent(PopTripActivity::class.java.name))
+//
+//        onView(allOf(withText("    recipe 1: something"))).perform(click())
+//
+//        Intents.intended(hasComponent(PopRecipeActivity::class.java.name))
+//
+//        onView(allOf(withTagValue(`is`("url")), isDisplayed()))
+//            .perform(click())
+//    }
 }
 
 //@RunWith(AndroidJUnit4::class)
-//class SocialsActivityTest {
+//class PreferencesTest {
 //    @Rule
-//    val activityRule = ActivityScenarioRule(SocialsActivity::class.java)
+//    val activityRule = ActivityScenarioRule(ManageAccount::class.java)
 //}

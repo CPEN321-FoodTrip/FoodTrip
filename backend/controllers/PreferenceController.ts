@@ -12,10 +12,10 @@ export const addAllergy = async (
   res: Response,
   next: NextFunction
 ) => {
-  // validation of params performed by express-validator middleware
-  const { userID, allergy } = req.body as Allergy;
-
   try {
+    // validation of params performed by express-validator middleware
+    const { userID, allergy }: Allergy = req.body;
+
     await addAllergyToDb(userID, allergy);
     res.status(201).json({ message: "Allergy added successfully" });
   } catch (error) {
@@ -50,9 +50,9 @@ export const deleteAllergy = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { id: userID, allergy } = req.params;
-
   try {
+    const { id: userID, allergy } = req.params;
+
     const deleteCount = await deleteAllergyFromDb(userID, allergy);
     if (deleteCount === 0) {
       return res.status(404).json({ error: "Allergy not found" });

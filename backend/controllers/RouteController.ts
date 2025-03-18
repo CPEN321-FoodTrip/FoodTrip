@@ -16,16 +16,16 @@ export const createRoute = async (
   res: Response,
   next: NextFunction
 ) => {
-  // validation of params performed by express-validator middleware
-  const { userID, origin, destination, numStops }: RouteRequest = req.body;
-
-  if (numStops < 1) {
-    return res
-      .status(400)
-      .json({ error: "Number of stops must be at least 1" });
-  }
-
   try {
+    // validation of params performed by express-validator middleware
+    const { userID, origin, destination, numStops }: RouteRequest = req.body;
+
+    if (numStops < 1) {
+      return res
+        .status(400)
+        .json({ error: "Number of stops must be at least 1" });
+    }
+
     const originCityData = await fetchCityData(origin);
     if (!originCityData) {
       return res.status(400).json({ error: "Origin city not found" });
