@@ -1,6 +1,7 @@
 import request from "supertest";
 import app from "../../index";
 import { client } from "../../services";
+import { Allergy } from "../../interfaces/PreferenceInterfaces";
 
 const DB_NAME = "preferences";
 const COLLECTION_NAME = "allergies";
@@ -25,7 +26,7 @@ describe("Unmocked: POST /preferences/allergies", () => {
     // verify db update
     const result = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Allergy>(COLLECTION_NAME)
       .findOne({ userID });
 
     expect(result).toHaveProperty("allergy", allergy);
@@ -40,7 +41,7 @@ describe("Unmocked: POST /preferences/allergies", () => {
   test("Missing parameters", async () => {
     const countBefore = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Allergy>(COLLECTION_NAME)
       .countDocuments();
 
     const response = await request(app)
@@ -63,7 +64,7 @@ describe("Unmocked: POST /preferences/allergies", () => {
     // no db update
     const countAfter = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Allergy>(COLLECTION_NAME)
       .countDocuments();
     expect(countAfter).toBe(countBefore);
   });
@@ -82,7 +83,7 @@ describe("Unmocked: GET /preferences/allergies/:id", () => {
     // insert allergies
     await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Allergy>(COLLECTION_NAME)
       .insertMany(allergies.map((allergy) => ({ userID, allergy })));
 
     const response = await request(app)
@@ -122,7 +123,7 @@ describe("Unmocked: DELETE /preferences/allergies/:id/:allergy", () => {
     // insert allergy
     await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Allergy>(COLLECTION_NAME)
       .insertOne({ userID, allergy });
 
     const response = await request(app)
@@ -134,7 +135,7 @@ describe("Unmocked: DELETE /preferences/allergies/:id/:allergy", () => {
     // verify db update
     const result = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Allergy>(COLLECTION_NAME)
       .findOne({ userID });
 
     expect(result).toBeNull();
@@ -149,7 +150,7 @@ describe("Unmocked: DELETE /preferences/allergies/:id/:allergy", () => {
   test("No allergies", async () => {
     const countBefore = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Allergy>(COLLECTION_NAME)
       .countDocuments();
 
     const userID = "1";
@@ -164,7 +165,7 @@ describe("Unmocked: DELETE /preferences/allergies/:id/:allergy", () => {
     // no db update
     const countAfter = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Allergy>(COLLECTION_NAME)
       .countDocuments();
     expect(countAfter).toBe(countBefore);
   });

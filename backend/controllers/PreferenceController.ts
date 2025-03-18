@@ -4,11 +4,16 @@ import {
   deleteAllergyFromDb,
   getAllergiesFromDb,
 } from "../helpers/PreferenceHelper";
+import { Allergy } from "../interfaces/PreferenceInterfaces";
 
 // POST /preferences/allergies
-export const addAllergy = async(req: Request, res: Response, next: NextFunction) => {
+export const addAllergy = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   // validation of params performed by express-validator middleware
-  const { userID, allergy } = req.body as { userID: string; allergy: string };
+  const { userID, allergy } = req.body as Allergy;
 
   try {
     await addAllergyToDb(userID, allergy);
@@ -16,10 +21,14 @@ export const addAllergy = async(req: Request, res: Response, next: NextFunction)
   } catch (error) {
     next(error);
   }
-}
+};
 
 // GET /preferences/allergies/:id
-export const getAllergies = async(req: Request, res: Response, next: NextFunction) => {
+export const getAllergies = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const userID = req.params.id;
 
   try {
@@ -33,10 +42,14 @@ export const getAllergies = async(req: Request, res: Response, next: NextFunctio
   } catch (error) {
     next(error);
   }
-}
+};
 
 // DELETE /preferences/allergies/:id/:allergy
-export const deleteAllergy = async(req: Request, res: Response, next: NextFunction) => {
+export const deleteAllergy = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { id: userID, allergy } = req.params;
 
   try {
@@ -49,4 +62,4 @@ export const deleteAllergy = async(req: Request, res: Response, next: NextFuncti
   } catch (error) {
     next(error);
   }
-}
+};

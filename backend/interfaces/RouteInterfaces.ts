@@ -1,3 +1,5 @@
+import { ObjectId } from "mongodb";
+
 export interface GeoNameCity {
   geonameId: number;
   name: string;
@@ -50,4 +52,10 @@ export interface RouteRequest {
   origin: string;
   destination: string;
   numStops: number;
+}
+
+export interface RouteDBEntry {
+  _id?: ObjectId;
+  userID: string;
+  route: Route;
 }
