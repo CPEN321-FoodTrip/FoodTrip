@@ -234,5 +234,60 @@ describe("Unmocked Performance test", () => {
       console.log(`unmocked Execution time: ${duration}ms`);
       expect(duration).toBeLessThanOrEqual(4000);
   });
+
+  test("Unmocked 10 discount", async () => {
+    
+    const start = Date.now();
+    const discountID = [];
+    for (let i =0 ; i < 10; i++){
+      const discount_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/discounts`,
+        {
+          method: 'POST',
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            storeID: "test_store",
+            storeName: "Vancouver",
+            ingredient: "Toronto, the entire province",
+            price: i
+          }),
+        }
+      );
+      const data = await discount_response.json();
+      console.log(i);
+      const discountIDsingle = data.discountID;
+      discountID.push(discountIDsingle);
+    }
+    const get_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/discounts`,
+      {
+        method: 'GET',
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    for(let i = 0; i < 10; i++){
+      const did = discountID.pop();
+      const discount_teardown = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/discounts/${did}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          }
+        });
+        if (!discount_teardown.ok) {
+          throw new Error(`HTTP error! Status: ${discount_teardown.status}`);
+        }
+    }
+    console.log('discount teardown successful');
+
+    const get_data = await get_response.json();
+    console.log('GET:', get_data);
+    const end = Date.now();
+    const duration = end - start; //begin timing test assuming that operation succeeded
+    console.log(`unmocked Execution time: ${duration}ms`);
+    expect(duration).toBeLessThanOrEqual(4000);
+  });
 });
   
