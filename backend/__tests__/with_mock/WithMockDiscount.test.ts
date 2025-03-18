@@ -418,6 +418,7 @@ describe("Mocked: GET /discounts", () => {
       storeName: "mock store",
       ingredient: "apple",
       price: 1.5,
+      discountID: new ObjectId().toHexString(),
     };
     jest
       .spyOn(DiscountHelpers, "getAllDiscountsFromDb")

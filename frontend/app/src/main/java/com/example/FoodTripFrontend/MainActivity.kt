@@ -80,15 +80,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             insets
         }
 
-        if (FirebaseApp.getApps(this).isEmpty()) {
-            FirebaseApp.initializeApp(this)
-            Log.d(TAG, "Firebase Initialized in MainActivity")
-        }
 
-        //Request Notification Permission
-        //Temp located here
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Log.d(TAG, "Checking permissions")
             if (ActivityCompat.checkSelfPermission(
                     this,
                     Manifest.permission.POST_NOTIFICATIONS
@@ -101,29 +94,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         } else {
             fetchFCMToken()
         }
-
-
-
+        
         //Map fragment instead of Map activity to maintain functionality of a "main page" and the
         //ability to turn the map on and off as needed
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        findViewById<Button>(R.id.PastTrips).setOnClickListener() {
-            val intent = Intent(this, PastTripActivity::class.java)
-            startActivity(intent)
-        }
-
-        findViewById<Button>(R.id.ManageTrip).setOnClickListener() {
-            val intent = Intent(this, TripActivity::class.java)
-            startActivity(intent)
-        }
-
-        findViewById<Button>(R.id.ManageAccount).setOnClickListener() {
-            val intent = Intent(this, AccountActivity::class.java)
-            startActivity(intent)
-        }
+        //sets up onClick listeners for generic buttons
+        setUpButtons()
 
         findViewById<Button>(R.id.sign_out_button).setOnClickListener() {
             Log.d(TAG, "Sign Out Button Clicked")
@@ -150,10 +129,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
-        findViewById<Button>(R.id.viewRecipes).setOnClickListener() {
-            val intent = Intent(this, GroceryActivity::class.java)
-            startActivity(intent)
-        }
     }
 
     //temp function for Notifications
@@ -165,14 +140,34 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (!task.isSuccessful) {
                 Log.w(TAG, "Fetching FCM token failed", task.exception)
-                return@addOnCompleteListener
+            } else {
+                val token = task.result
+                Log.d(TAG, "FCM Token: $token")
             }
-            val token = task.result
-            Log.d(TAG, "FCM Token: $token")
         }
     }
 
+    fun setUpButtons() {
+        findViewById<Button>(R.id.PastTrips).setOnClickListener() {
+            val intent = Intent(this, PastTripActivity::class.java)
+            startActivity(intent)
+        }
 
+        findViewById<Button>(R.id.ManageTrip).setOnClickListener() {
+            val intent = Intent(this, TripActivity::class.java)
+            startActivity(intent)
+        }
+
+        findViewById<Button>(R.id.ManageAccount).setOnClickListener() {
+            val intent = Intent(this, AccountActivity::class.java)
+            startActivity(intent)
+        }
+
+        findViewById<Button>(R.id.viewRecipes).setOnClickListener() {
+            val intent = Intent(this, GroceryActivity::class.java)
+            startActivity(intent)
+        }
+    }
 
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -191,6 +186,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             if (mapFragment.visibility == android.view.View.GONE) {
                 mapFragment.visibility = android.view.View.VISIBLE
             }
+
+            //coordinates for testing purposes
+//            val points = listOf(
+//                LatLng(37.7749, -122.4194), // San Francisco
+//                LatLng(34.0522, -118.2437), // Los Angeles
+//                LatLng(36.1699, -115.1398)  // Las Vegas
+//            )
 
             //polyline only draws straight lines, ideally in release this should change to
             //actual routes (ie. roads, highways)
