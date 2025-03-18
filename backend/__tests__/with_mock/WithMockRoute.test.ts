@@ -3,9 +3,28 @@ import app from "../../index";
 import * as RouteHelpers from "../../helpers/RouteHelpers";
 import { ObjectId } from "mongodb";
 import { client } from "../../services";
-import { RouteDBEntry } from "../../interfaces/RouteInterfaces";
+import { Route, RouteDBEntry } from "../../interfaces/RouteInterfaces";
 
 jest.mock("node-fetch", () => jest.fn());
+
+const MOCK_ROUTE: RouteDBEntry = {
+  userID: "test-user",
+  route: {
+    start_location: {
+      latitude: 0,
+      longitude: 0,
+      name: "",
+      population: 0,
+    },
+    end_location: {
+      latitude: 0,
+      longitude: 0,
+      name: "",
+      population: 0,
+    },
+    stops: [],
+  },
+};
 
 // Interface POST /routes
 describe("Mocked: POST /routes", () => {
@@ -435,30 +454,35 @@ describe("Mocked: GET /routes/:id", () => {
   // Expected behavior: route returned successfully
   // Expected output: route object
   test("Valid tripID and route returned", async () => {
-    const mock_route = {
-      start_location: {
-        latitude: 0,
-        longitude: 0,
-        name: "",
-        population: 0,
-      },
-      end_location: {
-        latitude: 0,
-        longitude: 0,
-        name: "",
-        population: 0,
-      },
-      stops: [],
-    };
-    jest.spyOn(RouteHelpers, "getRouteFromDb").mockResolvedValue(mock_route);
+    jest
+      .spyOn(RouteHelpers, "getRouteFromDb")
+      .mockResolvedValue(MOCK_ROUTE.route);
 
     const tripID = new ObjectId(123);
     const response = await request(app)
       .get(`/routes/${tripID.toHexString()}`)
       .expect(200);
 
-    expect(response.body).toEqual(mock_route);
+    expect(response.body).toEqual(MOCK_ROUTE.route);
     expect(RouteHelpers.getRouteFromDb).toHaveBeenCalled();
+  });
+
+  // Mocked behavior: in-memory database with mocked route object
+  // Input: valid trip id with mocked valid route
+  // Expected status code: 200
+  // Expected behavior: db queried for route successfully
+  // Expected output: route object
+  test("Valid tripID and route returned, in-mem db", async () => {
+    const tripID = (
+      await client
+        .db("route_data")
+        .collection<RouteDBEntry>("routes")
+        .insertOne(MOCK_ROUTE)
+    ).insertedId.toHexString();
+
+    const response = await request(app).get(`/routes/${tripID}`).expect(200);
+
+    expect(response.body).toEqual(MOCK_ROUTE.route);
   });
 });
 
