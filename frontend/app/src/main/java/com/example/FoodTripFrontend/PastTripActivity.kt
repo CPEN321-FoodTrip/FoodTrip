@@ -66,7 +66,6 @@ class PastTripActivity : AppCompatActivity() {
         val tripID: String
     )
 
-    val sampleID = "test_person"
 
     lateinit var client: OkHttpClient
     lateinit var pastTripList: LinearLayout
