@@ -80,6 +80,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             insets
         }
 
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ActivityCompat.checkSelfPermission(
                     this,
