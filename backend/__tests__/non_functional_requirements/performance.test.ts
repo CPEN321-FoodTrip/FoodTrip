@@ -108,7 +108,7 @@ describe("Unmocked Performance test", () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            // tripID: tripID
+            tripID: tripID
           }),
         }
       );
@@ -128,6 +128,18 @@ describe("Unmocked Performance test", () => {
         }
         // const tdata = await route_teardown.json();
         console.log('route teardown successful');
+
+        const recipe_teardown = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/recipes/${tripID}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            }
+          });
+          if (!recipe_teardown.ok) {
+            throw new Error(`HTTP error! Status: ${recipe_teardown.status}`);
+          }
+          console.log('recipe teardown successful');
 
     } else {
       console.error('Request failed with status:', route_response.status);
@@ -167,89 +179,60 @@ describe("Unmocked Performance test", () => {
     // expect(recipe_result?.body.recipes).toHaveLength(10); 
 
     const duration = end - start; //begin timing test assuming that operation succeeded
-
-    // const route_teardown = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/routes${tripID}`,
-    //   {
-    //     method: "DELETE",
-    //     // headers: {
-    //     //   "Content-Type": "application/json",  
-    //     // },
-    //   });
-    // expect(route_teardown.body).toHaveProperty("success", true);
-    // const recipe_teardown = await request(app).delete(`/recipes/${tripID}`).expect(200);
-    // expect(recipe_teardown.body).toHaveProperty("success", true);
-
     console.log(`unmocked Execution time: ${duration}ms`);
     expect(duration).toBeLessThanOrEqual(4000); // 4s
   });
 
-//   test("Unmocked single route, 10 stops", async () => {
-//     const start = Date.now();
-//     const response = await request(app)
-//       .post("/routes")
-//       .send({
-//         userID: "test-user",
-//         origin: "Vancouver",
-//         destination: "Toronto",
-//         numStops: 10,
-//       })
-//       .expect(201);
-
+  test("Unmocked single discount", async () => {
     
-//     const db = client.db(ROUTES_DB_NAME);
-//     const collection = db.collection(ROUTES_COLLECTION_NAME);
-//     const tripID = response.body.tripID;
-//     const result = await collection.findOne({ _id: new ObjectId(tripID) });
-
-//     const recipe_response = await request(app)
-//       .post("/recipes")
-//       .send({
-//         tripID: tripID 
-//       })
-//       .expect(200);
-
-//     const recipe_db = client.db(RECIPE_DB_NAME);
-//     const recipe_collection = recipe_db.collection(RECIPE_COLLECTION_NAME);
-//     const recipe_result = await recipe_collection.findOne({ _id: tripID }); 
-
+    const start = Date.now();
+    const discount_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/discounts`,
+      {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          storeID: "test_store",
+          storeName: "Vancouver",
+          ingredient: "Toronto, the entire province",
+          price: 1
+        }),
+      }
+    );
     
+    const data = await discount_response.json();
+    console.log('discount:', data);
+    const discountID = data.discountID;
+    console.log(discountID);
 
-//       // route response verification
-//     expect(response.body).toHaveProperty("tripID");
-//     expect(response.body).toHaveProperty("start_location");
-//     expect(response.body).toHaveProperty("end_location");
-//     expect(Array.isArray(response.body.stops)).toBe(true);
-//     expect(response.body.stops).toHaveLength(10); // 10 stops
-//       // route db verification
-//     expect(result).not.toBeNull();
-//     expect(result).toHaveProperty("userID", "test-user");
-//     expect(result?.start_location).toHaveProperty("name", "Vancouver");
-//     expect(result?.end_location).toHaveProperty("name", "Toronto");
-//     expect(Array.isArray(result?.stops)).toBe(true);
-//     expect(result?.stops).toHaveLength(10); // 1 stop
+    const get_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/discounts`,
+      {
+        method: 'GET',
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
+    const get_data = await get_response.json();
+    console.log('GET:', get_data);
+    const end = Date.now();
 
-//     // recipe response verification
-//     expect(recipe_result).not.toBeNull();
-//     expect(Array.isArray(recipe_result?.body)).toBe(true);
-//     expect(recipe_result?.body.recipes[0]).toHaveProperty("recipeName");
-//     expect(recipe_result?.body.recipes[0]).toHaveProperty("recipeID");   
-//     expect(recipe_result?.body.recipes[0]).toHaveProperty("url");   
-//     expect(recipe_result?.body.recipes[0]).toHaveProperty("ingredients");   
-//     expect(recipe_result?.body.recipes).toHaveLength(1);
-//       // recipe db verification
-
-//     expect(result?.body.recipes[0]).toHaveProperty("recipeName", "Winnipeg Chicken Curry");
-//     expect(result?.body.recipes[0]).toHaveProperty("recipeID", 1);
-//     expect(result?.body.recipes[0]).toHaveProperty("url", "http://www.food.com/recipe/winnipeg-chicken-curry-2930");
-//     expect(result?.body.recipes[0]).toHaveProperty("ingredients", SAMPLE_RECIPE_1.recipes[0].ingredients);
-//     expect(Array.isArray(result?.stops)).toBe(true);
-//     expect(result).toHaveLength(10); 
-//     const end = Date.now();
-
-//     const duration = end - start; //begin timing test assuming that operation succeeded
-//     console.log(`unmocked Execution time: ${duration}ms`);
-//     expect(duration).toBeLessThanOrEqual(2000); // 2s
-//   });
+    const discount_teardown = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/discounts/${discountID}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+      if (!discount_teardown.ok) {
+        throw new Error(`HTTP error! Status: ${discount_teardown.status}`);
+      }
+      console.log('discount teardown successful');
+      const duration = end - start; //begin timing test assuming that operation succeeded
+      console.log(`unmocked Execution time: ${duration}ms`);
+      expect(duration).toBeLessThanOrEqual(4000);
+  });
 });
   
