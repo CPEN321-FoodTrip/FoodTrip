@@ -1,7 +1,7 @@
 import request from "supertest";
 import app from "../../index";
 import { client } from "../../services";
-import { Route } from "../../interfaces/RouteInterfaces";
+import { RouteDBEntry } from "../../interfaces/RouteInterfaces";
 
 // constants for routes saved in MongoDB
 const ROUTES_DB_NAME = "route_data";
@@ -47,9 +47,7 @@ describe("Unmocked: GET /users/:id/routes", () => {
   test("Valid user with routes", async () => {
     // setup: insert sample routes into db
     const db = client.db(ROUTES_DB_NAME);
-    const collection = db.collection<{ userID: string; route: Route }>(
-      ROUTES_COLLECTION_NAME
-    );
+    const collection = db.collection<RouteDBEntry>(ROUTES_COLLECTION_NAME);
     const restult = await collection.insertMany([
       { userID: "test-user", route: SAMPLE_ROUTE1 },
       { userID: "test-user", route: SAMPLE_ROUTE2 },

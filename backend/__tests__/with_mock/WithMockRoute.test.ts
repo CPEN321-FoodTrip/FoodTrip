@@ -3,6 +3,7 @@ import app from "../../index";
 import * as RouteHelpers from "../../helpers/RouteHelpers";
 import { ObjectId } from "mongodb";
 import { client } from "../../services";
+import { RouteDBEntry } from "../../interfaces/RouteInterfaces";
 
 jest.mock("node-fetch", () => jest.fn());
 
@@ -367,7 +368,7 @@ describe("Mocked: POST /routes", () => {
     // check if route added to in-memory db which was cleared after last test by afterEach in jest setup
     const result = await client
       .db("route_data")
-      .collection("routes")
+      .collection<RouteDBEntry>("routes")
       .findOne({ userID: "test-user" });
     expect(result).not.toBeNull();
   });

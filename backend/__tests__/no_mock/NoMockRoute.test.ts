@@ -3,7 +3,7 @@ import app from "../../index";
 import { initializeGeoNamesDatabase } from "../../helpers/RouteHelpers";
 import { client } from "../../services";
 import { ObjectId } from "mongodb";
-import { Route } from "../../interfaces/RouteInterfaces";
+import { RouteDBEntry } from "../../interfaces/RouteInterfaces";
 
 // constants for routes saved in MongoDB
 const ROUTES_DB_NAME = "route_data";
@@ -78,9 +78,7 @@ describe("Unmocked: POST /routes", () => {
 
     // db verification
     const db = client.db(ROUTES_DB_NAME);
-    const collection = db.collection<{ userID: string; route: Route }>(
-      ROUTES_COLLECTION_NAME
-    );
+    const collection = db.collection<RouteDBEntry>(ROUTES_COLLECTION_NAME);
     const tripID = response.body.tripID;
     const result = await collection.findOne({ _id: new ObjectId(tripID) });
 
@@ -101,7 +99,7 @@ describe("Unmocked: POST /routes", () => {
   test("Missing body parameters", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
-      .collection(ROUTES_COLLECTION_NAME)
+      .collection<RouteDBEntry>(ROUTES_COLLECTION_NAME)
       .countDocuments();
 
     const response = await request(app).post("/routes").send({}).expect(400);
@@ -130,7 +128,7 @@ describe("Unmocked: POST /routes", () => {
     // verify db unchaged
     const dbCountAfter = await client
       .db(ROUTES_DB_NAME)
-      .collection(ROUTES_COLLECTION_NAME)
+      .collection<RouteDBEntry>(ROUTES_COLLECTION_NAME)
       .countDocuments();
 
     expect(dbCountBefore).toBe(dbCountAfter);
@@ -143,7 +141,7 @@ describe("Unmocked: POST /routes", () => {
   test("Nonexistant origin city", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
-      .collection(ROUTES_COLLECTION_NAME)
+      .collection<RouteDBEntry>(ROUTES_COLLECTION_NAME)
       .countDocuments();
 
     const response = await request(app)
@@ -162,7 +160,7 @@ describe("Unmocked: POST /routes", () => {
     // verfify db unchaged
     const dbCountAfter = await client
       .db(ROUTES_DB_NAME)
-      .collection(ROUTES_COLLECTION_NAME)
+      .collection<RouteDBEntry>(ROUTES_COLLECTION_NAME)
       .countDocuments();
 
     expect(dbCountBefore).toBe(dbCountAfter);
@@ -175,7 +173,7 @@ describe("Unmocked: POST /routes", () => {
   test("Nonexistant destination city", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
-      .collection(ROUTES_COLLECTION_NAME)
+      .collection<RouteDBEntry>(ROUTES_COLLECTION_NAME)
       .countDocuments();
 
     const response = await request(app)
@@ -194,7 +192,7 @@ describe("Unmocked: POST /routes", () => {
     // verify db unchaged
     const dbCountAfter = await client
       .db(ROUTES_DB_NAME)
-      .collection(ROUTES_COLLECTION_NAME)
+      .collection<RouteDBEntry>(ROUTES_COLLECTION_NAME)
       .countDocuments();
 
     expect(dbCountBefore).toBe(dbCountAfter);
@@ -207,7 +205,7 @@ describe("Unmocked: POST /routes", () => {
   test("Invalid string value for stops", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
-      .collection(ROUTES_COLLECTION_NAME)
+      .collection<RouteDBEntry>(ROUTES_COLLECTION_NAME)
       .countDocuments();
 
     const response = await request(app)
@@ -230,7 +228,7 @@ describe("Unmocked: POST /routes", () => {
     // verify db unchaged
     const dbCountAfter = await client
       .db(ROUTES_DB_NAME)
-      .collection(ROUTES_COLLECTION_NAME)
+      .collection<RouteDBEntry>(ROUTES_COLLECTION_NAME)
       .countDocuments();
 
     expect(dbCountBefore).toBe(dbCountAfter);
@@ -243,7 +241,7 @@ describe("Unmocked: POST /routes", () => {
   test("Negative number of stops", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
-      .collection(ROUTES_COLLECTION_NAME)
+      .collection<RouteDBEntry>(ROUTES_COLLECTION_NAME)
       .countDocuments();
 
     const response = await request(app)
@@ -262,7 +260,7 @@ describe("Unmocked: POST /routes", () => {
     // verify db unchaged
     const dbCountAfter = await client
       .db(ROUTES_DB_NAME)
-      .collection(ROUTES_COLLECTION_NAME)
+      .collection<RouteDBEntry>(ROUTES_COLLECTION_NAME)
       .countDocuments();
 
     expect(dbCountBefore).toBe(dbCountAfter);
@@ -275,7 +273,7 @@ describe("Unmocked: POST /routes", () => {
   test("Too high number of stops", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
-      .collection(ROUTES_COLLECTION_NAME)
+      .collection<RouteDBEntry>(ROUTES_COLLECTION_NAME)
       .countDocuments();
 
     const response = await request(app)
@@ -294,7 +292,7 @@ describe("Unmocked: POST /routes", () => {
     // verify db unchaged
     const dbCountAfter = await client
       .db(ROUTES_DB_NAME)
-      .collection(ROUTES_COLLECTION_NAME)
+      .collection<RouteDBEntry>(ROUTES_COLLECTION_NAME)
       .countDocuments();
 
     expect(dbCountBefore).toBe(dbCountAfter);
@@ -307,7 +305,7 @@ describe("Unmocked: POST /routes", () => {
   test("Check same origin and destination city", async () => {
     const dbCountBefore = await client
       .db(ROUTES_DB_NAME)
-      .collection(ROUTES_COLLECTION_NAME)
+      .collection<RouteDBEntry>(ROUTES_COLLECTION_NAME)
       .countDocuments();
 
     const response = await request(app)
@@ -328,7 +326,7 @@ describe("Unmocked: POST /routes", () => {
     // verify db unchaged
     const dbCountAfter = await client
       .db(ROUTES_DB_NAME)
-      .collection(ROUTES_COLLECTION_NAME)
+      .collection<RouteDBEntry>(ROUTES_COLLECTION_NAME)
       .countDocuments();
 
     expect(dbCountBefore).toBe(dbCountAfter);
@@ -344,9 +342,7 @@ describe("Unmocked: GET /routes/:id", () => {
   test("Retreive valid route", async () => {
     // setup: inset sample route into db
     const db = client.db(ROUTES_DB_NAME);
-    const collection = db.collection<{ userID: string; route: Route }>(
-      ROUTES_COLLECTION_NAME
-    );
+    const collection = db.collection<RouteDBEntry>(ROUTES_COLLECTION_NAME);
     const result = await collection.insertOne({
       userID: "test-user",
       route: SAMPLE_ROUTE,
@@ -407,9 +403,7 @@ describe("Unmocked: DELETE /routes/:id", () => {
   test("Valid deletion", async () => {
     // setup: insert sample route
     const db = client.db(ROUTES_DB_NAME);
-    const collection = db.collection<{ userID: string; route: Route }>(
-      ROUTES_COLLECTION_NAME
-    );
+    const collection = db.collection<RouteDBEntry>(ROUTES_COLLECTION_NAME);
     const result = await collection.insertOne({
       userID: "test-user",
       route: SAMPLE_ROUTE,
@@ -433,9 +427,7 @@ describe("Unmocked: DELETE /routes/:id", () => {
   // Expected output: empty object
   test("Missing tripID", async () => {
     const db = client.db(ROUTES_DB_NAME);
-    const collection = db.collection<{ userID: string; route: Route }>(
-      ROUTES_COLLECTION_NAME
-    );
+    const collection = db.collection<RouteDBEntry>(ROUTES_COLLECTION_NAME);
     const originalCount = await collection.countDocuments();
 
     const response = await request(app).delete("/routes/").expect(404); // malformed url
@@ -454,9 +446,7 @@ describe("Unmocked: DELETE /routes/:id", () => {
   // Expected output: error message indicating invalid tripID format
   test("Invalid tripID format", async () => {
     const db = client.db(ROUTES_DB_NAME);
-    const collection = db.collection<{ userID: string; route: Route }>(
-      ROUTES_COLLECTION_NAME
-    );
+    const collection = db.collection<RouteDBEntry>(ROUTES_COLLECTION_NAME);
     const originalCount = await collection.countDocuments();
 
     const tripID = "1234"; // tripID should be a valid ObjectId
@@ -475,9 +465,7 @@ describe("Unmocked: DELETE /routes/:id", () => {
   test("Delete nonexistant route", async () => {
     // setup: insert sample route
     const db = client.db(ROUTES_DB_NAME);
-    const collection = db.collection<{ userID: string; route: Route }>(
-      ROUTES_COLLECTION_NAME
-    );
+    const collection = db.collection<RouteDBEntry>(ROUTES_COLLECTION_NAME);
     const result = await collection.insertOne({
       userID: "test-user",
       route: SAMPLE_ROUTE,
@@ -511,9 +499,7 @@ describe("Unmocked: DELETE /routes/:id", () => {
 
     // check db to make sure nothing was deleted
     const db = client.db(ROUTES_DB_NAME);
-    const collection = db.collection<{ userID: string; route: Route }>(
-      ROUTES_COLLECTION_NAME
-    );
+    const collection = db.collection<RouteDBEntry>(ROUTES_COLLECTION_NAME);
     const findResult = await collection.findOne({ _id: new ObjectId(tripID) });
     expect(findResult).toBeNull();
     const count = await collection.countDocuments();
