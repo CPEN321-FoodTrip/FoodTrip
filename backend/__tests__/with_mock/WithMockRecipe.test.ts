@@ -263,7 +263,7 @@ test("should log an error and throw when response is invalid", async () => {
     mocked(fetch).mockResolvedValueOnce(mockResponse);
 
     // Spy on console.error to verify it's called
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(jest.fn());
 
     // Act & Assert: Expect the function to throw
     await expect(RecipeHelper.fetchRecipe("invalid-query")).rejects.toThrow("Invalid JSON");
@@ -290,7 +290,7 @@ test("should log an error and throw when response is invalid", async () => {
     mocked(fetch).mockResolvedValueOnce(mockErrorResponse);
 
     // Spy on console.error to verify it's called
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(jest.fn());
 
     // Act & Assert: Expect the function to throw
     await expect(RecipeHelper.fetchRecipe("invalid-query")).rejects.toThrow(
