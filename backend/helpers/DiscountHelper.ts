@@ -8,7 +8,10 @@ const COLLECTION_NAME = "discounts";
 // add a discount to the database
 export async function addDiscountToDb(discount: Discount): Promise<string> {
   const insertedId: string = (
-    await client.db(DB_NAME).collection(COLLECTION_NAME).insertOne(discount)
+    await client
+      .db(DB_NAME)
+      .collection<Discount>(COLLECTION_NAME)
+      .insertOne(discount)
   ).insertedId.toHexString();
 
   return insertedId;
@@ -16,14 +19,14 @@ export async function addDiscountToDb(discount: Discount): Promise<string> {
 
 // get all discounts for a store
 export async function getDiscountsFromDb(storeID: string): Promise<Discount[]> {
-  const discounts: (Discount & { _id: ObjectId })[] = await client
+  const discounts: Discount[] = await client
     .db(DB_NAME)
-    .collection<Discount & { _id: ObjectId }>(COLLECTION_NAME)
+    .collection<Discount>(COLLECTION_NAME)
     .find({ storeID })
     .toArray();
 
   return discounts.map(({ _id, ...rest }) => ({
-    discountID: _id.toHexString(),
+    discountID: _id?.toHexString() ?? "",
     ...rest,
   }));
 }
@@ -34,14 +37,14 @@ export async function getAllDiscountsFromDb(
 ): Promise<Discount[]> {
   const query = ingredient ? { ingredient } : {};
 
-  const discounts: (Discount & { _id: ObjectId })[] = await client
+  const discounts: Discount[] = await client
     .db(DB_NAME)
-    .collection<Discount & { _id: ObjectId }>(COLLECTION_NAME)
+    .collection<Discount>(COLLECTION_NAME)
     .find(query)
     .toArray();
 
   return discounts.map(({ _id, ...rest }) => ({
-    discountID: _id.toHexString(),
+    discountID: _id?.toHexString() ?? "",
     ...rest,
   }));
 }
@@ -53,7 +56,7 @@ export async function deleteDiscountFromDb(
   const deletedCount: number = (
     await client
       .db(DB_NAME)
-      .collection<Discount & { _id: ObjectId }>(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .deleteOne({ _id: new ObjectId(discountID) })
   ).deletedCount;
 
