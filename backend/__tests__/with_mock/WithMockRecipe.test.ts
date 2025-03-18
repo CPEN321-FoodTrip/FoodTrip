@@ -220,7 +220,7 @@ describe("Mocked: GET /recipes/:id", () => {
       .expect(200);
 
     expect(response.body).toHaveProperty("mock", "route");
-    expect(RecipeHelper.getRecipesFromDb).toHaveBeenCalled;
+    expect(RecipeHelper.getRecipesFromDb).toHaveBeenCalled();
   });
 });
 
@@ -302,6 +302,6 @@ describe("Mocked: DELETE /recipes/:id", () => {
 
     expect(response.body).toHaveProperty("success", true);
     expect(response.body).toHaveProperty("message", "Recipes deleted");
-    expect(RecipeHelper.deleteRecipesFromDb).toHaveBeenCalled;
+    expect(RecipeHelper.deleteRecipesFromDb).toHaveBeenCalled();
   });
 });
