@@ -211,8 +211,17 @@ describe("Mocked: GET /recipes/:id", () => {
     jest
       .spyOn(RecipeHelper, "getRecipesFromDb")
       .mockResolvedValue([
-        { label: "Mock Recipe", image: "https://mockimage.com/recipe.jpg" },
-      ]);
+        {
+          recipeName: "Mocked recipe",
+          recipeID: 1,
+          url: "http://www.food.com/recipe/winnipeg-chicken-curry-2930",
+          ingredients: [
+            "3 tablespoons mocked",
+            "2 recipes, peeled and thinly sliced",
+            "2 tablespoons coffee powder",
+          ],
+        },
+      ],);
 
     const tripID = new ObjectId(123);
     const response = await request(app)

@@ -22,7 +22,7 @@ const ROUTES_COLLECTION_NAME = "routes";
 export async function fetchRecipe(query: string): Promise<Recipe[]> {
   try {
     if (!process.env.EDAMAM_APP_ID || !process.env.EDAMAM_API_KEY) {
-      throw new Error("Edamam App ID or API Key is missing");
+      throw new Error("Edamam App ID or API Key is missing"); ///
     }
 
     const params = new URLSearchParams({
@@ -47,7 +47,7 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
       ingredients: hit.recipe.ingredientLines,
     }));
   } catch (error) {
-    console.error("Detailed recipe fetch error:", error);
+    console.error("Detailed recipe fetch error:", error); //
     throw error;
   }
 }

@@ -55,7 +55,7 @@ export const getRecipes = async (
 
     res.status(200).json(recipes);
   } catch (error) {
-    console.error("Error getting recipe:", error);
+    console.error("Error getting recipe:", error);  ///
     next(error);
   }
 };
@@ -79,6 +79,6 @@ export const deleteRecipes = async (
     }
     res.status(200).json({ success: true, message: "Recipes deleted" });
   } catch (error) {
-    next(error);
+    next(error); ///
   }
 };
