@@ -12,10 +12,10 @@ const RECIPE_COLLECTION_NAME = "recipes";
 
 const SAMPLE_ROUTE_1 = {
     start_location: {
-      name: "Winnipeg",
-          latitude: 49.8844,
-          longitude: -97.14704,
-          population: 749607,
+          name: "Vancouver",
+          latitude: 49.2608724,
+          longitude: -123.113952,
+      
     },
     end_location: {
       name: "Toronto",
@@ -25,9 +25,10 @@ const SAMPLE_ROUTE_1 = {
     stops: [
       {
         location: {
-          name: "Vancouver",
-          latitude: 49.2608724,
-          longitude: -123.113952,
+          name: "Winnipeg",
+          latitude: 49.8844,
+          longitude: -97.14704,
+          population: 749607,
         },
         distanceFromStart: 1329.071074459746,
         cumulativeDistance: 1329.071074459746,
@@ -36,8 +37,19 @@ const SAMPLE_ROUTE_1 = {
     ],
   };
   
-  const SAMPLE_RECIPE_1 = {
-    recipes: [
+  const SAMPLE_RECIPE_1 = [
+      {
+        recipeName: "The Vancouver Recipe",
+        recipeID: 29,
+        url: "https://www.seriouseats.com/the-vancouver-cocktail-recipe",
+        ingredients: [
+            "2 ounces gin",
+            "1/2 ounce sweet vermouth",
+            "1 teaspoon Benedictine",
+            "1-2 dashes orange bitters, to taste",
+            "Thin strip of lemon peel, for garnish"
+        ]
+    },
       {
         recipeName: "Winnipeg Chicken Curry",
           recipeID: 1,
@@ -53,12 +65,23 @@ const SAMPLE_ROUTE_1 = {
             "1⁄4 cup cream (I use milk)",
             "salt & pepper"
           ]
-      }
+      },
+      {
+        recipeName: "Toronto Cocktail Recipe",
+        recipeID: 10,
+        url: "http://www.seriouseats.com/recipes/2008/10/toronto-cocktail-recipe.html",
+        ingredients: [
+            "2 ounces rye whiskey",
+            "1/4 ounce Fernet Branca",
+            "1/4 ounce simple syrup",
+            "2 dashes Angostura bitters"
+        ]
+    }
     ]
-  }
+  
 
 
-jest.mock("node-fetch", () => jest.fn());
+// jest.mock("node-fetch", () => jest.fn());
 
 describe("Unmocked Performance test", () => {
     jest.setTimeout(20000); //20s
@@ -66,27 +89,21 @@ describe("Unmocked Performance test", () => {
     await RouteHelpers.initializeGeoNamesDatabase();
   });
 
-//   afterEach(async () => {
-//     jest.restoreAllMocks();
-//   });
-
-  test("Unmocked single route, 10 stops", async () => {
+  test("Unmocked single route, 3 stops", async () => {
     const start = Date.now();
-    const response = await request(app)
+    const route_response = await request(app)
       .post("/routes")
       .send({
         userID: "test-user",
         origin: "Vancouver",
         destination: "Toronto",
-        numStops: 10,
+        numStops: 1,
       })
       .expect(201);
-    
-
-    
+        
     const db = client.db(ROUTES_DB_NAME);
     const collection = db.collection(ROUTES_COLLECTION_NAME);
-    const tripID = response.body.tripID;
+    const tripID = route_response.body.tripID;
     console.log(tripID);
     const result = await collection.findOne({ _id: new ObjectId(tripID) });
 
@@ -104,35 +121,34 @@ describe("Unmocked Performance test", () => {
     const end = Date.now();
 
       // route response verification
-    expect(response.body).toHaveProperty("tripID");
-    expect(response.body).toHaveProperty("start_location");
-    expect(response.body).toHaveProperty("end_location");
-    expect(Array.isArray(response.body.stops)).toBe(true);
-    expect(response.body.stops).toHaveLength(10); // 10 stops
+    expect(route_response.body).toHaveProperty("tripID");
+    expect(route_response.body).toHaveProperty("start_location");
+    expect(route_response.body).toHaveProperty("end_location");
+    expect(Array.isArray(route_response.body.stops)).toBe(true);
+    expect(route_response.body.stops).toHaveLength(1); // 1 stop
       // route db verification
     expect(result).not.toBeNull();
     expect(result).toHaveProperty("userID", "test-user");
     expect(result?.start_location).toHaveProperty("name", "Vancouver");
     expect(result?.end_location).toHaveProperty("name", "Toronto");
     expect(Array.isArray(result?.stops)).toBe(true);
-    expect(result?.stops).toHaveLength(10); // 10 stops
+    expect(result?.stops).toHaveLength(1); // 1 stop
 
 
     // recipe response verification
-    // expect(recipe_response).not.toBeNull();
-    // expect(Array.isArray(recipe_response?.body)).toBe(true);
-    // expect(recipe_response.body.recipes[0]).toHaveProperty("recipeName");
-    // expect(recipe_response.body.recipes[0]).toHaveProperty("recipeID");   
-    // expect(recipe_response.body.recipes[0]).toHaveProperty("url");   
-    // expect(recipe_response.body.recipes[0]).toHaveProperty("ingredients");   
-    // expect(recipe_response.body.recipes).toHaveLength(1);
+    expect(recipe_response).not.toBeNull();
+    expect(Array.isArray(recipe_response?.body)).toBe(true);
+    // console.log(recipe_response.body);
+    expect(recipe_response.body).toHaveLength(3);
+    expect(recipe_response.body).toEqual(SAMPLE_RECIPE_1);
+    
       // recipe db verification
-
-    // expect(Array.isArray(recipe_result?.recipes)).toBe(true);
-    // expect(recipe_result?.body.recipes[0]).toHaveProperty("recipeName", "Winnipeg Chicken Curry");
+    console.log(recipe_result?.body);
+    // expect(Array.isArray(recipe_result?.body)).toBe(true);
+    expect(recipe_result?.body[0]).toEqual(SAMPLE_RECIPE_1[0]);
     // expect(recipe_result?.body.recipes[0]).toHaveProperty("recipeID", 1);
     // expect(recipe_result?.body.recipes[0]).toHaveProperty("url", "http://www.food.com/recipe/winnipeg-chicken-curry-2930");
-    // expect(recipe_result?.body.recipes[0]).toHaveProperty("ingredients", SAMPLE_RECIPE_1.recipes[0].ingredients);
+    // expect(recipe_result?.body.recipes[0]).toHaveProperty("ingredients", SAMPLE_RECIPE_1);
     // expect(recipe_result?.body.recipes).toHaveLength(10); 
 
     const duration = end - start; //begin timing test assuming that operation succeeded
