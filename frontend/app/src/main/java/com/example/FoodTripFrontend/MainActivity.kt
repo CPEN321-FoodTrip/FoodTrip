@@ -80,13 +80,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             insets
         }
 
-        if (FirebaseApp.getApps(this).isEmpty()) {
-            FirebaseApp.initializeApp(this)
-            Log.d(TAG, "Firebase Initialized in MainActivity")
-        }
+        FirebaseApp.initializeApp(this)
 
-        //Request Notification Permission
-        //Temp located here
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             Log.d(TAG, "Checking permissions")
             if (ActivityCompat.checkSelfPermission(
@@ -101,9 +96,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         } else {
             fetchFCMToken()
         }
-
-
-
+        
         //Map fragment instead of Map activity to maintain functionality of a "main page" and the
         //ability to turn the map on and off as needed
         val mapFragment = supportFragmentManager
@@ -165,10 +158,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (!task.isSuccessful) {
                 Log.w(TAG, "Fetching FCM token failed", task.exception)
-                return@addOnCompleteListener
+            } else {
+                val token = task.result
+                Log.d(TAG, "FCM Token: $token")
             }
-            val token = task.result
-            Log.d(TAG, "FCM Token: $token")
         }
     }
 
@@ -191,6 +184,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             if (mapFragment.visibility == android.view.View.GONE) {
                 mapFragment.visibility = android.view.View.VISIBLE
             }
+
+            //coordinates for testing purposes
+//            val points = listOf(
+//                LatLng(37.7749, -122.4194), // San Francisco
+//                LatLng(34.0522, -118.2437), // Los Angeles
+//                LatLng(36.1699, -115.1398)  // Las Vegas
+//            )
 
             //polyline only draws straight lines, ideally in release this should change to
             //actual routes (ie. roads, highways)
