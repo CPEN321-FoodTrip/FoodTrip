@@ -1,6 +1,10 @@
 import { ObjectId } from "mongodb";
 import { client } from "../services";
-import { Discount } from "../interfaces/DiscountInterfaces";
+import {
+  Discount,
+  DiscountDBEntry,
+  DiscountWithID,
+} from "../interfaces/DiscountInterfaces";
 
 const DB_NAME = "discounts";
 const COLLECTION_NAME = "discounts";
@@ -18,15 +22,17 @@ export async function addDiscountToDb(discount: Discount): Promise<string> {
 }
 
 // get all discounts for a store
-export async function getDiscountsFromDb(storeID: string): Promise<Discount[]> {
-  const discounts: Discount[] = await client
+export async function getDiscountsFromDb(
+  storeID: string
+): Promise<DiscountWithID[]> {
+  const discounts: DiscountDBEntry[] = await client
     .db(DB_NAME)
-    .collection<Discount>(COLLECTION_NAME)
+    .collection<DiscountDBEntry>(COLLECTION_NAME)
     .find({ storeID })
     .toArray();
 
   return discounts.map(({ _id, ...rest }) => ({
-    discountID: _id?.toHexString() ?? "",
+    discountID: _id.toHexString(),
     ...rest,
   }));
 }
@@ -34,17 +40,17 @@ export async function getDiscountsFromDb(storeID: string): Promise<Discount[]> {
 // get all discounts from the database, with optional ingredient filter
 export async function getAllDiscountsFromDb(
   ingredient: string
-): Promise<Discount[]> {
+): Promise<DiscountWithID[]> {
   const query = ingredient ? { ingredient } : {};
 
-  const discounts: Discount[] = await client
+  const discounts: DiscountDBEntry[] = await client
     .db(DB_NAME)
-    .collection<Discount>(COLLECTION_NAME)
+    .collection<DiscountDBEntry>(COLLECTION_NAME)
     .find(query)
     .toArray();
 
   return discounts.map(({ _id, ...rest }) => ({
-    discountID: _id?.toHexString() ?? "",
+    discountID: _id.toHexString(),
     ...rest,
   }));
 }
@@ -56,7 +62,7 @@ export async function deleteDiscountFromDb(
   const deletedCount: number = (
     await client
       .db(DB_NAME)
-      .collection<Discount>(COLLECTION_NAME)
+      .collection<DiscountDBEntry>(COLLECTION_NAME)
       .deleteOne({ _id: new ObjectId(discountID) })
   ).deletedCount;
 
