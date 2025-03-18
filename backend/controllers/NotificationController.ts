@@ -35,9 +35,9 @@ export const unsubscribe = async (
   res: Response,
   next: NextFunction
 ) => {
-  const userID = req.params.id;
-
   try {
+    const userID = req.params.id;
+
     const result = await removeTokenFromDb(userID);
     if (!result) {
       return res.status(400).json({ error: "Not subscribed" });

@@ -12,18 +12,22 @@ import * as admin from "firebase-admin";
 
 // add a new discount
 // POST /discounts
-export const addDiscount = async(req: Request, res: Response, next: NextFunction) => {
-  // validation of params performed by express-validator middleware
-  const { storeID, storeName, ingredient, price } = req.body;
-
-  const discount: Discount = {
-    storeID,
-    storeName,
-    ingredient,
-    price,
-  };
-
+export const addDiscount = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
+    // validation of params performed by express-validator middleware
+    const { storeID, storeName, ingredient, price } = req.body;
+
+    const discount: Discount = {
+      storeID,
+      storeName,
+      ingredient,
+      price,
+    };
+
     const discountID = await addDiscountToDb(discount);
 
     const tokens = await getAllTokensFromDb();
@@ -50,11 +54,15 @@ export const addDiscount = async(req: Request, res: Response, next: NextFunction
   } catch (error) {
     next(error);
   }
-}
+};
 
 // get discounts for a store
 // GET /discounts/:id
-export const getDiscounts = async(req: Request, res: Response, next: NextFunction) => {
+export const getDiscounts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     // storeID validation is performed by express-validator middleware
     const storeID = req.params.id;
@@ -71,11 +79,15 @@ export const getDiscounts = async(req: Request, res: Response, next: NextFunctio
   } catch (error) {
     next(error);
   }
-}
+};
 
 // access all discounts
 // GET /discounts
-export const getAllDiscounts = async(req: Request, res: Response, next: NextFunction) => {
+export const getAllDiscounts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const ingredient = (req.query.ingredient as string) || "";
 
@@ -89,11 +101,15 @@ export const getAllDiscounts = async(req: Request, res: Response, next: NextFunc
   } catch (error) {
     next(error);
   }
-}
+};
 
 // delete a discount
 // DELETE /discounts/:id
-export const deleteDiscount = async(req: Request, res: Response, next: NextFunction) => {
+export const deleteDiscount = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const discountID = req.params.id;
 
@@ -111,4 +127,4 @@ export const deleteDiscount = async(req: Request, res: Response, next: NextFunct
   } catch (error) {
     next(error);
   }
-}
+};
