@@ -1,15 +1,14 @@
-
 describe("Unmocked Performance test", () => {
-    jest.setTimeout(20000); //20s
+  jest.setTimeout(20000); //20s
 
-    // Justification: A user may decide to generate a route and recipes, but then decide to delete both
-    // route and recipes if they find them unsatisfactory, which should possible to do quickly
+  // Justification: A user may decide to generate a route and recipes, but then decide to delete both
+  // route and recipes if they find them unsatisfactory, which should possible to do quickly
   test("Unmocked single route, 3 stops", async () => {
-    
     const start = Date.now();
-    const route_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/routes`,
+    const route_response = await fetch(
+      `${process.env.GATEWAY_BASE_URL}/routes`,
       {
-        method: 'POST',
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
@@ -17,7 +16,7 @@ describe("Unmocked Performance test", () => {
           userID: "test_person3",
           origin: "Vancouver",
           destination: "Toronto",
-          numStops: 1
+          numStops: 1,
         }),
       }
     );
@@ -26,9 +25,10 @@ describe("Unmocked Performance test", () => {
       const data = await route_response.json();
       const tripID = data.tripID;
 
-      const recipe_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/recipes`,
+      const recipe_response = await fetch(
+        `${process.env.GATEWAY_BASE_URL}/recipes`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
@@ -41,7 +41,8 @@ describe("Unmocked Performance test", () => {
       const recipedata = await recipe_response.json();
       console.debug('Recipe:', recipedata); ///
 
-      const route_teardown = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/routes/${tripID}`,
+      const route_teardown = await fetch(
+        `${process.env.GATEWAY_BASE_URL}/routes/${tripID}`,
         {
           method: "DELETE",
           headers: {
@@ -52,7 +53,7 @@ describe("Unmocked Performance test", () => {
           throw new Error(`HTTP error! Status: ${route_teardown.status}`);
         }
         
-        const recipe_teardown = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/recipes/${tripID}`,
+        const recipe_teardown = await fetch(`${process.env.GATEWAY_BASE_URL}/${tripID}`,
           {
             method: "DELETE",
             headers: {
@@ -64,7 +65,7 @@ describe("Unmocked Performance test", () => {
           }
 
     } else {
-      console.error('Request failed with status:', route_response.status);
+      console.error("Request failed with status:", route_response.status);
     }
 
     const end = Date.now();
@@ -76,11 +77,11 @@ describe("Unmocked Performance test", () => {
   // Justification: A store owner should be able to upload a discount, check that it is available,
   // and potentially delete it quickly.
   test("Unmocked single discount", async () => {
-    
     const start = Date.now();
-    const discount_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/discounts`,
+    const discount_response = await fetch(
+      `${process.env.GATEWAY_BASE_URL}/discounts`,
       {
-        method: 'POST',
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
@@ -88,17 +89,18 @@ describe("Unmocked Performance test", () => {
           storeID: "test_store",
           storeName: "Vancouver",
           ingredient: "Toronto, the entire province",
-          price: 1
+          price: 1,
         }),
       }
     );
-    
+
     const data = await discount_response.json();
     const discountID = data.discountID;
 
-    const get_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/discounts`,
+    const get_response = await fetch(
+      `${process.env.GATEWAY_BASE_URL}/discounts`,
       {
-        method: 'GET',
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
@@ -107,7 +109,7 @@ describe("Unmocked Performance test", () => {
 
     const get_data = await get_response.json();   
 
-    const discount_teardown = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/discounts/${discountID}`,
+    const discount_teardown = await fetch(`${process.env.GATEWAY_BASE_URL}/discounts/${discountID}`,
       {
         method: "DELETE",
         headers: {
@@ -126,13 +128,13 @@ describe("Unmocked Performance test", () => {
   // Justification: A store owner should be able to upload multiple discounts, check that they are
   //  available, and delete any number of them quickly.
   test("Unmocked 10 discount", async () => {
-    
     const start = Date.now();
     const discountID = [];
-    for (let i =0 ; i < 10; i++){
-      const discount_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/discounts`,
+    for (let i = 0; i < 10; i++) {
+      const discount_response = await fetch(
+        `${process.env.GATEWAY_BASE_URL}/discounts`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
@@ -140,7 +142,7 @@ describe("Unmocked Performance test", () => {
             storeID: "test_store",
             storeName: "Vancouver",
             ingredient: "Toronto, the entire province",
-            price: i
+            price: i,
           }),
         }
       );
@@ -148,26 +150,29 @@ describe("Unmocked Performance test", () => {
       const discountIDsingle = data.discountID;
       discountID.push(discountIDsingle);
     }
-    const get_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/discounts`,
+    const get_response = await fetch(
+      `${process.env.GATEWAY_BASE_URL}/discounts`,
       {
-        method: 'GET',
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
       }
     );
-    for(let i = 0; i < 10; i++){
+    for (let i = 0; i < 10; i++) {
       const did = discountID.pop();
-      const discount_teardown = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/discounts/${did}`,
+      const discount_teardown = await fetch(
+        `${process.env.GATEWAY_BASE_URL}/discounts/${did}`,
         {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-          }
-        });
-        if (!discount_teardown.ok) {
-          throw new Error(`HTTP error! Status: ${discount_teardown.status}`);
+          },
         }
+      );
+      if (!discount_teardown.ok) {
+        throw new Error(`HTTP error! Status: ${discount_teardown.status}`);
+      }
     }
 
     const get_data = await get_response.json();
@@ -183,9 +188,10 @@ describe("Unmocked Performance test", () => {
   test("Unmocked single notification", async () => {
     const userID = "real_person";
     const start = Date.now();
-    const notif_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/notifications`,
+    const notif_response = await fetch(
+      `${process.env.GATEWAY_BASE_URL}/notifications`,
       {
-        method: 'POST',
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
@@ -198,7 +204,8 @@ describe("Unmocked Performance test", () => {
     const data = await notif_response.json();
     expect(data.message).toContain("Subscribed successfully");
 
-    const notif_teardown = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/notifications/${userID}`,
+    const notif_teardown = await fetch(
+      `${process.env.GATEWAY_BASE_URL}/notifications/${userID}`,
       {
         method: "DELETE",
         headers: {
@@ -218,10 +225,11 @@ describe("Unmocked Performance test", () => {
   // not cause significant delays
   test("Unmocked 10 notification", async () => {
     const start = Date.now();
-    for (let i = 0 ; i < 10; i++){
-      const notif_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/notifications`,
+    for (let i = 0; i < 10; i++) {
+      const notif_response = await fetch(
+        `${process.env.GATEWAY_BASE_URL}/notifications`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
@@ -234,17 +242,21 @@ describe("Unmocked Performance test", () => {
       const data = await notif_response.json();
     expect(data.message).toContain("Subscribed successfully");
     }
-    for (let i = 0; i < 10; i++){
-      const notif_teardown = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/notifications/${i}`,
+    for (let i = 0; i < 10; i++) {
+      const notif_teardown = await fetch(
+        `${process.env.GATEWAY_BASE_URL}/notifications/${i}`,
         {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-          }
-        });
-        if (!notif_teardown.ok) {
-          throw new Error(`10 notification delete error! Status: ${notif_teardown.status}`);
+          },
         }
+      );
+      if (!notif_teardown.ok) {
+        throw new Error(
+          `10 notification delete error! Status: ${notif_teardown.status}`
+        );
+      }
     }
     const end = Date.now();
       const duration = end - start; //begin timing test assuming that operation succeeded
@@ -257,7 +269,7 @@ describe("Unmocked Performance test", () => {
       const userID = "real_person";
       const allergen = "fake_people";
       const start = Date.now();
-      const allergy_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/preferences/allergies/`,
+      const allergy_response = await fetch(`${process.env.GATEWAY_BASE_URL}/preferences/allergies/`,
         {
           method: 'POST',
           headers: {
@@ -271,7 +283,7 @@ describe("Unmocked Performance test", () => {
       );
       const data = await allergy_response.json();
       expect(data.message).toContain("Allergy added successfully")
-      const get_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/preferences/allergies/${userID}`,
+      const get_response = await fetch(`${process.env.GATEWAY_BASE_URL}/preferences/allergies/${userID}`,
         {
           method: 'GET',
           headers: {
@@ -281,7 +293,7 @@ describe("Unmocked Performance test", () => {
       );
       const get_data = await get_response.json();
       const end = Date.now();
-      const allergy_teardown = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/preferences/allergies/${userID}/${allergen}`,
+      const allergy_teardown = await fetch(`${process.env.GATEWAY_BASE_URL}/preferences/allergies/${userID}/${allergen}`,
         {
           method: "DELETE",
           headers: {
@@ -296,4 +308,3 @@ describe("Unmocked Performance test", () => {
         expect(duration).toBeLessThanOrEqual(2700);
     });
 });
-  
