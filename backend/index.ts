@@ -9,6 +9,9 @@ import { RecipeRoutes } from "./routes/RecipesRoutes";
 import { UserRoutes } from "./routes/UserRoutes";
 import { NotificationRoutes } from "./routes/NotificationRoutes";
 import { PreferenceRoutes } from "./routes/PreferenceRoutes";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 
@@ -74,9 +77,6 @@ const errorHandle = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error("Error:", err.message);
-  console.error("Stack trace:", err.stack);
-
   res.status(500).json({ error: "Internal server error" });
   next(err);
 };

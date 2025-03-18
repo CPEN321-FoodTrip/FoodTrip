@@ -127,9 +127,16 @@ describe("Mocked: GET /preferences/allergies/:id", () => {
   // Expected behavior: PreferenceHelper.getAllergiesFromDb called
   // Expected output: list of allergies
   test("Valid allergy", async () => {
-    jest
-      .spyOn(PreferenceHelper, "getAllergiesFromDb")
-      .mockResolvedValue([{ allergy: "peanut" }, { allergy: "egg" }]);
+    jest.spyOn(PreferenceHelper, "getAllergiesFromDb").mockResolvedValue([
+      {
+        allergy: "peanut",
+        userID: "123",
+      },
+      {
+        allergy: "egg",
+        userID: "123",
+      },
+    ]);
 
     const response = await request(app)
       .get("/preferences/allergies/123")

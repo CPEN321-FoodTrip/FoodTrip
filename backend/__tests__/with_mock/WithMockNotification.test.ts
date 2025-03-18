@@ -58,7 +58,9 @@ describe("Mocked: POST /notifications", () => {
   // Expected behavior: error handled gracefully
   // Expected output: error message
   test("Database failure on insert", async () => {
-    jest.spyOn(NotificationHelper, "addTokenToDb").mockResolvedValue(null);
+    jest.spyOn(NotificationHelper, "addTokenToDb").mockImplementation(() => {
+      throw new Error("Forced error");
+    });
 
     const response = await request(app)
       .post("/notifications")
