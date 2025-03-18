@@ -109,7 +109,7 @@ export async function getRecipesFromDb(
     .collection<{ tripID: string; recipes: Recipe[] }>(RECIPE_COLLECTION_NAME)
     .findOne({ tripID });
 
-  if (!result || !result.recipes) {
+  if (!result?.recipes) {
     return null;
   }
   return result.recipes;

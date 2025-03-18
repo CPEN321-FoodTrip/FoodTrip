@@ -112,7 +112,7 @@ export async function fetchCityData(
       throw new Error(`Failed to fetch city data: ${response.statusText}`);
     }
 
-    const data: object = await response.json();
+    const data: { lat: string; lon: string }[] = await response.json();
 
     if (!Array.isArray(data) || data.length === 0) {
       return null;
