@@ -1,13 +1,11 @@
 import { body } from "express-validator";
-import { RouteController } from "../controllers/RouteController";
-
-const controller = new RouteController();
+import { createRoute, deleteRoute, getRoute } from "../controllers/RouteController";
 
 export const RouteRoutes = [
   {
     method: "post",
     route: "/routes",
-    action: controller.createRoute,
+    action: createRoute,
     validation: [
       body("userID")
         .exists()
@@ -30,13 +28,13 @@ export const RouteRoutes = [
   {
     method: "get",
     route: "/routes/:id",
-    action: controller.getRoute,
+    action: getRoute,
     validation: [],
   },
   {
     method: "delete",
     route: "/routes/:id",
-    action: controller.deleteRoute,
+    action: deleteRoute,
     validation: [],
   },
 ];

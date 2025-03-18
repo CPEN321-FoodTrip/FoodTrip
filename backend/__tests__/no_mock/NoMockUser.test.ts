@@ -1,7 +1,7 @@
 import request from "supertest";
 import app from "../../index";
 import { client } from "../../services";
-import { ObjectId } from "mongodb";
+import { RouteDBEntry } from "../../interfaces/RouteInterfaces";
 
 // constants for routes saved in MongoDB
 const ROUTES_DB_NAME = "route_data";
@@ -10,32 +10,34 @@ const ROUTES_COLLECTION_NAME = "routes";
 // Interface GET /users/:id/routes
 describe("Unmocked: GET /users/:id/routes", () => {
   const SAMPLE_ROUTE1 = {
-    userID: "test-user",
     start_location: {
       name: "Vancouver",
       latitude: 49.2608724,
       longitude: -123.113952,
+      population: 675218,
     },
     end_location: {
       name: "Ottawa",
       latitude: 45.4208777,
       longitude: -75.6901106,
+      population: 1013247,
     },
-    _id: new ObjectId(),
+    stops: [],
   };
   const SAMPLE_ROUTE2 = {
-    userID: "test-user",
     start_location: {
       name: "Istanbul",
       latitude: 41.006381,
       longitude: 28.9758715,
+      population: 15462452,
     },
     end_location: {
       name: "Prague",
       latitude: 50.0874654,
       longitude: 14.4212535,
+      population: 1301132,
     },
-    _id: new ObjectId(),
+    stops: [],
   };
 
   // Input: SAMPLE_ROUTE1 and SAMPLE_ROUTE2 are valid routes saved in the db
@@ -45,8 +47,13 @@ describe("Unmocked: GET /users/:id/routes", () => {
   test("Valid user with routes", async () => {
     // setup: insert sample routes into db
     const db = client.db(ROUTES_DB_NAME);
-    const collection = db.collection(ROUTES_COLLECTION_NAME);
-    await collection.insertMany([SAMPLE_ROUTE1, SAMPLE_ROUTE2]);
+    const collection = db.collection<RouteDBEntry>(ROUTES_COLLECTION_NAME);
+    const restult = await collection.insertMany([
+      { userID: "test-user", route: SAMPLE_ROUTE1 },
+      { userID: "test-user", route: SAMPLE_ROUTE2 },
+    ]);
+    const tripID1 = restult.insertedIds[0];
+    const tripID2 = restult.insertedIds[1];
 
     const userID = "test-user";
     const response = await request(app)
@@ -56,17 +63,15 @@ describe("Unmocked: GET /users/:id/routes", () => {
     expect(Array.isArray(response.body)).toBe(true);
     expect(response.body.length).toBeGreaterThan(0);
 
-    const { _id: _id1, ...routeWithoutId1 } = SAMPLE_ROUTE1;
-    const { _id: _id2, ...routeWithoutId2 } = SAMPLE_ROUTE2;
     expect(response.body).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          ...routeWithoutId1,
-          tripID: _id1.toHexString(),
+          tripID: tripID1.toHexString(),
+          ...SAMPLE_ROUTE1,
         }),
         expect.objectContaining({
-          ...routeWithoutId2,
-          tripID: _id2.toHexString(),
+          tripID: tripID2.toHexString(),
+          ...SAMPLE_ROUTE2,
         }),
       ])
     );

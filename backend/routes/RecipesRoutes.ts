@@ -1,13 +1,11 @@
 import { body } from "express-validator";
-import { RecipeController } from "../controllers/RecipeController";
-
-const controller = new RecipeController();
+import { createRecipes, deleteRecipes, getRecipes } from "../controllers/RecipeController";
 
 export const RecipeRoutes = [
   {
     method: "post",
     route: "/recipes",
-    action: controller.createRecipesfromRoute,
+    action: createRecipes,
     validation: [
       body("tripID")
         .exists()
@@ -18,13 +16,13 @@ export const RecipeRoutes = [
   {
     method: "get",
     route: "/recipes/:id",
-    action: controller.getRecipes,
+    action: getRecipes,
     validation: [],
   },
   {
     method: "delete",
     route: "/recipes/:id",
-    action: controller.deleteRecipes,
+    action: deleteRecipes,
     validation: [],
   },
 ];

@@ -5,6 +5,8 @@ import { ObjectId } from "mongodb";
 import {
   GeoNameCity,
   Location,
+  Route,
+  RouteDBEntry,
   RouteStop,
 } from "../interfaces/RouteInterfaces";
 
@@ -98,7 +100,9 @@ async function importGeoNamesToMongoDB(): Promise<void> {
 }
 
 // helper function to fetch city data from OpenStreetMap API
-export async function fetchCityData(city: string): Promise<any | null> {
+export async function fetchCityData(
+  city: string
+): Promise<{ lat: string; lon: string } | null> {
   const url = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(
     city
   )}&format=json&limit=1`;
@@ -109,7 +113,7 @@ export async function fetchCityData(city: string): Promise<any | null> {
       throw new Error(`Failed to fetch city data: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data: { lat: string; lon: string }[] = await response.json();
 
     if (!Array.isArray(data) || data.length === 0) {
       return null;
@@ -238,7 +242,11 @@ export async function generateRouteStops(
 
     // choose city closest to ideal point
     if (nearbyCities.length > 0) {
-      const citiesWithDistance = nearbyCities.map((city) => {
+      const citiesWithDistance: {
+        location: Location;
+        distanceFromIdealPoint: number;
+        distanceFromStart: number;
+      }[] = nearbyCities.map((city) => {
         const location: Location = {
           name: city.name,
           latitude: city.latitude,
@@ -273,10 +281,6 @@ export async function generateRouteStops(
         cumulativeDistance: bestCity.distanceFromStart,
         segmentPercentage: segmentPercentage * 100,
       });
-    } else {
-      console.log(
-        `No cities found for segment ${i} at ${segmentPercentage * 100}`
-      );
     }
   }
 
@@ -287,29 +291,36 @@ export async function generateRouteStops(
 // save route to MongoDB and return ID
 export async function saveRouteToDb(
   userID: string,
-  route: {}
-): Promise<ObjectId> {
+  route: Route
+): Promise<string> {
   const db = client.db(ROUTES_DB_NAME);
-  const collection = db.collection(ROUTES_COLLECTION_NAME);
+  const collection = db.collection<RouteDBEntry>(ROUTES_COLLECTION_NAME);
 
-  const result = await collection.insertOne({ userID, ...route });
-  return result.insertedId;
+  const insertedId: string = (
+    await collection.insertOne({ userID, route })
+  ).insertedId.toHexString();
+  return insertedId;
 }
 
 // get route from MongoDB by ID (or null if not found)
-export async function getRouteFromDb(tripID: string): Promise<{} | null> {
+export async function getRouteFromDb(tripID: string): Promise<Route | null> {
   const db = client.db(ROUTES_DB_NAME);
-  const collection = db.collection(ROUTES_COLLECTION_NAME);
+  const collection = db.collection<RouteDBEntry>(ROUTES_COLLECTION_NAME);
 
-  return await collection.findOne({ _id: new ObjectId(tripID) });
+  const result = await collection.findOne({ _id: new ObjectId(tripID) });
+  return result ? result.route : null;
 }
 
 // delete route from MongoDB by ID
 export async function deleteRouteFromDb(tripID: string): Promise<number> {
   const db = client.db(ROUTES_DB_NAME);
-  const collection = db.collection(ROUTES_COLLECTION_NAME);
+  const collection = db.collection<RouteDBEntry>(ROUTES_COLLECTION_NAME);
 
-  const result = await collection.deleteOne({ _id: new ObjectId(tripID) });
+  const deletedCount: number = (
+    await collection.deleteOne({
+      _id: new ObjectId(tripID),
+    })
+  ).deletedCount;
 
-  return result.deletedCount;
+  return deletedCount;
 }
