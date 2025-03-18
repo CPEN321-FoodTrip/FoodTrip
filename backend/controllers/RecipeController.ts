@@ -5,24 +5,22 @@ import {
   createRecipesfromRoute,
   deleteRecipesFromDb,
 } from "../helpers/RecipeHelper";
-import { validationResult } from "express-validator";
 import { ObjectId } from "mongodb";
 
 // generate a list of recipes from a route
 // POST /recipes
-export const createRecipes = async(
+export const createRecipes = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
-  const { tripID } = req.body as { tripID: string };
-
   try {
+    // validation of params performed by express-validator middleware
+    const { tripID } = req.body as { tripID: string };
+    if (!ObjectId.isValid(tripID)) {
+      return res.status(400).json({ error: "Invalid tripID format" });
+    }
+
     const recipes = await createRecipesfromRoute(tripID);
     if (!recipes) {
       return res.status(404).json({ error: "Trip not found" });
@@ -34,15 +32,19 @@ export const createRecipes = async(
       return res.status(500).json({ error: "Failed to save recipes" });
     }
 
-    res.json(recipes);
+    res.status(201).json(recipes);
   } catch (error) {
     next(error);
   }
-}
+};
 
 // get all recipes from a trip
 // GET /recipes/:id
-export const getRecipes = async(req: Request, res: Response, next: NextFunction) => {
+export const getRecipes = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const tripID = req.params.id;
     if (!ObjectId.isValid(tripID)) {
@@ -54,16 +56,20 @@ export const getRecipes = async(req: Request, res: Response, next: NextFunction)
       return res.status(404).json({ error: "No recipes found for tripID" });
     }
 
-    res.json(recipes);
+    res.status(200).json(recipes);
   } catch (error) {
     console.error("Error getting recipe:", error);
     next(error);
   }
-}
+};
 
 // delete all recipes from a trip
 // DELETE /recipes/:id
-export const deleteRecipes = async(req: Request, res: Response, next: NextFunction) => {
+export const deleteRecipes = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const tripID = req.params.id;
     if (!ObjectId.isValid(tripID)) {
@@ -74,8 +80,8 @@ export const deleteRecipes = async(req: Request, res: Response, next: NextFuncti
     if (!result) {
       return res.status(404).json({ error: "No recipes found for tripID" });
     }
-    res.json({ success: true, message: "Recipes deleted" });
+    res.status(200).json({ success: true, message: "Recipes deleted" });
   } catch (error) {
     next(error);
   }
-}
+};

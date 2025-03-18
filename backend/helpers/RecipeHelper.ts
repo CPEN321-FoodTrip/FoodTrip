@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import { client } from "../services";
 
-import { RouteStop } from "../interfaces/RouteInterfaces";
+import { RouteDBEntry, RouteStop } from "../interfaces/RouteInterfaces";
 import {
   Recipe,
   EdamamResponse,
@@ -58,7 +58,9 @@ export async function createRecipesfromRoute(
 ): Promise<Recipe[] | null> {
   try {
     const route_db = client.db(ROUTES_DB_NAME);
-    const route_collection = route_db.collection(ROUTES_COLLECTION_NAME);
+    const route_collection = route_db.collection<RouteDBEntry>(
+      ROUTES_COLLECTION_NAME
+    );
     const route = await route_collection.findOne({ _id: new ObjectId(tripID) });
     if (!route) {
       return null;
@@ -67,7 +69,7 @@ export async function createRecipesfromRoute(
     const recipes: Recipe[] = [];
 
     const stopNames: string[] = [];
-    route.stops.forEach((stop: RouteStop) => {
+    route.route.stops.forEach((stop: RouteStop) => {
       const stopName = stop.location.name;
       stopNames.push(stopName);
     });
