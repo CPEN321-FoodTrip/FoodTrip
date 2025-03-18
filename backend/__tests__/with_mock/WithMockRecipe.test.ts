@@ -17,7 +17,7 @@ describe("Mocked: POST /recipes", () => {
   });
 
   // Mocked behavior: mock edamam api call that does not get received
-  // Expected status code: 503
+  // Expected status code: 500
   // Expected behavior: error handled gracefully
   // Expected output: error message
   test("Fail external api request", async () => {
@@ -40,7 +40,7 @@ describe("Mocked: POST /recipes", () => {
   // Expected behavior: error handled gracefully
   // Expected output: error message
   test("External api non ok status", async () => {
-    // 500 when trying to search for first city
+    // 503 when trying to search for first recipe
     global.fetch = jest.fn().mockResolvedValueOnce({
       ok: false,
       status: 503,
@@ -50,14 +50,14 @@ describe("Mocked: POST /recipes", () => {
     const response = await request(app)
       .post("/recipes")
       .send({
-        tripID: "test-user",
+        tripID: new ObjectId().toHexString(),
       })
       .expect(500);
 
     expect(response.body).toHaveProperty("error", "Internal server error");
   });
 
-  // Mocked behavior: RecipeHelper.saveRecipesToDb throws an error
+  // Mocked behavior: RecipeHelper.saveRecipesToDb throws an error and mock edamam api call to return valid recipe
   // Input: tripID valid
   // Expected status code: 500
   // Expected behavior: error handled gracefully
@@ -73,7 +73,7 @@ describe("Mocked: POST /recipes", () => {
         },
       ],
     };
-    global.fetch = jest.fn().mockResolvedValueOnce(mockResponse);
+    global.fetch = jest.fn().mockResolvedValueOnce(mockResponse); // mock edamam api call
 
     // database failure
     jest.spyOn(RecipeHelper, "saveRecipesToDb").mockImplementation(() => {
@@ -83,7 +83,7 @@ describe("Mocked: POST /recipes", () => {
     const response = await request(app)
       .post("/recipes")
       .send({
-        userID: "12334254365",
+        tripID: new ObjectId().toHexString(),
       })
       .expect(500);
 
