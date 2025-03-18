@@ -38,7 +38,7 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
 
     return data.hits.map((hit) => ({
       recipeName: hit.recipe.label || "",
-      recipeID: parseInt(hit.recipe.uri.split("_")[1] || "0", 10),
+      recipeID: parseInt(hit.recipe.uri.split("_")[1] || "0", 10), 
       url: hit.recipe.url,
       ingredients: hit.recipe.ingredientLines,
     }));

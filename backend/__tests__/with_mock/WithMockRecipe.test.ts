@@ -148,6 +148,42 @@ describe("Mocked: POST /recipes", () => {
   });
 });
 
+test("should handle recipes with empty recipeName and recipeID = 0", async () => {
+  // Arrange: Mock fetch to return a response with empty recipeName and recipeID = 0
+  const mockResponse = {
+    ok: true,
+    status: 200,
+    json: () =>
+      Promise.resolve({
+        hits: [
+          {
+            recipe: {
+              label: "", // Empty recipeName
+              uri: "", // Invalid URI (results in recipeID = 0)
+              url: "http://example.com/recipe",
+              ingredientLines: ["Ingredient 1", "Ingredient 2"],
+            },
+          },
+        ],
+      }),
+  } as Response;
+
+  mocked(fetch).mockResolvedValueOnce(mockResponse);
+
+  // Act: Call the function
+  const recipes = await RecipeHelper.fetchRecipe("query");
+
+  // Assert: Verify the returned recipe has empty recipeName and recipeID = 0
+  expect(recipes).toEqual([
+    {
+      recipeName: "",
+      recipeID: 0,
+      url: "http://example.com/recipe",
+      ingredients: ["Ingredient 1", "Ingredient 2"],
+    },
+  ]);
+});
+
 // Mock fetchRecipe not connecting to Edamam API
 test('cannot reach Edamam API', async () => {
   // Mock fetch to return a non-OK response
