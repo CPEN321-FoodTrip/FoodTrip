@@ -80,10 +80,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             insets
         }
 
-        FirebaseApp.initializeApp(this)
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Log.d(TAG, "Checking permissions")
             if (ActivityCompat.checkSelfPermission(
                     this,
                     Manifest.permission.POST_NOTIFICATIONS
@@ -103,20 +100,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        findViewById<Button>(R.id.PastTrips).setOnClickListener() {
-            val intent = Intent(this, PastTripActivity::class.java)
-            startActivity(intent)
-        }
-
-        findViewById<Button>(R.id.ManageTrip).setOnClickListener() {
-            val intent = Intent(this, TripActivity::class.java)
-            startActivity(intent)
-        }
-
-        findViewById<Button>(R.id.ManageAccount).setOnClickListener() {
-            val intent = Intent(this, AccountActivity::class.java)
-            startActivity(intent)
-        }
+        //sets up onClick listeners for generic buttons
+        setUpButtons()
 
         findViewById<Button>(R.id.sign_out_button).setOnClickListener() {
             Log.d(TAG, "Sign Out Button Clicked")
@@ -143,10 +128,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
-        findViewById<Button>(R.id.viewRecipes).setOnClickListener() {
-            val intent = Intent(this, GroceryActivity::class.java)
-            startActivity(intent)
-        }
     }
 
     //temp function for Notifications
@@ -165,7 +146,27 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    fun setUpButtons() {
+        findViewById<Button>(R.id.PastTrips).setOnClickListener() {
+            val intent = Intent(this, PastTripActivity::class.java)
+            startActivity(intent)
+        }
 
+        findViewById<Button>(R.id.ManageTrip).setOnClickListener() {
+            val intent = Intent(this, TripActivity::class.java)
+            startActivity(intent)
+        }
+
+        findViewById<Button>(R.id.ManageAccount).setOnClickListener() {
+            val intent = Intent(this, AccountActivity::class.java)
+            startActivity(intent)
+        }
+
+        findViewById<Button>(R.id.viewRecipes).setOnClickListener() {
+            val intent = Intent(this, GroceryActivity::class.java)
+            startActivity(intent)
+        }
+    }
 
 
     override fun onMapReady(googleMap: GoogleMap) {
