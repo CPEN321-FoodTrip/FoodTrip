@@ -12,9 +12,10 @@ const RECIPE_COLLECTION_NAME = "recipes";
 
 const SAMPLE_ROUTE_1 = {
     start_location: {
-      name: "Vancouver",
-      latitude: 49.2608724,
-      longitude: -123.113952,
+      name: "Winnipeg",
+          latitude: 49.8844,
+          longitude: -97.14704,
+          population: 749607,
     },
     end_location: {
       name: "Toronto",
@@ -24,10 +25,9 @@ const SAMPLE_ROUTE_1 = {
     stops: [
       {
         location: {
-          name: "Winnipeg",
-          latitude: 49.8844,
-          longitude: -97.14704,
-          population: 749607,
+          name: "Vancouver",
+          latitude: 49.2608724,
+          longitude: -123.113952,
         },
         distanceFromStart: 1329.071074459746,
         cumulativeDistance: 1329.071074459746,
@@ -93,7 +93,7 @@ describe("Unmocked Performance test", () => {
     const recipe_response = await request(app)
       .post("/recipes")
       .send({
-        tripID: tripID 
+        tripID 
       })
       .expect(200);
 
