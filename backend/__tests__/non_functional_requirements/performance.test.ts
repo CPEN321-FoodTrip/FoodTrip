@@ -200,7 +200,7 @@ describe("Unmocked Performance test", () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userID: userID,
+          userID,
           fcmToken: "Vancouver",
         }),
       }
