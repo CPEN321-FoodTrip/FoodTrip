@@ -40,6 +40,11 @@ import org.hamcrest.Matchers.`is`
 val startCount = 0
 val maxCount = 3
 var clickCount = 0
+
+/**
+ * customize click action with click count
+ * for usability test: click count <= 3 for each use case
+ */
 fun customClick(): ViewAction {
     return object : ViewAction {
         override fun getConstraints(): Matcher<View> {
