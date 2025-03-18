@@ -3,7 +3,7 @@ import app from "../../index";
 import * as RouteHelpers from "../../helpers/RouteHelpers";
 import { ObjectId } from "mongodb";
 import { client } from "../../services";
-import { Route, RouteDBEntry } from "../../interfaces/RouteInterfaces";
+import { RouteDBEntry } from "../../interfaces/RouteInterfaces";
 
 jest.mock("node-fetch", () => jest.fn());
 
