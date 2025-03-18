@@ -125,39 +125,27 @@ describe("Mocked: POST /recipes", () => {
   // Expected status code: 500
   // Expected behavior: error handled gracefully
   // Expected output: error message
-  // test("Missing API keys", async () => {
-  //   jest.spyOn(RecipeHelper, "fetchRecipe").mockRejectedValueOnce({
-  //     ok: false,
-  //     status: 401,
-  //     json: async () => Promise.resolve({ message: "Unauthorized" }),
-  //   });
-  //   const route_collection = {
-  //     findOne: jest.fn(),
-  //   };
-  //   const tripID = ; // Example trip ID
-  //   const mockedRoute = {
-  //     _id: new ObjectId(tripID),
-  //     name: "Mocked Route",
-  //     distance: 100,
-  //   };
-  //   route_collection.findOne.mockResolvedValueOnce(mockedRoute);
-  //   const originalApiKey = process.env.EDAMAM_API_KEY;
-  //   delete process.env.EDAMAM_API_KEY;
+  test("Missing API keys", async () => {
+    const originalApiKey = process.env.EDAMAM_API_KEY;
+    const originalAppId = process.env.EDAMAM_APP_ID;
+    process.env.EDAMAM_API_KEY = "";
+    process.env.EDAMAM_APP_ID = "";
 
-  //   const response = await request(app)
-  //     .post("/recipes")
-  //     .send({
-  //       tripID: new ObjectId().toHexString(),
-  //     })
-  //     .expect(400);
-  //   console.debug(response.body);
-  //   expect(response.body?.message).toHaveProperty("Unauthorized");
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    await expect(RecipeHelper.fetchRecipe("query")).rejects.toThrow();
 
-  //   if (originalApiKey !== undefined) {
-  //     process.env.EDAMAM_API_KEY = originalApiKey;
-  //   }
-  //   jest.resetModules();
-  // });
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Detailed recipe fetch error:",
+      expect.any(Error)
+    );
+
+    if (originalApiKey !== undefined) {
+      process.env.EDAMAM_API_KEY = originalApiKey;
+      process.env.EDAMAM_APP_ID = originalAppId;
+    }
+    consoleErrorSpy.mockRestore();
+    jest.resetModules();
+  });
 });
 
 // Mock fetchRecipe not connecting to Edamam API
