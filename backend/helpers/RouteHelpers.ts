@@ -5,6 +5,8 @@ import { ObjectId } from "mongodb";
 import {
   GeoNameCity,
   Location,
+  Route,
+  RouteDBEntry,
   RouteStop,
 } from "../interfaces/RouteInterfaces";
 
@@ -111,7 +113,7 @@ export async function fetchCityData(
       throw new Error(`Failed to fetch city data: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data: { lat: string; lon: string }[] = await response.json();
 
     if (!Array.isArray(data) || data.length === 0) {
       return null;
@@ -279,10 +281,6 @@ export async function generateRouteStops(
         cumulativeDistance: bestCity.distanceFromStart,
         segmentPercentage: segmentPercentage * 100,
       });
-    } else {
-      // console.debug(
-      //   `No cities found for segment ${i} at ${segmentPercentage * 100}`
-      // );
     }
   }
 
@@ -293,29 +291,36 @@ export async function generateRouteStops(
 // save route to MongoDB and return ID
 export async function saveRouteToDb(
   userID: string,
-  route: object
-): Promise<ObjectId> {
+  route: Route
+): Promise<string> {
   const db = client.db(ROUTES_DB_NAME);
-  const collection = db.collection(ROUTES_COLLECTION_NAME);
+  const collection = db.collection<RouteDBEntry>(ROUTES_COLLECTION_NAME);
 
-  const result = await collection.insertOne({ userID, ...route });
-  return result.insertedId;
+  const insertedId: string = (
+    await collection.insertOne({ userID, route })
+  ).insertedId.toHexString();
+  return insertedId;
 }
 
 // get route from MongoDB by ID (or null if not found)
-export async function getRouteFromDb(tripID: string): Promise<object | null> {
+export async function getRouteFromDb(tripID: string): Promise<Route | null> {
   const db = client.db(ROUTES_DB_NAME);
-  const collection = db.collection(ROUTES_COLLECTION_NAME);
+  const collection = db.collection<RouteDBEntry>(ROUTES_COLLECTION_NAME);
 
-  return await collection.findOne({ _id: new ObjectId(tripID) });
+  const result = await collection.findOne({ _id: new ObjectId(tripID) });
+  return result ? result.route : null;
 }
 
 // delete route from MongoDB by ID
 export async function deleteRouteFromDb(tripID: string): Promise<number> {
   const db = client.db(ROUTES_DB_NAME);
-  const collection = db.collection(ROUTES_COLLECTION_NAME);
+  const collection = db.collection<RouteDBEntry>(ROUTES_COLLECTION_NAME);
 
-  const result = await collection.deleteOne({ _id: new ObjectId(tripID) });
+  const deletedCount: number = (
+    await collection.deleteOne({
+      _id: new ObjectId(tripID),
+    })
+  ).deletedCount;
 
-  return result.deletedCount;
+  return deletedCount;
 }

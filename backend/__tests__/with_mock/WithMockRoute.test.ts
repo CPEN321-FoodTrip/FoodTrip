@@ -3,6 +3,7 @@ import app from "../../index";
 import * as RouteHelpers from "../../helpers/RouteHelpers";
 import { ObjectId } from "mongodb";
 import { client } from "../../services";
+import { RouteDBEntry } from "../../interfaces/RouteInterfaces";
 
 jest.mock("node-fetch", () => jest.fn());
 
@@ -11,7 +12,7 @@ describe("Mocked: POST /routes", () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     await RouteHelpers.initializeGeoNamesDatabase();
-  });
+  }, 30000); // increase timeout for geoNames initialization
 
   afterEach(() => {
     jest.restoreAllMocks();
@@ -367,7 +368,7 @@ describe("Mocked: POST /routes", () => {
     // check if route added to in-memory db which was cleared after last test by afterEach in jest setup
     const result = await client
       .db("route_data")
-      .collection("routes")
+      .collection<RouteDBEntry>("routes")
       .findOne({ userID: "test-user" });
     expect(result).not.toBeNull();
   });
@@ -434,16 +435,29 @@ describe("Mocked: GET /routes/:id", () => {
   // Expected behavior: route returned successfully
   // Expected output: route object
   test("Valid tripID and route returned", async () => {
-    jest
-      .spyOn(RouteHelpers, "getRouteFromDb")
-      .mockResolvedValue({ mock: "route" });
+    const mock_route = {
+      start_location: {
+        latitude: 0,
+        longitude: 0,
+        name: "",
+        population: 0,
+      },
+      end_location: {
+        latitude: 0,
+        longitude: 0,
+        name: "",
+        population: 0,
+      },
+      stops: [],
+    };
+    jest.spyOn(RouteHelpers, "getRouteFromDb").mockResolvedValue(mock_route);
 
     const tripID = new ObjectId(123);
     const response = await request(app)
       .get(`/routes/${tripID.toHexString()}`)
       .expect(200);
 
-    expect(response.body).toHaveProperty("mock", "route");
+    expect(response.body).toEqual(mock_route);
     expect(RouteHelpers.getRouteFromDb).toHaveBeenCalled();
   });
 });

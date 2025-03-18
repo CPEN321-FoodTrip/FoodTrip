@@ -15,3 +15,8 @@ export interface EdamamResponse {
     };
   }[];
 }
+
+export interface RecipeDBEntry {
+  tripID: string;
+  recipes: Recipe[];
+}

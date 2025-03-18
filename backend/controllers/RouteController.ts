@@ -6,12 +6,12 @@ import {
   deleteRouteFromDb,
   fetchCityData,
 } from "../helpers/RouteHelpers";
-import { Location, RouteRequest } from "../interfaces/RouteInterfaces";
+import { Location, Route, RouteRequest } from "../interfaces/RouteInterfaces";
 import { ObjectId } from "mongodb";
 
 // create a new route
 // POST /routes
-export const createRoute = async(
+export const createRoute = async (
   req: Request<object, object, RouteRequest>,
   res: Response,
   next: NextFunction
@@ -52,16 +52,18 @@ export const createRoute = async(
 
     const stops = await generateRouteStops(start, end, numStops);
 
-    const route = {
+    const route: Route = {
       start_location: {
         name: origin,
         latitude: start.latitude,
         longitude: start.longitude,
+        population: 0, // not used for start location
       },
       end_location: {
         name: destination,
         latitude: end.latitude,
         longitude: end.longitude,
+        population: 0, // not used for end location
       },
       stops,
     };
@@ -73,11 +75,15 @@ export const createRoute = async(
   } catch (error) {
     next(error);
   }
-}
+};
 
 // get information about a particular route
 // GET /routes/:id
-export const getRoute = async(req: Request, res: Response, next: NextFunction) => {
+export const getRoute = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const tripID = req.params.id;
 
@@ -95,11 +101,15 @@ export const getRoute = async(req: Request, res: Response, next: NextFunction) =
   } catch (error) {
     next(error);
   }
-}
+};
 
 // delete a route
 // DELETE /routes/:id
-export const deleteRoute = async(req: Request, res: Response, next: NextFunction) => {
+export const deleteRoute = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const tripID = req.params.id;
 
@@ -117,4 +127,4 @@ export const deleteRoute = async(req: Request, res: Response, next: NextFunction
   } catch (error) {
     next(error);
   }
-}
+};

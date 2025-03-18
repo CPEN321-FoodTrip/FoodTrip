@@ -1,6 +1,7 @@
 import request from "supertest";
 import app from "../../index";
 import { client } from "../../services";
+import { UserNotificationData } from "../../interfaces/NotificationInterfaces";
 
 const DB_NAME = "discounts";
 const COLLECTION_NAME = "notifications";
@@ -24,7 +25,7 @@ describe("Unmocked: POST /notifications", () => {
     // verify token added to db
     const result = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .findOne({ userID });
     expect(result).not.toBeNull();
     expect(result?.fcmToken).toBe(fcmToken);
@@ -39,7 +40,7 @@ describe("Unmocked: POST /notifications", () => {
   test("Missing parameters", async () => {
     const countBefore = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .countDocuments();
 
     const response = await request(app)
@@ -62,7 +63,7 @@ describe("Unmocked: POST /notifications", () => {
     // verify db is unchanged
     const countAfter = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .countDocuments();
     expect(countAfter).toBe(countBefore);
   });
@@ -76,12 +77,12 @@ describe("Unmocked: POST /notifications", () => {
     const fcmtTken = "real-token";
     await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .insertOne({ userID, fcmToken: fcmtTken });
 
     const countBefore = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .countDocuments();
 
     const response = await request(app)
@@ -94,7 +95,7 @@ describe("Unmocked: POST /notifications", () => {
     // verify db is unchanged
     const countAfter = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .countDocuments();
     expect(countAfter).toBe(countBefore);
 
@@ -113,11 +114,11 @@ describe("Unmocked: DELETE /notifications/:id", () => {
     const fcmToken = "real-token";
     await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .insertOne({ userID, fcmToken });
     const countBefore = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .countDocuments();
 
     const response = await request(app)
@@ -132,13 +133,13 @@ describe("Unmocked: DELETE /notifications/:id", () => {
     // verify token removed from db
     const result = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .findOne({ userID });
     expect(result).toBeNull();
 
     const countAfter = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .countDocuments();
     expect(countAfter).toBe(countBefore - 1);
 
@@ -154,11 +155,11 @@ describe("Unmocked: DELETE /notifications/:id", () => {
     const fcmToken = "real-token";
     await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .insertOne({ userID: userID1, fcmToken });
     const countBefore = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .countDocuments();
 
     const userID2 = "54321"; // different user id
@@ -172,14 +173,14 @@ describe("Unmocked: DELETE /notifications/:id", () => {
     // verify db is unchanged
     const countAfter = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .countDocuments();
     expect(countAfter).toBe(countBefore);
 
     // verify token still exists in db
     const result = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .findOne({ userID: userID1 });
     expect(result).not.toBeNull();
 
@@ -195,11 +196,11 @@ describe("Unmocked: DELETE /notifications/:id", () => {
     const fcmToken = "12345";
     await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .insertOne({ userID: "12345", fcmToken });
     const countBefore = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .countDocuments();
 
     await request(app).delete("/notifications/").expect(404); // malformed request
@@ -207,14 +208,14 @@ describe("Unmocked: DELETE /notifications/:id", () => {
     // verify db is unchanged
     const countAfter = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .countDocuments();
     expect(countAfter).toBe(countBefore);
 
     // verify token still exists in db
     const result = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
       .findOne({ userID });
     expect(result).not.toBeNull();
     expect(result?.fcmToken).toBe(fcmToken);

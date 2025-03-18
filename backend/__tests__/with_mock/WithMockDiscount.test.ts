@@ -5,6 +5,8 @@ import * as NotificationHelper from "../../helpers/NotificationHelper";
 import { ObjectId } from "mongodb";
 import { client } from "../../services";
 import admin from "firebase-admin";
+import { Discount } from "../../interfaces/DiscountInterfaces";
+import { UserNotificationData } from "../../interfaces/NotificationInterfaces";
 
 // mock firebase-admin messaging for new discount notifications
 jest.mock("firebase-admin", () => ({
@@ -92,7 +94,7 @@ describe("Mocked: POST /discounts", () => {
   test("Valid discount, in-memory db", async () => {
     await client
       .db("discounts")
-      .collection("notifications")
+      .collection<UserNotificationData>("notifications")
       .insertOne({ userID: "123", fcmToken: "token1" });
 
     const response = await request(app)
@@ -249,13 +251,27 @@ describe("Mocked: GET /discounts/:id", () => {
   // Expected output: discounts array
   test("Valid discount mock retrieved", async () => {
     const discountID: string = new ObjectId().toHexString();
-    jest
-      .spyOn(DiscountHelpers, "getDiscountsFromDb")
-      .mockResolvedValue([{ discountID, storeID: "123" }]);
+    jest.spyOn(DiscountHelpers, "getDiscountsFromDb").mockResolvedValue([
+      {
+        discountID,
+        storeID: "123",
+        storeName: "",
+        ingredient: "",
+        price: 0,
+      },
+    ]);
 
     const response = await request(app).get("/discounts/123").expect(200);
 
-    expect(response.body).toEqual([{ discountID, storeID: "123" }]);
+    expect(response.body).toEqual([
+      {
+        discountID,
+        storeID: "123",
+        storeName: "",
+        ingredient: "",
+        price: 0,
+      },
+    ]);
     expect(DiscountHelpers.getDiscountsFromDb).toHaveBeenCalled();
   });
 
@@ -267,15 +283,25 @@ describe("Mocked: GET /discounts/:id", () => {
   test("Valid discount in-mem retrieved", async () => {
     // use in-memory db for mock data
     const discountID = (
-      await client
-        .db("discounts")
-        .collection("discounts")
-        .insertOne({ storeID: "123" })
+      await client.db("discounts").collection<Discount>("discounts").insertOne({
+        storeID: "123",
+        storeName: "superstore",
+        ingredient: "tomato",
+        price: 0.99,
+      })
     ).insertedId.toHexString();
 
     const response = await request(app).get("/discounts/123").expect(200);
 
-    expect(response.body).toEqual([{ discountID, storeID: "123" }]);
+    expect(response.body).toEqual([
+      {
+        discountID,
+        storeID: "123",
+        storeName: "superstore",
+        ingredient: "tomato",
+        price: 0.99,
+      },
+    ]);
   });
 
   // Mocked behavior: in-memory db is empty
@@ -329,8 +355,20 @@ describe("Mocked: GET /discounts", () => {
   // Expected output: discounts array
   test("Valid discounts mock retrieved", async () => {
     const discounts = [
-      { discountID: "123", storeID: "123" },
-      { discountID: "456", storeID: "456" },
+      {
+        discountID: "123",
+        storeID: "123",
+        storeName: "Store 1",
+        ingredient: "apple",
+        price: 1.5,
+      },
+      {
+        discountID: "456",
+        storeID: "456",
+        storeName: "Store 2",
+        ingredient: "banana",
+        price: 2.0,
+      },
     ];
     jest
       .spyOn(DiscountHelpers, "getAllDiscountsFromDb")
@@ -375,7 +413,12 @@ describe("Mocked: GET /discounts", () => {
   // Expected behavior: discounts are retrieved from db
   // Expected output: discounts array
   test("Optional ingredient query mock implemented", async () => {
-    const mockDiscount = { storeName: "mock store" };
+    const mockDiscount = {
+      storeID: "123",
+      storeName: "mock store",
+      ingredient: "apple",
+      price: 1.5,
+    };
     jest
       .spyOn(DiscountHelpers, "getAllDiscountsFromDb")
       .mockImplementation((ingredient: string) => {
@@ -398,10 +441,16 @@ describe("Mocked: GET /discounts", () => {
   // Expected output: discounts array
   test("Optional ingredient query in-mem db", async () => {
     // use in-memory db for mock data
-    const mockDiscount = { storeName: "mock store", ingredient: "apple" };
+    const mockDiscount = {
+      storeID: "123",
+      storeName: "mock store",
+      ingredient: "apple",
+      price: 1.5,
+      discountID: new ObjectId().toHexString(),
+    };
     await client
       .db("discounts")
-      .collection("discounts")
+      .collection<Discount>("discounts")
       .insertOne(mockDiscount);
 
     const response = await request(app)
@@ -411,6 +460,8 @@ describe("Mocked: GET /discounts", () => {
 
     expect(response.body.length).toBe(1);
     expect(response.body[0]).toHaveProperty("storeName", "mock store");
+    expect(response.body[0]).toHaveProperty("ingredient", "apple");
+    expect(response.body[0]).toHaveProperty("price", 1.5);
   });
 });
 

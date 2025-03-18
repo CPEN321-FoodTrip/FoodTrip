@@ -1,3 +1,4 @@
+import { UserNotificationData } from "../interfaces/NotificationInterfaces";
 import { client } from "../services";
 
 const DB_NAME = "discounts";
@@ -7,30 +8,34 @@ const COLLECTION_NAME = "notifications";
 export async function addTokenToDb(
   userID: string,
   fcmToken: string
-): Promise<unknown> {
-  const result = await client
-    .db(DB_NAME)
-    .collection(COLLECTION_NAME)
-    .insertOne({ userID, fcmToken });
+): Promise<string> {
+  const insertedId: string = (
+    await client
+      .db(DB_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
+      .insertOne({ userID, fcmToken })
+  ).insertedId.toHexString();
 
-  return result.insertedId;
+  return insertedId;
 }
 
 // remove user fcm token from database
 export async function removeTokenFromDb(userID: string): Promise<number> {
-  const result = await client
-    .db(DB_NAME)
-    .collection(COLLECTION_NAME)
-    .deleteOne({ userID });
+  const deletedCount: number = (
+    await client
+      .db(DB_NAME)
+      .collection<UserNotificationData>(COLLECTION_NAME)
+      .deleteOne({ userID })
+  ).deletedCount;
 
-  return result.deletedCount;
+  return deletedCount;
 }
 
 // get user fcm token from database
 export async function getTokenFromDb(userID: string): Promise<string | null> {
-  const result = await client
+  const result: UserNotificationData | null = await client
     .db(DB_NAME)
-    .collection(COLLECTION_NAME)
+    .collection<UserNotificationData>(COLLECTION_NAME)
     .findOne({ userID });
 
   return result ? result.fcmToken : null;
@@ -38,9 +43,9 @@ export async function getTokenFromDb(userID: string): Promise<string | null> {
 
 // get all fcm tokens from database
 export async function getAllTokensFromDb(): Promise<string[]> {
-  const result = await client
+  const result: UserNotificationData[] = await client
     .db(DB_NAME)
-    .collection(COLLECTION_NAME)
+    .collection<UserNotificationData>(COLLECTION_NAME)
     .find({})
     .toArray();
 
