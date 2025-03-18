@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '18'
 
@@ -34,7 +34,7 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: backend/coverage
