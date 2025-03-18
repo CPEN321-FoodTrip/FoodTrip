@@ -27,10 +27,7 @@ export const createRecipes = async (
     }
 
     // save recipes to db
-    const insertId = await saveRecipesToDb(tripID, recipes);
-    if (!insertId) {
-      return res.status(500).json({ error: "Failed to save recipes" });
-    }
+    await saveRecipesToDb(tripID, recipes);
 
     res.status(201).json(recipes);
   } catch (error) {

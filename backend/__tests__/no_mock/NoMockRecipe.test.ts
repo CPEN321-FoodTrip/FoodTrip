@@ -173,12 +173,147 @@ describe("Unmocked: POST /recipes", () => {
     const response = await request(app)
       .post("/recipes")
       .send({
-        tripID: "123",
+        tripID: "123", // tripID should be an ObjectId
       })
       .expect(400);
 
     expect(response.body).toHaveProperty("error");
     expect(response.body.error).toContain("Invalid tripID format");
+
+    // verfify db unchaged
+    const dbCountAfter = await client
+      .db(RECIPE_DB_NAME)
+      .collection(RECIPE_COLLECTION_NAME)
+      .countDocuments();
+
+    expect(dbCountBefore).toBe(dbCountAfter);
+  });
+
+  // Input: tripID is not in the route database
+  // Expected status code: 404
+  // Expected behavior: database is unchanged
+  // Expected output: error message indicating route does not exist
+  test("Nonexistant trip", async () => {
+    const dbCountBefore = await client
+      .db(RECIPE_DB_NAME)
+      .collection<RecipeDBEntry>(RECIPE_COLLECTION_NAME)
+      .countDocuments();
+
+    const response = await request(app)
+      .post("/recipes")
+      .send({
+        tripID: new ObjectId().toHexString(), // nonexistant tripID
+      })
+      .expect(404);
+
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toContain("Trip not found");
+
+    // verfify db unchaged
+    const dbCountAfter = await client
+      .db(RECIPE_DB_NAME)
+      .collection(RECIPE_COLLECTION_NAME)
+      .countDocuments();
+
+    expect(dbCountBefore).toBe(dbCountAfter);
+  });
+
+  // Input: tripID points to a route with no stops
+  // Expected status code: 500
+  // Expected behavior: database is unchanged
+  // Expected output: error message indicating internal issue
+  test("Malformed route with no stops", async () => {
+    // insert route with no stops
+    const route_db = client.db(ROUTES_DB_NAME);
+    const route_collection = route_db.collection<RouteDBEntry>(
+      ROUTES_COLLECTION_NAME
+    );
+    const route_result = await route_collection.insertOne({
+      userID: "test-user",
+      route: {
+        start_location: {
+          name: "Vancouver",
+          latitude: 49.2608724,
+          longitude: -123.113952,
+          population: 631486,
+        },
+        end_location: {
+          name: "Toronto",
+          latitude: 43.6534817,
+          longitude: -79.3839347,
+          population: 2731571,
+        },
+        stops: [],
+      },
+    });
+
+    const dbCountBefore = await client
+      .db(RECIPE_DB_NAME)
+      .collection<RecipeDBEntry>(RECIPE_COLLECTION_NAME)
+      .countDocuments();
+
+    const response = await request(app)
+      .post("/recipes")
+      .send({
+        tripID: route_result.insertedId.toHexString(),
+      })
+      .expect(500);
+
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toContain("Internal server error");
+
+    // verfify db unchaged
+    const dbCountAfter = await client
+      .db(RECIPE_DB_NAME)
+      .collection(RECIPE_COLLECTION_NAME)
+      .countDocuments();
+
+    expect(dbCountBefore).toBe(dbCountAfter);
+  });
+
+  // Input: tripID points to a route with no stops
+  // Expected status code: 500
+  // Expected behavior: database is unchanged
+  // Expected output: error message indicating internal issue
+  test("Malformed route with no stops", async () => {
+    // insert route with no stops
+    const route_db = client.db(ROUTES_DB_NAME);
+    const route_collection = route_db.collection<RouteDBEntry>(
+      ROUTES_COLLECTION_NAME
+    );
+    const route_result = await route_collection.insertOne({
+      userID: "test-user",
+      route: {
+        start_location: {
+          name: "Vancouver",
+          latitude: 49.2608724,
+          longitude: -123.113952,
+          population: 631486,
+        },
+        end_location: {
+          name: "Toronto",
+          latitude: 43.6534817,
+          longitude: -79.3839347,
+          population: 2731571,
+        },
+        stops: [],
+      },
+    });
+
+    const dbCountBefore = await client
+      .db(RECIPE_DB_NAME)
+      .collection<RecipeDBEntry>(RECIPE_COLLECTION_NAME)
+      .countDocuments();
+
+    const response = await request(app)
+      .post("/recipes")
+      .send({
+        tripID: route_result.insertedId.toHexString(),
+      })
+      .expect(500);
+
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toContain("Internal server error");
 
     // verfify db unchaged
     const dbCountAfter = await client
@@ -318,7 +453,9 @@ describe("Unmocked: DELETE /recipes/:id", () => {
     const originalCount = await collection.countDocuments();
 
     const tripID = "1234"; // tripID should be a valid ObjectId
-    const response = await request(app).delete(`/routes/${tripID}`).expect(400);
+    const response = await request(app)
+      .delete(`/recipes/${tripID}`)
+      .expect(400);
     expect(response.body).toHaveProperty("error", "Invalid tripID format");
 
     // verify nothing deleted in db

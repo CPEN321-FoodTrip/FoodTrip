@@ -61,23 +61,23 @@ export async function createRecipesfromRoute(
     const route_collection = route_db.collection<RouteDBEntry>(
       ROUTES_COLLECTION_NAME
     );
-    const route = await route_collection.findOne({ _id: new ObjectId(tripID) });
-    if (!route) {
+    const result = await route_collection.findOne({
+      _id: new ObjectId(tripID),
+    });
+    if (!result) {
       return null;
     }
-
-    const recipes: Recipe[] = [];
+    if (result.route.stops.length === 0) {
+      throw new Error("No stops found in route");
+    }
 
     const stopNames: string[] = [];
-    route.route.stops.forEach((stop: RouteStop) => {
+    result.route.stops.forEach((stop: RouteStop) => {
       const stopName = stop.location.name;
       stopNames.push(stopName);
     });
 
-    if (stopNames.length === 0) {
-      throw new Error("No stops found in route");
-    }
-
+    const recipes: Recipe[] = [];
     for (const name of stopNames) {
       const recipe = await fetchRecipe(name);
       recipes.push(recipe[0]); // choose top match recipe
@@ -92,17 +92,14 @@ export async function createRecipesfromRoute(
 export async function saveRecipesToDb(
   tripID: string,
   recipes: Recipe[]
-): Promise<string> {
+): Promise<void> {
   const db = client.db(RECIPE_DB_NAME);
   const collection = db.collection<RecipeDBEntry>(RECIPE_COLLECTION_NAME);
 
-  const insertedId: string = (
-    await collection.insertOne({
-      tripID,
-      recipes,
-    })
-  ).insertedId.toHexString();
-  return insertedId;
+  await collection.insertOne({
+    tripID,
+    recipes,
+  });
 }
 
 export async function getRecipesFromDb(
