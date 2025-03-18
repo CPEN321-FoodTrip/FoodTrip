@@ -1,6 +1,47 @@
 import request from "supertest";
 import app from "../../index";
 import * as UserHelper from "../../helpers/UserHelper";
+import { client } from "../../services";
+import { RouteDBEntry } from "../../interfaces/RouteInterfaces";
+
+const MOCK_ROUTES = [
+  {
+    userID: "test-user",
+    route: {
+      start_location: {
+        name: "Vancouver",
+        latitude: 49.2608724,
+        longitude: -123.113952,
+        population: 675218,
+      },
+      end_location: {
+        name: "Ottawa",
+        latitude: 45.4208777,
+        longitude: -75.6901106,
+        population: 1013247,
+      },
+      stops: [],
+    },
+  },
+  {
+    userID: "test-user",
+    route: {
+      start_location: {
+        name: "Istanbul",
+        latitude: 41.006381,
+        longitude: 28.9758715,
+        population: 15462452,
+      },
+      end_location: {
+        name: "Prague",
+        latitude: 50.0874654,
+        longitude: 14.4212535,
+        population: 1301132,
+      },
+      stops: [],
+    },
+  },
+];
 
 // Interface GET /users/:id/routes
 describe("Mocked: GET /users/:id/routes", () => {
@@ -62,23 +103,49 @@ describe("Mocked: GET /users/:id/routes", () => {
   });
 
   // Mocked behavior: UserHelper.getUserRoutesFromDb with mocked routes
-  // Input: valid userID with mocked routes in in-memory database
+  // Input: valid userID with mocked routes
   // Expected status code: 200
   // Expected behavior: query database for user routes
   // Expected output: array of routes
   test("Valid userID", async () => {
     const userID = "test-user";
-    const routes = [
-      { userID, tripID: "1", route: "route 1" },
-      { userID, tripID: "2", route: "route 2" },
-    ];
-    jest.spyOn(UserHelper, "getUserRoutesFromDb").mockResolvedValue(routes);
+    jest
+      .spyOn(UserHelper, "getUserRoutesFromDb")
+      .mockResolvedValue(MOCK_ROUTES);
 
     const response = await request(app)
       .get(`/users/${userID}/routes`)
       .expect(200);
 
-    expect(response.body).toEqual(routes);
+    expect(response.body).toEqual(MOCK_ROUTES);
     expect(UserHelper.getUserRoutesFromDb).toHaveBeenCalledTimes(1);
+  });
+
+  // Mocked behavior: mock routes in in-memory database
+  // Input: valid userID with mocked routes in in-memory database
+  // Expected status code: 200
+  // Expected behavior: query database for user routes
+  // Expected output: array of routes
+  test("Valid userID, in-mem db", async () => {
+    const userID = "test-user";
+    await client
+      .db("route_data")
+      .collection<RouteDBEntry>("routes")
+      .insertMany(MOCK_ROUTES);
+
+    const response = await request(app)
+      .get(`/users/${userID}/routes`)
+      .expect(200);
+
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body.length).toBe(MOCK_ROUTES.length);
+    expect(response.body[0]).toHaveProperty(
+      "stops",
+      MOCK_ROUTES[0].route.stops
+    );
+    expect(response.body[1]).toHaveProperty(
+      "stops",
+      MOCK_ROUTES[1].route.stops
+    );
   });
 });

@@ -59,3 +59,7 @@ export interface RouteDBEntry {
   userID: string;
   route: Route;
 }
+
+export interface RouteDBEntryWithID extends RouteDBEntry {
+  _id: ObjectId;
+}
