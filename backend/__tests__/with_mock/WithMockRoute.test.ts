@@ -11,7 +11,7 @@ describe("Mocked: POST /routes", () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     await RouteHelpers.initializeGeoNamesDatabase();
-  });
+  }, 30000); // increase timeout for geoNames initialization
 
   afterEach(() => {
     jest.restoreAllMocks();

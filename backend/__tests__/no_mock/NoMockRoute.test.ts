@@ -52,7 +52,7 @@ const SAMPLE_ROUTE = {
 describe("Unmocked: POST /routes", () => {
   beforeEach(async () => {
     await initializeGeoNamesDatabase();
-  });
+  }, 30000); // increase timeout for geoNames initialization
 
   // Input: valid userID, origin, destination and numStops
   // Expected status code: 201
