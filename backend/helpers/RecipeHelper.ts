@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import { client } from "../services";
 
-import { RouteStop } from "../interfaces/RouteInterfaces";
+import { RouteDBEntry, RouteStop } from "../interfaces/RouteInterfaces";
 import {
   Recipe,
   EdamamResponse,
@@ -22,9 +22,8 @@ const ROUTES_COLLECTION_NAME = "routes";
 export async function fetchRecipe(query: string): Promise<Recipe[]> {
   try {
     if (!process.env.EDAMAM_APP_ID || !process.env.EDAMAM_API_KEY) {
-      throw new Error("Edamam App ID or API Key is missing");
+      throw new Error("Edamam API credentials are missing");
     }
-
     const params = new URLSearchParams({
       type: "public",
       q: query,
@@ -34,7 +33,7 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
 
     const response = await fetch(`${EDAMAM_BASE_URL}?${params.toString()}`);
     if (!response.ok) {
-      const errorBody = await response.text();
+      const errorBody = await response.text();  ///unreached
       throw new Error(`Edamam API Error: ${response.status} - ${errorBody}`);
     }
 
@@ -42,12 +41,12 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
 
     return data.hits.map((hit) => ({
       recipeName: hit.recipe.label || "",
-      recipeID: parseInt(hit.recipe.uri.split("_")[1] || "0", 10),
+      recipeID: parseInt(hit.recipe.uri.split("_")[1] || "0", 10), 
       url: hit.recipe.url,
       ingredients: hit.recipe.ingredientLines,
     }));
   } catch (error) {
-    console.error("Detailed recipe fetch error:", error);
+    console.error("Detailed recipe fetch error:", error); 
     throw error;
   }
 }
@@ -58,24 +57,26 @@ export async function createRecipesfromRoute(
 ): Promise<Recipe[] | null> {
   try {
     const route_db = client.db(ROUTES_DB_NAME);
-    const route_collection = route_db.collection(ROUTES_COLLECTION_NAME);
-    const route = await route_collection.findOne({ _id: new ObjectId(tripID) });
-    if (!route) {
+    const route_collection = route_db.collection<RouteDBEntry>(
+      ROUTES_COLLECTION_NAME
+    );
+    const result = await route_collection.findOne({
+      _id: new ObjectId(tripID),
+    });
+    if (!result) {
       return null;
     }
-
-    const recipes: Recipe[] = [];
+    if (result.route.stops.length === 0) {
+      throw new Error("No stops found in route");
+    }
 
     const stopNames: string[] = [];
-    route.stops.forEach((stop: RouteStop) => {
+    result.route.stops.forEach((stop: RouteStop) => {
       const stopName = stop.location.name;
       stopNames.push(stopName);
     });
 
-    if (stopNames.length === 0) {
-      throw new Error("No stops found in route");
-    }
-
+    const recipes: Recipe[] = [];
     for (const name of stopNames) {
       const recipe = await fetchRecipe(name);
       recipes.push(recipe[0]); // choose top match recipe
@@ -90,17 +91,14 @@ export async function createRecipesfromRoute(
 export async function saveRecipesToDb(
   tripID: string,
   recipes: Recipe[]
-): Promise<string> {
+): Promise<void> {
   const db = client.db(RECIPE_DB_NAME);
   const collection = db.collection<RecipeDBEntry>(RECIPE_COLLECTION_NAME);
 
-  const insertedId: string = (
-    await collection.insertOne({
-      tripID,
-      recipes,
-    })
-  ).insertedId.toHexString();
-  return insertedId;
+  await collection.insertOne({
+    tripID,
+    recipes,
+  });
 }
 
 export async function getRecipesFromDb(
