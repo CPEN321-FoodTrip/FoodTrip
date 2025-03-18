@@ -5,6 +5,12 @@ export interface Discount {
   storeName: string;
   ingredient: string;
   price: number;
-  discountID?: string;
-  _id?: ObjectId;
+}
+
+export interface DiscountWithID extends Discount {
+  discountID: string;
+}
+
+export interface DiscountDBEntry extends Discount {
+  _id: ObjectId;
 }
