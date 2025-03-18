@@ -32,6 +32,7 @@ jobs:
           EDAMAM_APP_ID: ${{ secrets.EDAMAM_APP_ID }}
           EDAMAM_API_KEY: ${{ secrets.EDAMAM_API_KEY }}
           FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
+          GATEWAY_BASE_URL: ${{ secrets.GATEWAY_BASE_URL }}
 
       - name: Upload coverage report
         if: always() # always upload even if tests fail
