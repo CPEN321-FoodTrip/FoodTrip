@@ -7,29 +7,34 @@ import {
 } from "../helpers/NotificationHelper";
 
 // POST /notifications
-export const subscribe = async(req: Request, res: Response, next: NextFunction) => {
-  // validation of params performed by express-validator middleware
-  const { userID, fcmToken }: UserNotificationData = req.body;
-
+export const subscribe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
+    // validation of params performed by express-validator middleware
+    const { userID, fcmToken }: UserNotificationData = req.body;
+
     const prevToken = await getTokenFromDb(userID);
     if (prevToken) {
       return res.status(400).json({ error: "Already subscribed" });
     }
 
-    const result = await addTokenToDb(userID, fcmToken);
-    if (!result) {
-      throw new Error("Failed to subscribe");
-    }
+    await addTokenToDb(userID, fcmToken);
 
     res.status(201).json({ message: "Subscribed successfully" });
   } catch (error) {
     next(error);
   }
-}
+};
 
 // DELETE /notifications/:id
-export const unsubscribe = async(req: Request, res: Response, next: NextFunction) => {
+export const unsubscribe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const userID = req.params.id;
 
   try {
@@ -42,4 +47,4 @@ export const unsubscribe = async(req: Request, res: Response, next: NextFunction
   } catch (error) {
     next(error);
   }
-}
+};
