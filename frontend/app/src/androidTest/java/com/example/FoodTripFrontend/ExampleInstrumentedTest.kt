@@ -1,6 +1,7 @@
 package com.example.FoodTripFrontend
 
 import android.content.Context
+import android.util.Log
 import android.view.View
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -36,6 +37,7 @@ import com.google.android.gms.maps.model.LatLng
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.`is`
+import org.junit.rules.TestName
 
 val startCount = 0
 val maxCount = 3
@@ -63,6 +65,19 @@ fun customClick(): ViewAction {
 }
 
 /**
+ * Print test log result of usability test
+ */
+private const val TAG = "TestLog"
+fun checkClick(str: String) {
+    try {
+        assert(clickCount <= maxCount)
+        Log.d(TAG, "Usability Test Passed($clickCount clicks): $str")
+    } catch (e: AssertionError) {
+        Log.d(TAG, "Usability Test Failed($clickCount clicks): $str")
+    }
+}
+
+/**
  * Test of LoginActivity-related functionality.
  *
  * Test cases include:
@@ -70,9 +85,11 @@ fun customClick(): ViewAction {
  */
 @RunWith(AndroidJUnit4::class)
 class LoginActivityTest {
-
     @get:Rule
     val activityRule = ActivityScenarioRule(LoginActivity::class.java)
+
+    @get:Rule
+    var testName = TestName()
 
     /**
      * Initialization for intent checking
@@ -94,7 +111,7 @@ class LoginActivityTest {
     @After
     fun tearDown() {
         Intents.release()
-        assert(clickCount <= maxCount)
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
 
@@ -144,11 +161,14 @@ class MainActivityTest {
     @After
     fun tearDown() {
         Intents.release()
-        assert(clickCount <= maxCount)
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
     @get:Rule
     val activityRule = ActivityScenarioRule(MainActivity::class.java)
+
+    @get:Rule
+    var testName = TestName()
 
     /**
      * Ui Test for the Main Activity
@@ -253,11 +273,14 @@ class MainActivityAdminTest {
     @After
     fun tearDown() {
         Intents.release()
-        assert(clickCount <= maxCount)
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
     @get:Rule
     val activityRule = ActivityScenarioRule(MainActivityAdmin::class.java)
+
+    @get:Rule
+    var testName = TestName()
 
     /**
      * Functionality Test for the Main Admin Activity
@@ -290,6 +313,9 @@ class TripActivityTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(TripActivity::class.java)
 
+    @get:Rule
+    var testName = TestName()
+
     /**
      * Initialization for intent checking
      *
@@ -309,7 +335,7 @@ class TripActivityTest {
     @After
     fun tearDown() {
         Intents.release()
-        assert(clickCount <= maxCount)
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
     /**
@@ -591,11 +617,14 @@ class PastTripActivityEmptyTest {
     @After
     fun tearDown() {
         Intents.release()
-        assert(clickCount <= maxCount)
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
     @get:Rule
     val activityRule = ActivityScenarioRule(PastTripActivity::class.java)
+
+    @get:Rule
+    var testName = TestName()
 
     /**
      * UI Test for the current Activity
@@ -643,6 +672,9 @@ class PastTripActivityTestPersonTest {
      @get:Rule
     val activityRule = ActivityScenarioRule(PastTripActivity::class.java)
 
+    @get:Rule
+    var testName = TestName()
+
     /**
      * Initialization for intent checking
      *
@@ -667,7 +699,7 @@ class PastTripActivityTestPersonTest {
     @After
     fun tearDown() {
         Intents.release()
-        assert(clickCount <= maxCount)
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
     /**
@@ -733,6 +765,9 @@ class GroceryActivityTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(GroceryActivity::class.java)
 
+    @get:Rule
+    var testName = TestName()
+
     /**
      * Initialization for intent checking
      *
@@ -752,7 +787,7 @@ class GroceryActivityTest {
     @After
     fun tearDown() {
         Intents.release()
-        assert(clickCount <= maxCount)
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
     /**
@@ -839,6 +874,9 @@ class GroceryStoreActivityTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(GroceryStoreActivity::class.java)
 
+    @get:Rule
+    var testName = TestName()
+
     /**
      * Initialization for intent checking
      *
@@ -858,7 +896,7 @@ class GroceryStoreActivityTest {
     @After
     fun tearDown() {
         Intents.release()
-        assert(clickCount <= maxCount)
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
     /**
@@ -1125,12 +1163,14 @@ class RecipeTests {
     @After
     fun tearDown() {
         Intents.release()
-        assert(clickCount <= maxCount)
+        checkClick("${this::class.simpleName}:${testName.methodName}")
     }
 
     @get:Rule
     val activityRule = ActivityScenarioRule(MainActivity::class.java)
 
+    @get:Rule
+    var testName = TestName()
 
     /**
      * Functionality Test for the Recipe viewing
