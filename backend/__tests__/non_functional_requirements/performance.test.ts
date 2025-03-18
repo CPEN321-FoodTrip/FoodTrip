@@ -99,7 +99,7 @@ describe("Unmocked Performance test", () => {
       const data = await route_response.json();
       console.log('Route:', data);
       const tripID = data.tripID;
-      console.log(tripID);
+      console.log("tripID: ",tripID);
 
       const recipe_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/recipes`,
         {
@@ -179,8 +179,8 @@ describe("Unmocked Performance test", () => {
     // expect(recipe_result?.body.recipes).toHaveLength(10); 
 
     const duration = end - start; //begin timing test assuming that operation succeeded
-    console.log(`unmocked Execution time: ${duration}ms`);
-    expect(duration).toBeLessThanOrEqual(4000); // 4s
+    console.log(`Route Execution time: ${duration}ms`);
+    expect(duration).toBeLessThanOrEqual(2700); // 4s
   });
 
   test("Unmocked single discount", async () => {
@@ -204,7 +204,6 @@ describe("Unmocked Performance test", () => {
     const data = await discount_response.json();
     console.log('discount:', data);
     const discountID = data.discountID;
-    console.log(discountID);
 
     const get_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/discounts`,
       {
@@ -216,7 +215,7 @@ describe("Unmocked Performance test", () => {
     );
 
     const get_data = await get_response.json();
-    console.log('GET:', get_data);
+    console.log('GET single discount:', get_data);
     const end = Date.now();
 
     const discount_teardown = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/discounts/${discountID}`,
@@ -231,8 +230,8 @@ describe("Unmocked Performance test", () => {
       }
       console.log('discount teardown successful');
       const duration = end - start; //begin timing test assuming that operation succeeded
-      console.log(`unmocked Execution time: ${duration}ms`);
-      expect(duration).toBeLessThanOrEqual(4000);
+      console.log(`Discount Execution time: ${duration}ms`);
+      expect(duration).toBeLessThanOrEqual(2700);
   });
 
   test("Unmocked 10 discount", async () => {
@@ -255,7 +254,7 @@ describe("Unmocked Performance test", () => {
         }
       );
       const data = await discount_response.json();
-      console.log(i);
+      console.log("DIscount number ",i);
       const discountIDsingle = data.discountID;
       discountID.push(discountIDsingle);
     }
@@ -280,14 +279,133 @@ describe("Unmocked Performance test", () => {
           throw new Error(`HTTP error! Status: ${discount_teardown.status}`);
         }
     }
-    console.log('discount teardown successful');
+    console.log('10 discount teardown successful');
 
     const get_data = await get_response.json();
-    console.log('GET:', get_data);
+    console.log('10 discount GET:', get_data);
     const end = Date.now();
     const duration = end - start; //begin timing test assuming that operation succeeded
-    console.log(`unmocked Execution time: ${duration}ms`);
-    expect(duration).toBeLessThanOrEqual(4000);
+    console.log(`10 discount Execution time: ${duration}ms`);
+    expect(duration).toBeLessThanOrEqual(2700);
   });
+
+  test("Unmocked single notification", async () => {
+    const userID = "real_person";
+    const start = Date.now();
+    const notif_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/notifications`,
+      {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userID: userID,
+          fcmToken: "Vancouver",
+        }),
+      }
+    );
+    const data = await notif_response.json();
+    expect(data.message).toContain("Subscribed successfully");
+    console.log(userID," has subscribed successfully");
+
+    const notif_teardown = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/notifications/${userID}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+      if (!notif_teardown.ok) {
+        throw new Error(`notification delete error! Status: ${notif_teardown.status}`);
+      }
+      const end = Date.now();
+      console.log('notif teardown successful');
+      const duration = end - start; //begin timing test assuming that operation succeeded
+      console.log(`notif Execution time: ${duration}ms`);
+      expect(duration).toBeLessThanOrEqual(2700);
+  });
+
+  test("Unmocked 10 notification", async () => {
+    
+    const start = Date.now();
+    for (let i = 0 ; i < 10; i++){
+      const notif_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/notifications`,
+        {
+          method: 'POST',
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userID: i.toString(),
+            fcmToken: "Vancouver",
+          }),
+        }
+      );
+      const data = await notif_response.json();
+    expect(data.message).toContain("Subscribed successfully");
+    console.log(i," has subscribed successfully");
+    }
+    for (let i = 0; i < 10; i++){
+      const notif_teardown = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/notifications/${i}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          }
+        });
+        if (!notif_teardown.ok) {
+          throw new Error(`10 notification delete error! Status: ${notif_teardown.status}`);
+        }
+    }
+    const end = Date.now();
+      console.log('10 notif teardown successful');
+      const duration = end - start; //begin timing test assuming that operation succeeded
+      console.log(`10 notification Execution time: ${duration}ms`);
+      expect(duration).toBeLessThanOrEqual(2700);
+    });
+    
+    test("Unmocked single allergy", async () => {
+      const userID = "real_person";
+      const allergen = "fake_people";
+      const start = Date.now();
+      const allergy_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/preferences/allergies/`,
+        {
+          method: 'POST',
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userID: userID,
+            allergy: allergen,
+          }),
+        }
+      );
+      console.log(userID," added allergy ",allergen);
+      const get_response = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/preferences/allergies/${userID}`,
+        {
+          method: 'GET',
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const get_data = await get_response.json();
+      console.log('GET single allergy:', get_data);
+      const end = Date.now();
+      const allergy_teardown = await fetch(`https://xy47xwa9v8.execute-api.us-east-2.amazonaws.com/prod/preferences/allergies/${userID}/${allergen}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          }
+        });
+        if (!allergy_teardown.ok) {
+          throw new Error(`allergy delete error! Status: ${allergy_teardown.status}`);
+        }
+        console.log('allergy teardown successful');
+        const duration = end - start; //begin timing test assuming that operation succeeded
+        console.log(`allergy Execution time: ${duration}ms`);
+        expect(duration).toBeLessThanOrEqual(2700);
+    });
 });
   
