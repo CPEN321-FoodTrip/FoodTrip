@@ -21,11 +21,14 @@ const ROUTES_COLLECTION_NAME = "routes";
 // helper function to fetch recipe data from Edamam API
 export async function fetchRecipe(query: string): Promise<Recipe[]> {
   try {
+    if (!process.env.EDAMAM_APP_ID || !process.env.EDAMAM_API_KEY) {
+      throw new Error("Edamam API credentials are missing");
+    }
     const params = new URLSearchParams({
       type: "public",
       q: query,
-      app_id: process.env.EDAMAM_APP_ID ?? "",
-      app_key: process.env.EDAMAM_API_KEY ?? "",
+      app_id: process.env.EDAMAM_APP_ID,
+      app_key: process.env.EDAMAM_API_KEY,
     });
 
     const response = await fetch(`${EDAMAM_BASE_URL}?${params.toString()}`);

@@ -124,7 +124,7 @@ describe("Mocked: POST /recipes", () => {
   // Expected status code: 500
   // Expected behavior: error handled gracefully
   // Expected output: error message
-  test("Missing API keys", async () => {
+  test("set API keys to empty string", async () => {
     const originalApiKey = process.env.EDAMAM_API_KEY;
     const originalAppId = process.env.EDAMAM_APP_ID;
     process.env.EDAMAM_API_KEY = "";
@@ -145,6 +145,41 @@ describe("Mocked: POST /recipes", () => {
     consoleErrorSpy.mockRestore();
     jest.resetModules();
   });
+});
+
+test("delete API keys", async () => {
+  const originalApiKey = process.env.EDAMAM_API_KEY;
+  const originalAppId = process.env.EDAMAM_APP_ID;
+  process.env.EDAMAM_APP_ID = undefined; 
+  process.env.EDAMAM_API_KEY = undefined;
+
+  const mockResponse = {
+    ok: false,
+    status: 401,
+    statusText: "Unauthorized",
+    json: () => Promise.resolve({ message: "Invalid API credentials" }),
+  } as Response;
+
+  mocked(fetch).mockResolvedValueOnce(mockResponse);
+
+  // Spy on console.error to verify it's called
+  const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(jest.fn());
+
+  // Act & Assert: Expect the function to throw
+  await expect(RecipeHelper.fetchRecipe("query")).rejects.toThrow("Invalid API credentials");
+
+  // Assert: Verify that console.error was called with the expected message
+  expect(consoleErrorSpy).toHaveBeenCalledWith(
+    "Detailed recipe fetch error:",
+    expect.any(Error)
+  );
+
+  if (originalApiKey !== undefined) {
+    process.env.EDAMAM_API_KEY = originalApiKey;
+    process.env.EDAMAM_APP_ID = originalAppId;
+  }
+  consoleErrorSpy.mockRestore();
+  jest.resetModules();
 });
 
 test("should handle recipes with empty recipeName and recipeID = 0", async () => {
@@ -271,6 +306,36 @@ test("should log an error and throw when response is invalid", async () => {
     // Clean up the spy
     consoleErrorSpy.mockRestore();
   });
+  it("should handle empty EDAMAM_APP_ID and EDAMAM_API_KEY", async () => {
+  // Arrange: Set environment variables to empty strings
+  process.env.EDAMAM_APP_ID = "";
+  process.env.EDAMAM_API_KEY = "";
+
+  // Mock fetch to simulate an API error (since the API keys are invalid)
+  const mockResponse = {
+    ok: false,
+    status: 401,
+    statusText: "Unauthorized",
+    json: () => Promise.resolve({ message: "Invalid API credentials" }),
+  } as Response;
+
+  mocked(fetch).mockResolvedValueOnce(mockResponse);
+
+  // Spy on console.error to verify it's called
+  const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(jest.fn());
+
+  // Act & Assert: Expect the function to throw
+  await expect(RecipeHelper.fetchRecipe("query")).rejects.toThrow();
+
+  // Assert: Verify that console.error was called with the expected message
+  expect(consoleErrorSpy).toHaveBeenCalledWith(
+    "Detailed recipe fetch error:",
+    expect.any(Error)
+  );
+
+  // Clean up the spy
+  consoleErrorSpy.mockRestore();
+});
 
 
 // Interface GET /recipes/:id
