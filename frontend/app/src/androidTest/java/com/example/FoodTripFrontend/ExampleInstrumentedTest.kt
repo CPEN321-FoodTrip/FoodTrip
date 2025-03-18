@@ -39,6 +39,8 @@ import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.`is`
 import org.junit.rules.TestName
 
+val TAG = "TestLog"
+
 val startCount = 0
 val maxCount = 3
 var clickCount = 0
@@ -67,7 +69,6 @@ fun customClick(): ViewAction {
 /**
  * Print test log result of usability test
  */
-private const val TAG = "TestLog"
 fun checkClick(str: String) {
     try {
         assert(clickCount <= maxCount)
