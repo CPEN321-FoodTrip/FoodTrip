@@ -24,8 +24,8 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
     const params = new URLSearchParams({
       type: "public",
       q: query,
-      app_id: process.env.EDAMAM_APP_ID || "",
-      app_key: process.env.EDAMAM_API_KEY || "",
+      app_id: process.env.EDAMAM_APP_ID ?? "",
+      app_key: process.env.EDAMAM_API_KEY ?? "",
     });
 
     const response = await fetch(`${EDAMAM_BASE_URL}?${params.toString()}`);

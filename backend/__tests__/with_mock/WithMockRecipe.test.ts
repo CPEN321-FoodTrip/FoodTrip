@@ -2,7 +2,6 @@ import request from "supertest";
 import { mocked } from "jest-mock";
 import app from "../../index";
 import * as RecipeHelper from "../../helpers/RecipeHelper";
-import * as RouteHelpers from "../../helpers/RouteHelpers";
 import { RouteDBEntry } from "../../interfaces/RouteInterfaces";
 import { client } from "../../services";
 import { ObjectId } from "mongodb";
@@ -131,7 +130,9 @@ describe("Mocked: POST /recipes", () => {
     process.env.EDAMAM_API_KEY = "";
     process.env.EDAMAM_APP_ID = "";
 
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {
+      
+    });
     await expect(RecipeHelper.fetchRecipe("query")).rejects.toThrow();
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
