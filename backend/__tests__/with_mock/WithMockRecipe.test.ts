@@ -8,7 +8,7 @@ jest.mock("node-fetch", () => jest.fn());
 
 // Interface POST /recipes
 describe("Mocked: POST /recipes", () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.clearAllMocks();
   });
 

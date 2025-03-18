@@ -95,7 +95,7 @@ describe("Unmocked: POST /recipes", () => {
     const response = await request(app)
       .post("/recipes")
       .send({
-        tripID: tripID,
+        tripID,
       })
       .expect(201);
 
