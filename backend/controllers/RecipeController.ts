@@ -27,11 +27,10 @@ export const createRecipes = async (
     }
 
     // save recipes to db
-    await saveRecipesToDb(tripID, recipes);
-
+    await saveRecipesToDb(tripID, recipes);  /// unreachable
     res.status(201).json(recipes);
   } catch (error) {
-    next(error);
+    next(error);                       /// unreachable
   }
 };
 

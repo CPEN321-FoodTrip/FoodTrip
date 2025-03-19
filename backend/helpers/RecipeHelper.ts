@@ -33,7 +33,7 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
 
     const response = await fetch(`${EDAMAM_BASE_URL}?${params.toString()}`);
     if (!response.ok) {
-      const errorBody = await response.text();  ///unreached
+      const errorBody = await response.text();  
       throw new Error(`Edamam API Error: ${response.status} - ${errorBody}`);
     }
 
@@ -66,7 +66,7 @@ export async function createRecipesfromRoute(
     if (!result) {
       return null;
     }
-    if (result.route.stops.length === 0) { ////////////
+    if (result.route.stops.length === 0) { /// unreachable
       throw new Error("No stops found in route"); 
     }
     const stopNames: string[] = [];
@@ -88,7 +88,7 @@ export async function createRecipesfromRoute(
     return recipes;
   } catch (error) {
     console.error("Create recipes from trip error:", error);
-    throw error; //////////////////////////////////////////
+    throw error; ///unreachable
   }
 }
 
@@ -96,10 +96,9 @@ export async function saveRecipesToDb(
   tripID: string,
   recipes: Recipe[]
 ): Promise<void> {
-  const db = client.db(RECIPE_DB_NAME);
+  const db = client.db(RECIPE_DB_NAME); /// unreachable
   const collection = db.collection<RecipeDBEntry>(RECIPE_COLLECTION_NAME);
-
-  await collection.insertOne({
+  await collection.insertOne({  ///unreachable
     tripID,
     recipes,
   });
@@ -116,7 +115,7 @@ export async function getRecipesFromDb(
   if (!result?.recipes) {
     return null;
   }
-  return result.recipes;
+  return result.recipes;  /// unreachable
 }
 
 export async function deleteRecipesFromDb(tripID: string): Promise<number> {
