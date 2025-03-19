@@ -33,20 +33,19 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
 
     const response = await fetch(`${EDAMAM_BASE_URL}?${params.toString()}`);
     if (!response.ok) {
-      const errorBody = await response.text();  
-      throw new Error(`Edamam API Error: ${response.status} - ${errorBody}`);
+      throw new Error(`Edamam API Error`);
     }
 
     const data: EdamamResponse = await response.json();
 
     return data.hits.map((hit) => ({
       recipeName: hit.recipe.label || "",
-      recipeID: parseInt(hit.recipe.uri.split("_")[1] || "0", 10), 
+      recipeID: parseInt(hit.recipe.uri.split("_")[1] || "0", 10),
       url: hit.recipe.url,
       ingredients: hit.recipe.ingredientLines,
     }));
   } catch (error) {
-    console.error("Detailed recipe fetch error:", error); 
+    console.error("Detailed recipe fetch error:", error);
     throw error;
   }
 }
@@ -63,16 +62,16 @@ export async function createRecipesfromRoute(
     const result = await route_collection.findOne({
       _id: new ObjectId(tripID),
     });
-    if (!result) {
+    if (!result || result === undefined) {
       return null;
     }
-    if (result.route.stops.length === 0) { /// unreachable
-      throw new Error("No stops found in route"); 
+    if (result.route.stops.length === 0) {
+      throw new Error("No stops found in route");
     }
     const stopNames: string[] = [];
 
-    const startname:string = result.route.start_location.name;
-    const endname:string = result.route.end_location.name;
+    const startname: string = result.route.start_location.name;
+    const endname: string = result.route.end_location.name;
     stopNames.push(startname);
     result.route.stops.forEach((stop: RouteStop) => {
       const stopName = stop.location.name;
@@ -98,7 +97,8 @@ export async function saveRecipesToDb(
 ): Promise<void> {
   const db = client.db(RECIPE_DB_NAME); /// unreachable
   const collection = db.collection<RecipeDBEntry>(RECIPE_COLLECTION_NAME);
-  await collection.insertOne({  ///unreachable
+  await collection.insertOne({
+    ///unreachable
     tripID,
     recipes,
   });
@@ -115,7 +115,7 @@ export async function getRecipesFromDb(
   if (!result?.recipes) {
     return null;
   }
-  return result.recipes;  /// unreachable
+  return result.recipes; /// unreachable
 }
 
 export async function deleteRecipesFromDb(tripID: string): Promise<number> {

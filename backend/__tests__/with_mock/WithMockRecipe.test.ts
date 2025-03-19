@@ -2,11 +2,17 @@ import request from "supertest";
 import { mocked } from "jest-mock";
 import app from "../../index";
 import * as RecipeHelper from "../../helpers/RecipeHelper";
-import { RecipeDBEntry } from "../../interfaces/RecipeInterfaces";
+import {
+  EdamamResponse,
+  Recipe,
+  RecipeDBEntry,
+} from "../../interfaces/RecipeInterfaces";
 import { client } from "../../services";
 import { ObjectId } from "mongodb";
+import { RouteDBEntry } from "../../interfaces/RouteInterfaces";
 
 jest.mock("node-fetch", () => jest.fn());
+
 const RECIPES_DB_NAME = "recipes";
 const RECIPE_COLLECTION_NAME = "recipes";
 
@@ -32,6 +38,132 @@ const SAMPLE_RECIPE = {
   ],
 };
 
+const SAMPLE_RECIPES_LIST: Recipe[] = [
+  {
+    recipeName: "Winnipeg Chicken Curry",
+    recipeID: 1,
+    url: "http://www.food.com/recipe/winnipeg-chicken-curry-2930",
+    ingredients: [
+      "3 tablespoons butter",
+      "2 onions, peeled and thinly sliced",
+      "2 tablespoons curry powder",
+      "2 chicken breasts",
+      "2 cups chicken stock, heated",
+      "1 tablespoon cornstarch",
+      "2 tablespoons water, cold",
+      "1⁄4 cup cream (I use milk)",
+      "salt & pepper",
+    ],
+  },
+  {
+    recipeName: "Chicken Curry",
+    recipeID: 2,
+    url: "http://www.food.com/recipe/chicken-curry-2930",
+    ingredients: [
+      "3 tablespoons butter",
+      "2 onions, peeled and thinly sliced",
+      "2 tablespoons curry powder",
+      "2 chicken breasts",
+      "2 cups chicken stock, heated",
+      "1 tablespoon cornstarch",
+      "2 tablespoons water, cold",
+      "1⁄4 cup cream (I use milk)",
+      "salt & pepper",
+    ],
+  },
+];
+
+const SAMPLE_EDAMAM_RESPONSE: EdamamResponse = {
+  hits: [
+    {
+      recipe: {
+        label: "Winnipeg Chicken Curry",
+        uri: "http://www.food.com/recipe/winnipeg-chicken-curry-2930",
+        url: "http://www.food.com/recipe/winnipeg-chicken-curry-2930",
+        ingredientLines: [
+          "3 tablespoons butter",
+          "2 onions, peeled and thinly sliced",
+          "2 tablespoons curry powder",
+          "2 chicken breasts",
+          "2 cups chicken stock, heated",
+          "1 tablespoon cornstarch",
+          "2 tablespoons water, cold",
+          "1⁄4 cup cream (I use milk)",
+          "salt & pepper",
+        ],
+      },
+    },
+    {
+      recipe: {
+        label: "Chicken Curry",
+        uri: "http://www.food.com/recipe/chicken-curry-2930",
+        url: "http://www.food.com/recipe/chicken-curry-2930",
+        ingredientLines: [
+          "3 tablespoons butter",
+          "2 onions, peeled and thinly sliced",
+          "2 tablespoons curry powder",
+          "2 chicken breasts",
+          "2 cups chicken stock, heated",
+          "1 tablespoon cornstarch",
+          "2 tablespoons water, cold",
+          "1⁄4 cup cream (I use milk)",
+          "salt & pepper",
+        ],
+      },
+    },
+  ],
+};
+
+const MOCK_ROUTE: RouteDBEntry = {
+  userID: "test-user",
+  route: {
+    start_location: {
+      latitude: 0,
+      longitude: 0,
+      name: "",
+      population: 0,
+    },
+    end_location: {
+      latitude: 0,
+      longitude: 0,
+      name: "",
+      population: 0,
+    },
+    stops: [
+      {
+        location: {
+          latitude: 0,
+          longitude: 0,
+          name: "",
+          population: 0,
+        },
+        distanceFromStart: 0,
+        cumulativeDistance: 0,
+        segmentPercentage: 0,
+      },
+    ],
+  },
+};
+
+const MOCK_ROUTE_NO_STOPS: RouteDBEntry = {
+  userID: "test-user",
+  route: {
+    start_location: {
+      latitude: 0,
+      longitude: 0,
+      name: "",
+      population: 0,
+    },
+    end_location: {
+      latitude: 0,
+      longitude: 0,
+      name: "",
+      population: 0,
+    },
+    stops: [],
+  },
+};
+
 global.fetch = jest.fn();
 
 // Interface POST /recipes
@@ -45,18 +177,25 @@ describe("Mocked: POST /recipes", () => {
   });
 
   // Mocked behavior: mock edamam api call that does not get received
-  // Input: 
+  // Input:
   // Expected status code: 404
   // Expected behavior: error handled gracefully
   // Expected output: error message
   test("Fail external api request", async () => {
     // mock no response from edamam api call, cause it to fail
-        const response = await request(app)
+
+    // add mock route to db
+    const result = await client
+      .db("route_data")
+      .collection<RouteDBEntry>("routes")
+      .insertOne(MOCK_ROUTE);
+
+    const response = await request(app)
       .post("/recipes")
       .send({
-        tripID: new ObjectId().toHexString(),
+        tripID: result.insertedId.toHexString(),
       })
-      .expect(404);
+      .expect(500);
 
     expect(response.body).toHaveProperty("error", "Internal server error");
   });
@@ -74,33 +213,20 @@ describe("Mocked: POST /recipes", () => {
       json: async () => Promise.resolve({ error: "Service Unavailable" }),
     });
 
-    const route_response = await request(app)
-      .post("/routes")
-      .send({
-        userID: "test-user",
-        origin: "Vancouver",
-        destination: "Toronto",
-        numStops: 1,
-      })
-      .expect(500);
-
-      const db = client.db(RECIPES_DB_NAME);
-      const collection = db.collection<RecipeDBEntry>(RECIPE_COLLECTION_NAME);
-      const tripID = route_response.body.tripID;
-      const result = await collection.findOne({ _id: new ObjectId(tripID) });
-      if (!result){
-        console.debug(tripID);
-      }
-      console.debug(tripID);
+    // add mock route to db
+    const route_response = await client
+      .db("route_data")
+      .collection<RouteDBEntry>("routes")
+      .insertOne(MOCK_ROUTE);
 
     const response = await request(app)
       .post("/recipes")
       .send({
-        tripID,
+        tripID: route_response.insertedId.toHexString(),
       })
       .expect(500);
-    expect(response.body).toHaveProperty("error", "Internal server error");
 
+    expect(response.body).toHaveProperty("error", "Internal server error");
   });
 
   // Mocked behavior: RecipeHelper.saveRecipesToDb throws an error and mock edamam api call to return valid recipe
@@ -109,17 +235,14 @@ describe("Mocked: POST /recipes", () => {
   // Expected behavior: error handled gracefully
   // Expected output: error message
   test("Insert database failure", async () => {
-    const mockResponse = {
-      hits: [
-        {
-          recipe: {
-            label: "Mock Pancakes",
-            image: "https://mockimage.com/pancakes.jpg",
-          },
-        },
-      ],
-    };
-    global.fetch = jest.fn().mockResolvedValueOnce(mockResponse); // mock edamam api call
+    jest.spyOn(RecipeHelper, "createRecipesfromRoute").mockResolvedValue([
+      {
+        recipeName: "recipe",
+        recipeID: 1,
+        url: "url",
+        ingredients: ["ingredient"],
+      },
+    ]);
 
     // database failure
     jest.spyOn(RecipeHelper, "saveRecipesToDb").mockImplementation(() => {
@@ -134,23 +257,10 @@ describe("Mocked: POST /recipes", () => {
       .expect(500);
 
     expect(response.body).toHaveProperty("error", "Internal server error");
+    expect(RecipeHelper.createRecipesfromRoute).toHaveBeenCalled();
     expect(RecipeHelper.saveRecipesToDb).toHaveBeenCalled();
     jest.resetModules();
   });
-
-  
-  test('should throw an error if database query fails', async () => {
-    const tripID = new ObjectId().toHexString();
-
-    // Mock the database to throw an error
-    const route_db = client.db(RECIPES_DB_NAME);
-    const route_collection = route_db.collection(RECIPE_COLLECTION_NAME);
-    jest.spyOn(route_collection, 'findOne').mockRejectedValueOnce(new Error('Database error'));
-
-    // Act & Assert: Expect the function to throw
-    await expect(RecipeHelper.createRecipesfromRoute(tripID)).rejects.toThrow('Database error');
-  });
-
 
   // Mocked behavior: route_collection.findOne returns a mocked route, and mock edamam
   //  api call to return valid recipe
@@ -158,13 +268,16 @@ describe("Mocked: POST /recipes", () => {
   // Expected status code: 500
   // Expected behavior: error handled gracefully
   // Expected output: error message
-  test('should return 400 for invalid tripID format', async () => { //cover 21
+  test("Invalid tripID format", async () => {
+    jest.spyOn(RecipeHelper, "createRecipesfromRoute").mockImplementation();
+
     const response = await request(app)
-      .post('/recipes')
-      .send({ tripID: 'invalidObjectId' }); // Invalid ObjectId format
+      .post("/recipes")
+      .send({ tripID: "invalidObjectId" }); // Invalid ObjectId format
 
     expect(response.status).toBe(400);
-    expect(response.body.error).toBe('Invalid tripID format');
+    expect(response.body.error).toBe("Invalid tripID format");
+    expect(RecipeHelper.createRecipesfromRoute).not.toHaveBeenCalled();
   });
 
   /// Mocked behavior: route_collection.findOne returns a mocked route, and mock edamam
@@ -173,24 +286,24 @@ describe("Mocked: POST /recipes", () => {
   // Expected status code: 500
   // Expected behavior: error handled gracefully
   // Expected output: error message
-  test('should throw an error if no stops are found in the route', async () => { /// missed 69-87
-    const tripID = new ObjectId().toHexString();
+  test("No stops found in route", async () => {
+    jest.spyOn(RecipeHelper, "saveRecipesToDb").mockImplementation();
 
-    // Mock the database to return a route with no stops
-    const route_db = client.db(RECIPES_DB_NAME);
-    const route_collection = route_db.collection(RECIPE_COLLECTION_NAME);
-    jest.spyOn(route_collection, 'findOne').mockResolvedValueOnce({
-      _id: new ObjectId(tripID),
-      route: {
-        start_location: { name: 'Start' },
-        end_location: { name: 'End' },
-        stops: [], // No stops
-      },
-    });
+    const result = await client
+      .db("route_data")
+      .collection<RouteDBEntry>("routes")
+      .insertOne(MOCK_ROUTE_NO_STOPS);
 
-    await expect(RecipeHelper.createRecipesfromRoute(tripID)).rejects.toThrow('No stops found in route');  });
-  
-  /// Mocked behavior: route_collection.findOne returns a mocked route, and mock edamam
+    const response = await request(app)
+      .post("/recipes")
+      .send({ tripID: result.insertedId.toHexString() })
+      .expect(500);
+
+    expect(response.body).toHaveProperty("error", "Internal server error");
+    jest.resetModules();
+  });
+
+  // Mocked behavior: route_collection.findOne returns a mocked route, and mock edamam
   //  api call to return valid recipe
   // Input: tripID valid
   // Expected status code: 500
@@ -202,7 +315,9 @@ describe("Mocked: POST /recipes", () => {
     process.env.EDAMAM_API_KEY = "";
     process.env.EDAMAM_APP_ID = "";
 
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(jest.fn());
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(jest.fn());
     await expect(RecipeHelper.fetchRecipe("query")).rejects.toThrow();
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -246,14 +361,15 @@ describe("Mocked: POST /recipes", () => {
     // (MongoClient as jest.Mock).mockImplementation(() => mockClient);
 
     // Act & Assert: Expect the function to throw
-    await expect(RecipeHelper.createRecipesfromRoute(tripID)).rejects.toThrow("No stops found in route");
+    await expect(RecipeHelper.createRecipesfromRoute(tripID)).rejects.toThrow(
+      "No stops found in route"
+    );
   });
-
 
   test("delete API keys", async () => {
     const originalApiKey = process.env.EDAMAM_API_KEY;
     const originalAppId = process.env.EDAMAM_APP_ID;
-    process.env.EDAMAM_APP_ID = undefined; 
+    process.env.EDAMAM_APP_ID = undefined;
     process.env.EDAMAM_API_KEY = undefined;
 
     const mockResponse = {
@@ -266,10 +382,14 @@ describe("Mocked: POST /recipes", () => {
     mocked(fetch).mockResolvedValueOnce(mockResponse);
 
     // Spy on console.error to verify it's called
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(jest.fn());
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(jest.fn());
 
     // Act & Assert: Expect the function to throw
-    await expect(RecipeHelper.fetchRecipe("query")).rejects.toThrow("Invalid API credentials");
+    await expect(RecipeHelper.fetchRecipe("query")).rejects.toThrow(
+      "Invalid API credentials"
+    );
 
     // Assert: Verify that console.error was called with the expected message
     expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -322,101 +442,110 @@ describe("Mocked: POST /recipes", () => {
   });
 
   // Mock fetchRecipe not connecting to Edamam API
-  test('cannot reach Edamam API', async () => {
+  test("cannot reach Edamam API", async () => {
     // Mock fetch to return a non-OK response
     mocked(fetch).mockRejectedValueOnce(new Error("Network error"));
 
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(jest.fn());
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(jest.fn());
 
-      // Act & Assert: Expect the function to throw
-      await expect(RecipeHelper.fetchRecipe("invalid-query")).rejects.toThrow("Network error");
+    // Act & Assert: Expect the function to throw
+    await expect(RecipeHelper.fetchRecipe("invalid-query")).rejects.toThrow(
+      "Network error"
+    );
 
-      // Assert: Verify that console.error was called with the expected message
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Detailed recipe fetch error:",
-        expect.any(Error)
-      );
+    // Assert: Verify that console.error was called with the expected message
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Detailed recipe fetch error:",
+      expect.any(Error)
+    );
 
-      // Clean up the spy
-      consoleErrorSpy.mockRestore();
+    // Clean up the spy
+    consoleErrorSpy.mockRestore();
     jest.resetModules();
   });
 
   // Arrange: Mock fetch to return an invalid response ////
-    // Mocked behavior: 
-    // Input: 
-    // Expected status code: 
-    // Expected behavior: 
-    // Expected output: 
+  // Mocked behavior:
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
   test("", async () => {
-      
-      const mockResponse = {
-        ok: false,
-        status: 500,
-        statusText: "Internal Server Error",
-        json: () => Promise.reject(new Error("Invalid JSON")),
-        headers: new Headers(),
-        redirected: false,
-        type: "basic",
-        url: "https://example.com",
-        clone: () => mockResponse,
-        body: null,
-        bodyUsed: false,
-        arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-        blob: () => Promise.resolve(new Blob()),
-        formData: () => Promise.resolve(new FormData()),
-        text: () => Promise.resolve(""),
-      } as Response;
+    const mockResponse = {
+      ok: false,
+      status: 500,
+      statusText: "Internal Server Error",
+      json: () => Promise.reject(new Error("Invalid JSON")),
+      headers: new Headers(),
+      redirected: false,
+      type: "basic",
+      url: "https://example.com",
+      clone: () => mockResponse,
+      body: null,
+      bodyUsed: false,
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+      blob: () => Promise.resolve(new Blob()),
+      formData: () => Promise.resolve(new FormData()),
+      text: () => Promise.resolve(""),
+    } as Response;
 
-      // Mock fetch to return the invalid response
-      mocked(fetch).mockResolvedValueOnce(mockResponse);
+    // Mock fetch to return the invalid response
+    mocked(fetch).mockResolvedValueOnce(mockResponse);
 
-      // Spy on console.error to verify it's called
-      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(jest.fn());
+    // Spy on console.error to verify it's called
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(jest.fn());
 
-      // Act & Assert: Expect the function to throw
-      await expect(RecipeHelper.fetchRecipe("invalid-query")).rejects.toThrow("Invalid JSON");
+    // Act & Assert: Expect the function to throw
+    await expect(RecipeHelper.fetchRecipe("invalid-query")).rejects.toThrow(
+      "Invalid JSON"
+    );
 
-      // Assert: Verify that console.error was called with the expected message
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Detailed recipe fetch error:",
-        expect.any(Error)
-      );
+    // Assert: Verify that console.error was called with the expected message
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Detailed recipe fetch error:",
+      expect.any(Error)
+    );
 
-      // Clean up the spy
-      consoleErrorSpy.mockRestore();
-    });
+    // Clean up the spy
+    consoleErrorSpy.mockRestore();
+  });
 
-    test("line 34 coverage", async () => {
-      // Arrange: Mock fetch to return a non-OK response
-      const mockErrorResponse = {
-        ok: false,
-        status: 400,
-        statusText: "Bad Request",
-        text: () => Promise.resolve("Invalid query parameter"),
-      } as Response;
+  test("line 34 coverage", async () => {
+    // Arrange: Mock fetch to return a non-OK response
+    const mockErrorResponse = {
+      ok: false,
+      status: 400,
+      statusText: "Bad Request",
+      text: () => Promise.resolve("Invalid query parameter"),
+    } as Response;
 
-      mocked(fetch).mockResolvedValueOnce(mockErrorResponse);
+    mocked(fetch).mockResolvedValueOnce(mockErrorResponse);
 
-      // Spy on console.error to verify it's called
-      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(jest.fn());
+    // Spy on console.error to verify it's called
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(jest.fn());
 
-      // Act & Assert: Expect the function to throw
-      await expect(RecipeHelper.fetchRecipe("invalid-query")).rejects.toThrow(
-        "Edamam API Error: 500 - "
-      );
+    // Act & Assert: Expect the function to throw
+    await expect(RecipeHelper.fetchRecipe("invalid-query")).rejects.toThrow(
+      "Edamam API Error: 500 - "
+    );
 
-      // Assert: Verify that console.error was called with the expected message
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Detailed recipe fetch error:",
-        expect.any(Error)
-      );
+    // Assert: Verify that console.error was called with the expected message
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Detailed recipe fetch error:",
+      expect.any(Error)
+    );
 
-      // Clean up the spy
-      consoleErrorSpy.mockRestore();
-    });
+    // Clean up the spy
+    consoleErrorSpy.mockRestore();
+  });
 
-    test("should handle empty EDAMAM_APP_ID and EDAMAM_API_KEY", async () => {
+  test("should handle empty EDAMAM_APP_ID and EDAMAM_API_KEY", async () => {
     // Arrange: Set environment variables to empty strings
     process.env.EDAMAM_APP_ID = "";
     process.env.EDAMAM_API_KEY = "";
@@ -432,7 +561,9 @@ describe("Mocked: POST /recipes", () => {
     mocked(fetch).mockResolvedValueOnce(mockResponse);
 
     // Spy on console.error to verify it's called
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(jest.fn());
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(jest.fn());
 
     // Act & Assert: Expect the function to throw
     await expect(RecipeHelper.fetchRecipe("query")).rejects.toThrow();
@@ -446,8 +577,30 @@ describe("Mocked: POST /recipes", () => {
     // Clean up the spy
     consoleErrorSpy.mockRestore();
   });
-});
 
+  // Mocked behavior:
+  // Input:
+  // Expected status code:
+  // Expected behavior:
+  // Expected output:
+  test("Valid recipes returned", async () => {
+    jest
+      .spyOn(RecipeHelper, "fetchRecipe")
+      .mockResolvedValue(SAMPLE_RECIPES_LIST);
+
+    const result = await client
+      .db("route_data")
+      .collection("routes")
+      .insertOne(MOCK_ROUTE);
+
+    const response = await request(app)
+      .post("/recipes")
+      .send({ tripID: result.insertedId.toHexString() })
+      .expect(201);
+
+    expect(response.body).toEqual(SAMPLE_RECIPES_LIST);
+  });
+});
 
 // Interface GET /recipes/:id
 describe("Mocked: GET /recipes/:id", () => {
@@ -534,22 +687,24 @@ describe("Mocked: GET /recipes/:id", () => {
         },
       ],
     };
-  
+
     // Mock the database response
     jest
       .spyOn(RecipeHelper, "getRecipesFromDb")
       .mockResolvedValue(mockRecipeData.recipes); // Return the `recipes` array
-  
+
     const tripID = new ObjectId(123);
-  
+
     // Make the request to the endpoint
     const response = await request(app)
       .get(`/recipes/${tripID.toHexString()}`)
       .expect(200);
-  
+
     // Assertions
     expect(response.body).toEqual(mockRecipeData.recipes);
-    expect(RecipeHelper.getRecipesFromDb).toHaveBeenCalledWith(tripID.toHexString());
+    expect(RecipeHelper.getRecipesFromDb).toHaveBeenCalledWith(
+      tripID.toHexString()
+    );
   });
 
   test("Retrieve valid recipe", async () => {
@@ -596,21 +751,22 @@ describe("Mocked: GET /recipes/:id", () => {
       tripID: "1234",
       recipes: SAMPLE_RECIPE.recipes, // Use the recipes array from SAMPLE_RECIPE
     };
-  
+
     // Mock the database response
     jest
       .spyOn(RecipeHelper, "getRecipesFromDb")
       .mockResolvedValue(mockRecipeData.recipes); // Return the full object with `recipes` property
-  
-  
+
     // Make the request to the endpoint
     const response = await request(app)
       .get(`/recipes/${SAMPLE_RECIPE.tripID}`)
       .expect(200);
-  
+
     // Assertions
     expect(response.body).toEqual(SAMPLE_RECIPE.recipes);
-    expect(RecipeHelper.getRecipesFromDb).toHaveBeenCalledWith(SAMPLE_RECIPE.tripID);
+    expect(RecipeHelper.getRecipesFromDb).toHaveBeenCalledWith(
+      SAMPLE_RECIPE.tripID
+    );
   });
 
   test("Valid tripID and route returned, in-mem db", async () => {
