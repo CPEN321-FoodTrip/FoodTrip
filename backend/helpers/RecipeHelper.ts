@@ -87,7 +87,7 @@ export async function createRecipesfromRoute(
     return recipes;
   } catch (error) {
     console.error("Create recipes from trip error:", error);
-    throw error; ///unreachable
+    throw error;
   }
 }
 
@@ -95,10 +95,9 @@ export async function saveRecipesToDb(
   tripID: string,
   recipes: Recipe[]
 ): Promise<void> {
-  const db = client.db(RECIPE_DB_NAME); /// unreachable
+  const db = client.db(RECIPE_DB_NAME);
   const collection = db.collection<RecipeDBEntry>(RECIPE_COLLECTION_NAME);
   await collection.insertOne({
-    ///unreachable
     tripID,
     recipes,
   });
@@ -115,7 +114,7 @@ export async function getRecipesFromDb(
   if (!result?.recipes) {
     return null;
   }
-  return result.recipes; /// unreachable
+  return result.recipes;
 }
 
 export async function deleteRecipesFromDb(tripID: string): Promise<number> {

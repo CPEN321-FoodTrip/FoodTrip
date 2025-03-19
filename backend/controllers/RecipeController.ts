@@ -27,10 +27,10 @@ export const createRecipes = async (
     }
 
     // save recipes to db
-    await saveRecipesToDb(tripID, recipes);  /// unreachable
+    await saveRecipesToDb(tripID, recipes);
     res.status(201).json(recipes);
   } catch (error) {
-    next(error);                       /// unreachable
+    next(error);
   }
 };
 
@@ -54,7 +54,7 @@ export const getRecipes = async (
 
     res.status(200).json(recipes);
   } catch (error) {
-    console.error("Error getting recipe:", error);  
+    console.error("Error getting recipe:", error);
     next(error);
   }
 };
@@ -78,6 +78,6 @@ export const deleteRecipes = async (
     }
     res.status(200).json({ success: true, message: "Recipes deleted" });
   } catch (error) {
-    next(error); 
+    next(error);
   }
 };
