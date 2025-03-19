@@ -2,6 +2,8 @@ import request from "supertest";
 import app from "../../index";
 import { client } from "../../services";
 import { ObjectId } from "mongodb";
+import { UserNotificationData } from "../../interfaces/NotificationInterfaces";
+import { Discount } from "../../interfaces/DiscountInterfaces";
 
 // constants for discounts saved in db
 const DB_NAME = "discounts";
@@ -17,7 +19,7 @@ describe("Unmocked: POST /discounts", () => {
     // add token to db for person who will receive discount notification
     await client
       .db(DB_NAME)
-      .collection("notifications")
+      .collection<UserNotificationData>("notifications")
       .insertOne({ userID: "123", fcmToken: "real-token" });
 
     const discount = {
@@ -40,7 +42,7 @@ describe("Unmocked: POST /discounts", () => {
     const discountID = response.body.discountID;
     const dbDiscount = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .findOne({ _id: new ObjectId(discountID) });
 
     expect(dbDiscount).not.toBeNull();
@@ -59,7 +61,7 @@ describe("Unmocked: POST /discounts", () => {
   test("Missing body params", async () => {
     const dbCountBefore = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .countDocuments();
 
     const response = await request(app).post("/discounts").send({}).expect(400);
@@ -89,7 +91,7 @@ describe("Unmocked: POST /discounts", () => {
     // check db is unchanged
     const dbCountAfter = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .countDocuments();
 
     expect(dbCountAfter).toBe(dbCountBefore);
@@ -102,7 +104,7 @@ describe("Unmocked: POST /discounts", () => {
   test("Negative price", async () => {
     const dbCountBefore = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .countDocuments();
 
     const discount = {
@@ -125,7 +127,7 @@ describe("Unmocked: POST /discounts", () => {
     // check db is unchanged
     const dbCountAfter = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .countDocuments();
 
     expect(dbCountAfter).toBe(dbCountBefore);
@@ -138,7 +140,7 @@ describe("Unmocked: POST /discounts", () => {
   test("Price is non-numeric", async () => {
     const dbCountBefore = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .countDocuments();
 
     const discount = {
@@ -162,7 +164,7 @@ describe("Unmocked: POST /discounts", () => {
     // check db is unchanged
     const dbCountAfter = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .countDocuments();
 
     expect(dbCountAfter).toBe(dbCountBefore);
@@ -192,11 +194,11 @@ describe("Unmocked: GET /discounts/:id", () => {
     // save discounts to db
     const discountID1 = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .insertOne(SAMPLE_DISCOUNT1);
     const discountID2 = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .insertOne(SAMPLE_DISCOUNT2);
 
     const response = await request(app).get("/discounts/store1").expect(200);
@@ -272,11 +274,11 @@ describe("Unmocked: GET /discounts", () => {
     // save discounts to db
     await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .insertOne(SAMPLE_DISCOUNT1);
     await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .insertOne(SAMPLE_DISCOUNT2);
 
     const response = await request(app).get("/discounts").expect(200);
@@ -315,11 +317,11 @@ describe("Unmocked: GET /discounts", () => {
     // save discounts to db
     await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .insertOne(SAMPLE_DISCOUNT1);
     await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .insertOne(SAMPLE_DISCOUNT2);
 
     const response = await request(app)
@@ -355,12 +357,12 @@ describe("Unmocked: DELETE /discounts/:id", () => {
     // save discount to db
     const discountID = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .insertOne(discount);
 
     const dbCountBefore = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .countDocuments();
 
     const response = await request(app)
@@ -371,7 +373,7 @@ describe("Unmocked: DELETE /discounts/:id", () => {
 
     const dbCountAfter = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .countDocuments();
 
     expect(dbCountAfter).toBe(dbCountBefore - 1);
@@ -384,7 +386,7 @@ describe("Unmocked: DELETE /discounts/:id", () => {
   test("Invalid discountID format", async () => {
     const dbCountBefore = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .countDocuments();
 
     // discountID is not a valid ObjectId
@@ -397,7 +399,7 @@ describe("Unmocked: DELETE /discounts/:id", () => {
     // check db is unchanged
     const dbCountAfter = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .countDocuments();
 
     expect(dbCountAfter).toBe(dbCountBefore);
@@ -410,7 +412,7 @@ describe("Unmocked: DELETE /discounts/:id", () => {
   test("Discount doesn't exist", async () => {
     const dbCountBefore = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .countDocuments();
 
     // discountID is valid ObjectId but doesn't exist in db
@@ -423,7 +425,7 @@ describe("Unmocked: DELETE /discounts/:id", () => {
     // check db is unchanged
     const dbCountAfter = await client
       .db(DB_NAME)
-      .collection(COLLECTION_NAME)
+      .collection<Discount>(COLLECTION_NAME)
       .countDocuments();
 
     expect(dbCountAfter).toBe(dbCountBefore);

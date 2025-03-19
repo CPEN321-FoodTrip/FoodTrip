@@ -1,8 +1,12 @@
 import { ObjectId } from "mongodb";
 import { client } from "../services";
 
-import { RouteStop } from "../interfaces/RouteInterfaces";
-import { Recipe, EdamamResponse } from "../interfaces/RecipeInterfaces";
+import { RouteDBEntry, RouteStop } from "../interfaces/RouteInterfaces";
+import {
+  Recipe,
+  EdamamResponse,
+  RecipeDBEntry,
+} from "../interfaces/RecipeInterfaces";
 
 const EDAMAM_BASE_URL = "https://api.edamam.com/api/recipes/v2";
 
@@ -18,9 +22,8 @@ const ROUTES_COLLECTION_NAME = "routes";
 export async function fetchRecipe(query: string): Promise<Recipe[]> {
   try {
     if (!process.env.EDAMAM_APP_ID || !process.env.EDAMAM_API_KEY) {
-      throw new Error("Edamam App ID or API Key is missing");
+      throw new Error("Edamam API credentials are missing");
     }
-
     const params = new URLSearchParams({
       type: "public",
       q: query,
@@ -30,7 +33,7 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
 
     const response = await fetch(`${EDAMAM_BASE_URL}?${params.toString()}`);
     if (!response.ok) {
-      const errorBody = await response.text();
+      const errorBody = await response.text();  ///unreached
       throw new Error(`Edamam API Error: ${response.status} - ${errorBody}`);
     }
 
@@ -38,12 +41,12 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
 
     return data.hits.map((hit) => ({
       recipeName: hit.recipe.label || "",
-      recipeID: parseInt(hit.recipe.uri.split("_")[1] || "0", 10),
+      recipeID: parseInt(hit.recipe.uri.split("_")[1] || "0", 10), 
       url: hit.recipe.url,
       ingredients: hit.recipe.ingredientLines,
     }));
   } catch (error) {
-    console.error("Detailed recipe fetch error:", error);
+    console.error("Detailed recipe fetch error:", error); 
     throw error;
   }
 }
@@ -54,24 +57,30 @@ export async function createRecipesfromRoute(
 ): Promise<Recipe[] | null> {
   try {
     const route_db = client.db(ROUTES_DB_NAME);
-    const route_collection = route_db.collection(ROUTES_COLLECTION_NAME);
-    const route = await route_collection.findOne({ _id: new ObjectId(tripID) });
-    if (!route) {
+    const route_collection = route_db.collection<RouteDBEntry>(
+      ROUTES_COLLECTION_NAME
+    );
+    const result = await route_collection.findOne({
+      _id: new ObjectId(tripID),
+    });
+    if (!result) {
       return null;
     }
-
-    const recipes: Recipe[] = [];
-
+    if (result.route.stops.length === 0) {
+      throw new Error("No stops found in route");
+    }
     const stopNames: string[] = [];
-    route.stops.forEach((stop: RouteStop) => {
+
+    const startname:string = result.route.start_location.name;
+    const endname:string = result.route.end_location.name;
+    stopNames.push(startname);
+    result.route.stops.forEach((stop: RouteStop) => {
       const stopName = stop.location.name;
       stopNames.push(stopName);
     });
+    stopNames.push(endname);
 
-    if (stopNames.length === 0) {
-      throw new Error("No stops found in route");
-    }
-
+    const recipes: Recipe[] = [];
     for (const name of stopNames) {
       const recipe = await fetchRecipe(name);
       recipes.push(recipe[0]); // choose top match recipe
@@ -86,29 +95,36 @@ export async function createRecipesfromRoute(
 export async function saveRecipesToDb(
   tripID: string,
   recipes: Recipe[]
-): Promise<ObjectId> {
+): Promise<void> {
   const db = client.db(RECIPE_DB_NAME);
-  const collection = db.collection(RECIPE_COLLECTION_NAME);
+  const collection = db.collection<RecipeDBEntry>(RECIPE_COLLECTION_NAME);
 
-  const result = await collection.insertOne({
+  await collection.insertOne({
     tripID,
     recipes,
   });
-  return result.insertedId;
 }
 
-export async function getRecipesFromDb(tripID: string): Promise<object | null> {
-  const recipes = await client
+export async function getRecipesFromDb(
+  tripID: string
+): Promise<Recipe[] | null> {
+  const result: RecipeDBEntry | null = await client
     .db(RECIPE_DB_NAME)
-    .collection(RECIPE_COLLECTION_NAME)
+    .collection<RecipeDBEntry>(RECIPE_COLLECTION_NAME)
     .findOne({ tripID });
-  return recipes;
+
+  if (!result?.recipes) {
+    return null;
+  }
+  return result.recipes;
 }
 
 export async function deleteRecipesFromDb(tripID: string): Promise<number> {
-  const result = await client
-    .db(RECIPE_DB_NAME)
-    .collection(RECIPE_COLLECTION_NAME)
-    .deleteOne({ tripID });
-  return result.deletedCount;
+  const deletedCount: number = (
+    await client
+      .db(RECIPE_DB_NAME)
+      .collection<RecipeDBEntry>(RECIPE_COLLECTION_NAME)
+      .deleteOne({ tripID })
+  ).deletedCount;
+  return deletedCount;
 }

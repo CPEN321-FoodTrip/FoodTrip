@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.google.gms.google-services")
 }
 
 
@@ -75,9 +76,12 @@ dependencies {
     androidTestImplementation("androidx.test:rules:1.6.1")
     implementation("androidx.webkit:webkit:1.8.0")
     androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
-    
+    implementation("com.google.firebase:firebase-auth-ktx:22.1.1")
+    implementation("com.google.firebase:firebase-firestore-ktx:24.9.1")
+    implementation("com.google.firebase:firebase-messaging-ktx:23.3.1")
     dependencies {
         implementation(libs.okhttp)
         implementation(libs.gson)
     }
 }
+

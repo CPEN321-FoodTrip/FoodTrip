@@ -1,6 +1,8 @@
 import request from "supertest";
 import app from "../../index";
 import * as NotificationHelper from "../../helpers/NotificationHelper";
+import { UserNotificationData } from "../../interfaces/NotificationInterfaces";
+import { client } from "../../services";
 
 // Interface POST /notifications
 describe("Mocked: POST /notifications", () => {
@@ -58,7 +60,9 @@ describe("Mocked: POST /notifications", () => {
   // Expected behavior: error handled gracefully
   // Expected output: error message
   test("Database failure on insert", async () => {
-    jest.spyOn(NotificationHelper, "addTokenToDb").mockResolvedValue(null);
+    jest.spyOn(NotificationHelper, "addTokenToDb").mockImplementation(() => {
+      throw new Error("Forced error");
+    });
 
     const response = await request(app)
       .post("/notifications")
@@ -69,16 +73,17 @@ describe("Mocked: POST /notifications", () => {
     expect(NotificationHelper.addTokenToDb).toHaveBeenCalled();
   });
 
-  // Mocked behavior: NotificationHelper.getTokenFromDb returns a value for existing user and
+  // Mocked behavior: in-memory db contains token already for userID and
   //                  NotificationHelper.addTokenToDb has empty implementation
   // Input: valid userID and fcmToken
   // Expected status code: 400
   // Expected behavior: NotificationHelper.addTokenToDb not called
   // Expected output: error message
   test("User already subscribed", async () => {
-    jest
-      .spyOn(NotificationHelper, "getTokenFromDb")
-      .mockResolvedValue("real-token");
+    await client
+      .db("discounts")
+      .collection<UserNotificationData>("notifications")
+      .insertOne({ userID: "12345", fcmToken: "real-token" });
     jest.spyOn(NotificationHelper, "addTokenToDb").mockImplementation();
 
     const response = await request(app)
@@ -87,7 +92,6 @@ describe("Mocked: POST /notifications", () => {
       .expect(400);
 
     expect(response.body).toHaveProperty("error", "Already subscribed");
-    expect(NotificationHelper.getTokenFromDb).toHaveBeenCalled();
     expect(NotificationHelper.addTokenToDb).not.toHaveBeenCalled();
   });
 

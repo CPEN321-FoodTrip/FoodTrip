@@ -11,6 +11,9 @@ let client: MongoClient;
 const testDbs = ["recipes", "route_data", "discounts", "preferences"];
 
 beforeAll(async () => {
+  if (mongoServer) {
+    await mongoServer.stop();
+  }
   // start in-memory MongoDB server
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
@@ -20,7 +23,7 @@ beforeAll(async () => {
   initializeClient(client); // inject test client
 
   initializeFirebaseAdmin();
-});
+}, 30000); // 30 second timeout for starting MongoDB
 
 afterEach(async () => {
   // clear clear collections from dbs

@@ -1,12 +1,17 @@
 package com.example.FoodTripFrontend
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.credentials.ClearCredentialStateRequest
@@ -22,6 +27,8 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.firebase.FirebaseApp
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -51,6 +58,18 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val activityScope = CoroutineScope(Dispatchers.Main)
 
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                Log.d(TAG, "Notification permission granted!")
+                fetchFCMToken() // Fetch token after permission is granted
+            } else {
+                Log.w(TAG, "Notification permission denied.")
+            }
+        }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -61,26 +80,29 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             insets
         }
 
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                requestNotificationPermission()
+            } else {
+                fetchFCMToken()
+            }
+        } else {
+            fetchFCMToken()
+        }
+        
         //Map fragment instead of Map activity to maintain functionality of a "main page" and the
         //ability to turn the map on and off as needed
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        findViewById<Button>(R.id.PastTrips).setOnClickListener() {
-            val intent = Intent(this, PastTripActivity::class.java)
-            startActivity(intent)
-        }
-
-        findViewById<Button>(R.id.ManageTrip).setOnClickListener() {
-            val intent = Intent(this, TripActivity::class.java)
-            startActivity(intent)
-        }
-
-        findViewById<Button>(R.id.ManageAccount).setOnClickListener() {
-            val intent = Intent(this, AccountActivity::class.java)
-            startActivity(intent)
-        }
+        //sets up onClick listeners for generic buttons
+        setUpButtons()
 
         findViewById<Button>(R.id.sign_out_button).setOnClickListener() {
             Log.d(TAG, "Sign Out Button Clicked")
@@ -107,11 +129,46 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
+    }
+
+    //temp function for Notifications
+    private fun requestNotificationPermission() {
+        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+
+    private fun fetchFCMToken() {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w(TAG, "Fetching FCM token failed", task.exception)
+            } else {
+                val token = task.result
+                Log.d(TAG, "FCM Token: $token")
+            }
+        }
+    }
+
+    fun setUpButtons() {
+        findViewById<Button>(R.id.PastTrips).setOnClickListener() {
+            val intent = Intent(this, PastTripActivity::class.java)
+            startActivity(intent)
+        }
+
+        findViewById<Button>(R.id.ManageTrip).setOnClickListener() {
+            val intent = Intent(this, TripActivity::class.java)
+            startActivity(intent)
+        }
+
+        findViewById<Button>(R.id.ManageAccount).setOnClickListener() {
+            val intent = Intent(this, AccountActivity::class.java)
+            startActivity(intent)
+        }
+
         findViewById<Button>(R.id.viewRecipes).setOnClickListener() {
             val intent = Intent(this, GroceryActivity::class.java)
             startActivity(intent)
         }
     }
+
 
     override fun onMapReady(googleMap: GoogleMap) {
 
@@ -129,6 +186,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             if (mapFragment.visibility == android.view.View.GONE) {
                 mapFragment.visibility = android.view.View.VISIBLE
             }
+
+            //coordinates for testing purposes
+//            val points = listOf(
+//                LatLng(37.7749, -122.4194), // San Francisco
+//                LatLng(34.0522, -118.2437), // Los Angeles
+//                LatLng(36.1699, -115.1398)  // Las Vegas
+//            )
 
             //polyline only draws straight lines, ideally in release this should change to
             //actual routes (ie. roads, highways)

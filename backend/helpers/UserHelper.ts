@@ -1,3 +1,4 @@
+import { RouteDBEntryWithID } from "../interfaces/RouteInterfaces";
 import { client } from "../services";
 
 // constants for routes saved in MongoDB
@@ -7,10 +8,15 @@ const ROUTES_COLLECTION_NAME = "routes";
 // get all routes from MongoDB for user
 export async function getUserRoutesFromDb(userID: string): Promise<object[]> {
   const db = client.db(ROUTES_DB_NAME);
-  const collection = db.collection(ROUTES_COLLECTION_NAME);
+  const collection = db.collection<RouteDBEntryWithID>(ROUTES_COLLECTION_NAME);
 
-  const routes = await collection.find({ userID }).toArray();
+  const routes: RouteDBEntryWithID[] = await collection
+    .find({ userID })
+    .toArray();
 
   // add tripID to each route and remove _id and stops
-  return routes.map(({ _id, ...rest }) => ({ ...rest, tripID: _id }));
+  return routes.map(({ _id, route }) => ({
+    tripID: _id.toHexString(),
+    ...route,
+  }));
 }
