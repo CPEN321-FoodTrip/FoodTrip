@@ -126,7 +126,7 @@ The `services.ts` file has no coverage because, during testing, an in-memory Mon
 
 ![Screenshot 2025-03-16 at 4.18.07 PM](images/screenshot-2.png)
 
-The reason for not having 100% coverage in RecipeController and RecipeHelper is because those missing lines are related to database operations which were thoroughly tested in the unmocked tests and had no components which could be mocked for these tests.
+The reason for not having 100% coverage in RecipeController is due to a failing test for creating a valid recipe list which will be fix in the next milestone. The reason for not having 100% coverage in RecipeHelper is because those functions are for database operations which are mocked in these tests and therefore not reached. Additionally, they were thoroughly tested in the unmocked tests.
 
 ### 2.4. Jest Coverage Report Screenshots Without Mocks
 
