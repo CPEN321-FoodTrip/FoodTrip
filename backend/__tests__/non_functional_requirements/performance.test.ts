@@ -39,7 +39,7 @@ describe("Unmocked Performance test", () => {
       );
 
       const recipedata = await recipe_response.json();
-      console.debug('Recipe:', recipedata); ///
+      console.debug("tripID",tripID);
 
       const route_teardown = await fetch(
         `${process.env.GATEWAY_BASE_URL}/routes/${tripID}`,
@@ -53,7 +53,7 @@ describe("Unmocked Performance test", () => {
           throw new Error(`HTTP error! Status: ${route_teardown.status}`);
         }
         
-        const recipe_teardown = await fetch(`${process.env.GATEWAY_BASE_URL}/${tripID}`,
+        const recipe_teardown = await fetch(`${process.env.GATEWAY_BASE_URL}/recipes/${tripID}`, 
           {
             method: "DELETE",
             headers: {
@@ -176,7 +176,8 @@ describe("Unmocked Performance test", () => {
     }
 
     const get_data = await get_response.json();
-    expect(get_data.body).toHaveLength(10); // 10 discounts
+    console.debug(get_data);
+    expect(get_data).toHaveLength(10); // 10 discounts /// problem
 
     const end = Date.now();
     const duration = end - start; //begin timing test assuming that operation succeeded
