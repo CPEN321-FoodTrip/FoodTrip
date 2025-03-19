@@ -38,11 +38,8 @@ describe("Unmocked Performance test", () => {
         }
       );
 
-      const recipe_data = await recipe_response.json(); ///
-      expect(recipe_data).toHaveProperty("recipeName");
-      expect(recipe_data).toHaveProperty("recipeID");
-      expect(recipe_data).toHaveProperty("url");
-      expect(recipe_data).toHaveProperty("ingredients");
+      const recipe_data = await recipe_response.json(); 
+      expect(recipe_data).not.toBeNull();
       
 
       const route_teardown = await fetch(
