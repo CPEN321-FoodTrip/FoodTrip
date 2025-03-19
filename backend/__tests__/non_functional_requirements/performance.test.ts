@@ -38,8 +38,12 @@ describe("Unmocked Performance test", () => {
         }
       );
 
-      const recipedata = await recipe_response.json();
-      console.debug("tripID",tripID);
+      const recipe_data = await recipe_response.json();
+      expect(recipe_data).toHaveProperty("recipeName");
+      expect(recipe_data).toHaveProperty("recipeID");
+      expect(recipe_data).toHaveProperty("url");
+      expect(recipe_data).toHaveProperty("ingredients");
+      
 
       const route_teardown = await fetch(
         `${process.env.GATEWAY_BASE_URL}/routes/${tripID}`,
@@ -69,7 +73,7 @@ describe("Unmocked Performance test", () => {
     }
 
     const end = Date.now();
-    const duration = end - start; //begin timing test assuming that operation succeeded
+    const duration = end - start; //begin timing test assuming that operation sunpm cceeded
     console.debug(`Route Execution time: ${duration}ms`);
     expect(duration).toBeLessThanOrEqual(2700); // 4s
   });
@@ -107,7 +111,8 @@ describe("Unmocked Performance test", () => {
       }
     );
 
-    const get_data = await get_response.json();   
+    const get_data = await get_response.json();
+    expect(get_data).toHaveProperty("message","Discount created successfully");
 
     const discount_teardown = await fetch(`${process.env.GATEWAY_BASE_URL}/discounts/${discountID}`,
       {
@@ -176,8 +181,7 @@ describe("Unmocked Performance test", () => {
     }
 
     const get_data = await get_response.json();
-    console.debug(get_data);
-    expect(get_data).toHaveLength(10); // 10 discounts /// problem
+    expect(get_data).toHaveLength(10); // assumes db was empty
 
     const end = Date.now();
     const duration = end - start; //begin timing test assuming that operation succeeded
