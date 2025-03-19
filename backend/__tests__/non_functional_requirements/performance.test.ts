@@ -111,8 +111,7 @@ describe("Unmocked Performance test", () => {
       }
     );
 
-    const get_data = await get_response.json();
-    expect(get_data).toHaveProperty("message","Discount created successfully");
+    expect(await get_response.json()).toHaveProperty("message", "Discount created successfully");
 
     const discount_teardown = await fetch(`${process.env.GATEWAY_BASE_URL}/discounts/${discountID}`,
       {
@@ -180,8 +179,7 @@ describe("Unmocked Performance test", () => {
       }
     }
 
-    const get_data = await get_response.json();
-    expect(get_data).toHaveLength(10); // assumes db was empty
+    expect(await get_response.json()).toHaveLength(10); // assumes db was empty
 
     const end = Date.now();
     const duration = end - start; //begin timing test assuming that operation succeeded
@@ -296,7 +294,7 @@ describe("Unmocked Performance test", () => {
           },
         }
       );
-      const get_data = await get_response.json();
+      expect(await get_response.json()).not.toBeNull();
       const end = Date.now();
       const allergy_teardown = await fetch(`${process.env.GATEWAY_BASE_URL}/preferences/allergies/${userID}/${allergen}`,
         {
