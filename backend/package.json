@@ -6,7 +6,7 @@
     "start": "ts-node index.ts",
     "dev": "dotenv -e .env -- npx nodemon -e .ts index.ts",
     "test": "NODE_ENV=test jest",
-    "test:coverage": "set NODE_ENV=test&& jest --coverage"
+    "test:coverage": "set NODE_ENV=test && jest --coverage"
   },
   "author": "",
   "license": "ISC",
