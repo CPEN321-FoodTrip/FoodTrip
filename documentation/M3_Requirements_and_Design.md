@@ -11,7 +11,15 @@ The reason for changing our diagram is based on comments from our M3. We also re
 - March 16, 2025
     - Section 2: added more clarity of virtual trips and removed descoped features(social media)
     - Section 3.1: Updated use case diagram to more accurately reflect relationships between use cases (View Recipes must use View Past Trips, Manage Groceries must use View Recipes.)
-    - Section 3.2:
+    - Section 3.2: Updated actor to better reflect new usecases
+    - Section 3.3: Updated functional requirements to provide more details into success and failure scenarios as well as account for modified use cases
+    - Section 3.5: Updated non-functional requirements to better fit the needs of our app and what is feasible
+    - Section 4.1: Updated main components to account for use case changes and made function interfaces clearer
+    - Section 4.2: Updated databases to fit the changed use cases
+    - Section 4.3: Updated external modules to describe ones that provided the nessecary components needed to fulfill use cases
+    - Section 4.4: Likewise updated frameworks to reflect changes in use cases
+    - Section 4.6: Updated sequence diagrams to reflect every main use case and to follow REST call structure
+    - Section 4.7: Updated to reflect non-functional requirement changes
 
 ## 2. Project Description
 FoodTrip is an android app that helps users explore global cuisines by planning a virtual food trip. Users can choose a starting and ending country, and the app will generate a travel route with recipes from different locations along the way. It also creates a smart grocery list which can be used to optimize ingredient reuse and allow users to see local store discounts. Additionally, FoodTrip allows dietary preference customization and social media sharing, so users can tailor their meals to their needs and share their journeys with friends.
@@ -395,17 +403,17 @@ Not necessary to explain our requirements.
 
 ### **4.6. Functional Requirements Sequence Diagram**
 1. [Manage Trip](#fr1)\
-![SEQUENCE_DIAGRAM_HERE](images/sequenceManageTrip.png)
+![SEQUENCE_DIAGRAM_HERE](images/ManageTripSeqDiagNew.png)
 2. [View Past Trips](#fr2)\
-![SEQUENCE_DIAGRAM](images/ManageGrocerySequence.png)
+![SEQUENCE_DIAGRAM](images/ViewPastSeqDiagNew.png)
 3. [View Recipes](#fr3)\
-![SEQUENCE_DIAGRAM](images/SharingSequence.png)
+![SEQUENCE_DIAGRAM](images/ViewRecipeSeqDiagNew.png)
 4. [Manage Groceries](#fr4)\
-![SEQUENCE_DIAGRAM](images/SharingSequence.png)
+![SEQUENCE_DIAGRAM](images/ManageGrocerySeqDiagNew.png)
 5. [Manage Discounts](#fr5)\
-![SEQUENCE_DIAGRAM](images/SharingSequence.png)
+![SEQUENCE_DIAGRAM](images/MangeDiscSeqDiagNew.png)
 6. [Set Preferences](#fr6)\
-![SEQUENCE_DIAGRAM](images/SharingSequence.png)
+![SEQUENCE_DIAGRAM](images/SetPrefSeqDiagNew.png)
 
 
 ### **4.7. Non-Functional Requirements Design**
