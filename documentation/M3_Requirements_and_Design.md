@@ -2,17 +2,25 @@
 
 ## 1. Change History
 **M4:**
-- February 12, 2025: We modified our use cases to the following: Manage Trip, View Past Trips, View Recipes, View Groceries, Manage Account and Manage Discounts. The updated use-case diagram is:  
-![Use-Case Diagram](images/use-case-diagram-v2.png)  
+- February 12, 2025: We modified our use cases to the following: Manage Trip, View Past Trips, View Recipes, View Groceries, Manage Account and Manage Discounts.
 The reason for changing our diagram is based on comments from our M3. We also removed the "Share on Social Media" use case for the MVP since we didn’t think we would have enough time, however, we will try to add this functionality in the final version of the app.
 - February 12, 2025: Based on feedback from our M3, we added live updates through push notifications with Firebase. Every time a new discount is pushed by a grocery store, users subscribed to discount updates will receive a push notification about the discount.
 - February 26, 2025: Another change was made to the preferences option for "Manage Trip." This feature has been de-scoped for the MVP, so it is not included, however, we will try to add this functionality in the final version of the app.
-- February 27, 2025: Several changes were made to the databases. The new databases we now have are: geonames, route_data, food_data and discounts. The purpose of the geonames database is to store all cities with a population greater than 15,000 people in order to generate routes to these cities. We switched to this approach instead of using an API, as the API was unreliable and the server was often down. We also decided to remove the users database since we de-scoped preferences. It seemed better to separate routes and recipes for portability. Additionally, we got rid of the groceries database and now use the recipes database for ingredients.
+- February 27, 2025: Several changes were made to the databases. The new databases we now have are: geonames, route_data, food_data and discounts. The purpose of the geonames database is to store all cities with a population greater than 15,000 people in order to generate routes to these cities. We switched to this approach instead of using an API, as the API was unreliable and the server was often down. We also decided to remove the users database since we de-scoped preferences. It seemed better to separate routes and recipes for portability. Additionally, we got rid of the groceries database and now use the recipes database for ingredients.  
+
 **M5:**
 - March 16, 2025
     - Section 2: added more clarity of virtual trips and removed descoped features(social media)
     - Section 3.1: Updated use case diagram to more accurately reflect relationships between use cases (View Recipes must use View Past Trips, Manage Groceries must use View Recipes.)
-    - Section 3.2:
+    - Section 3.2: Updated actor to better reflect new usecases
+    - Section 3.3: Updated functional requirements to provide more details into success and failure scenarios as well as account for modified use cases
+    - Section 3.5: Updated non-functional requirements to better fit the needs of our app and what is feasible
+    - Section 4.1: Updated main components to account for use case changes and made function interfaces clearer
+    - Section 4.2: Updated databases to fit the changed use cases
+    - Section 4.3: Updated external modules to describe ones that provided the nessecary components needed to fulfill use cases
+    - Section 4.4: Likewise updated frameworks to reflect changes in use cases
+    - Section 4.6: Updated sequence diagrams to reflect every main use case and to follow REST call structure
+    - Section 4.7: Updated to reflect non-functional requirement changes
 
 ## 2. Project Description
 FoodTrip is an android app that helps users explore global cuisines by planning a virtual food trip. Users can choose a starting and ending country, and the app will generate a travel route with recipes from different locations along the way. It also creates a smart grocery list which can be used to optimize ingredient reuse and allow users to see local store discounts. Additionally, FoodTrip allows dietary preference customization and social media sharing, so users can tailor their meals to their needs and share their journeys with friends.
@@ -235,117 +243,148 @@ Not necessary to explain our requirements.
 <a name="nfr1"></a>
 
 1. **Efficient performance**
-    - **Description**: The system should generate food trips and grocery lists in under 10 seconds.
-    - **Justification**: Helps to ensure a good user experience without long loading times.
-2. **Scalability**
-    - **Description**: User data should be stored and retrieved efficiently, scaling up to 50 recipes for up to 50000 users  
-    - **Justification**: Since users are sharing to social media, being able to store large quantities of data for potentially tens of thousands of clients may be required. 
+    - **Description**: Virtual routes and their corresponding recipes should be generated and displayed in under 2 seconds.
+    - **Justification**: Responding to users within 2 seconds of them perceiving requests being sent ensures minimal frustration when using the app. Sources for time selection and user frustration are below
+        - https://developer.android.com/topic/performance/vitals/launch-time#av
+        - https://web.dev/articles/rail
+        - https://studiomosaicapps.com/2023/12/13/from-launch-to-loyalty-optimizing-your-apps-load-time-for-success/
+2. **Usability**
+    - **Description**: Users should be able to navigate and finish any use case within 3 clicks, if assuming all parameter filling counts as 1 click
+    - **Justification**: A simple and easy-to-use app can give users a user-friendly experience. An over-complicated interface will make user confused and frustrated.
+        - https://www.acsij.org/index.php/acsij/article/view/132/128
+        - https://zeldman.com/talent/Taking_Your_Talent_to_the_Web.pdf
 
 
 ## 4. Designs Specification
 ### **4.1. Main Components**
-1. **[Virtual Route Manager]**
-    - **Purpose**: Manages the virtual trip by allowing it to convert the coordinates given into a list of recipes which are returned to the user. Designed to handle all the logic and API calls required to create a virtual trip
+1. **Discount**
+    - **Purpose**: Allow grocery stores to upload and delete discounts for certain ingredients.
     - **Interfaces**: 
-        1. Convert_Virtual_Trip
-            - **Purpose**: Converts a pair of coordinates into a list of recipes that would be found if geographically travelling between the two points
-            - **Input**: firstpoint, The starting location of the virtual trip
-                        secondpoint, The end location of the virtual trip
-                        stops_per_country, the number of dishes to select per country
-                         dietary_restrictions, a list of ingredients to avoid
-            - **Return**: viableroutes, a list of routes that could be taken between the two points
-                        recipes, a list of recipes corresponding to a viableroute
-        2. find_route
-            - **Purpose**: finds a route using GoogleMaps API between a pair or points
-            - **Input**: firstpoint, The starting location of the virtual trip
-                        secondpoint, The end location of the virtual trip
-            - **Output**: route, a sequence of coordinates as specified by the polyline class in the GoogleMaps API documentation
-        3. find_countries_from_route
-            - **Purpose**: Determine which countries are passed through the two points for a given route
-            - **Input**: route
-            - **Output**:countries, a list of countries that are associated with said path
-        4. find_recipes_for_country
-            - **Purpose**: Looks up recipes using Edamam API for the given countries on the route. Recipes should only be selected if the location they are associated with is within the relevance distance of the route
-            - **Input**: route,
-                         countries,
-                         relevance_distance, the maximum euclidean distance between the region associated with a selected recipe and the route
-            - **Output**: potential_recipes, a list of all recipes within relevance distance, including recipes that may violate dietary restrictions
-        5. remove_violating_recipes
-            - **Purpose**: remove any recipes from the list of potential recipes if they violate the users' dietary preferences
-            - **Input**: potential_recipes, a list of all recipes within relevance distance, including recipes that may violate dietary restrictions
-                        dietary_restrictions, a list of ingredients to avoid
-            - **Output**: none, edits the list of potential recipes directly
-        6. select_recipes
-            - **Purpose**: select a final list of recipes for a given route
-            - **Input**: potential_recipes, a list of all recipes that are suitable to be used for a given route
-                        countries, a list of countries that are passed through the route
-                        stops_per_country, the maximum number of recipes that a single country can have
-                        subcultures_per_country, a multiplier to the number of recipes that a given country can have. For a given subculture, it cannot have more than stops_per_country recipes selected
-            - **Output**: selected_recipes, the final list of recipes for this route. the total number of recipes cannot exceed countries * stops_per_country * subcultures_per_country
-2. **[Grocery Manager]**
+        1. `addDiscount(storeID, storeName, ingredient, price)`
+            - **Purpose**: Add new a discount for a particular ingredient.
+            - **Input**: 
+                - storeID: A unique indetifier of the store uploading the discount.
+                - storeName: The name of the grocery store.
+                - ingredient: The ingredient to add the discount for.
+                - price: The price of the ingredient.
+            - **Output**: A success message along with a unique identifier for the discount.
+        2. `getDiscounts(storeID)`
+            - **Purpose**: Get all discounts for a particular store.
+            - **Input**: 
+                - storeID: A unique indetifier of a store that has uploaded as least one discount.
+            - **Output**: A list of discounts where each discount includes an ingredient and price.
+        3. `getAllDiscounts(ingredient="")`
+            - **Purpose**: Get all discounts for all stores with an optional ingredient parameter that can be used to filter.
+            - **Input**: 
+                - ingredient (optional): The ingredient to search discounts for.
+            - **Output**: All discounts available if no ingredient parameter is provided and all discounts for a particular ingredient if the parameter is provided.
+        4. `deleteDiscount(discountID)`
+            - **Purpose**: Delete a discount for an ingredient.
+            - **Input**: The unique identifier of the discount which was returned upon its creation.
+            - **Output**: A success message if the discount was found and deleted and an error message otherwise.
+
+2. **Route**
+    - **Purpose**: Generates a route for the virtual trip by taking a start and end location, along with the number of stops, and creates a route with evenly spaced stops between the two locations.
+    - **Interfaces**: 
+        1. `createRoute(userID, origin, destination, numStops)`
+            - **Purpose**: Generates a route betwen two locations with a provided number of stops.
+            - **Input**:
+                - userID: A unique indetifier of the user creating the route.
+                - origin: The starting location of the route.
+                - destination: The end location of the route.
+                - numStops: The number of stops to find between the start and end locations.
+            - **Return**: The names and the coordinates of the start and end locations, a list of stops where each stop has the name of the city, its coordinates and its distance from the start, and a unique trip indentifier.
+        2. `getRoute(tripID)`
+            - **Purpose**: Get information about a previous route including the start and end locations, and the stops along the route. 
+            - **Input**:
+                - tripID: The unique identifier assigned to the trip upon its creation.
+            - **Output**: The names and the coordinates of the start and end locations, and a list of stops where each stop has the name of the city, its coordinates and its distance from the start.
+        3. `getUserRoutes(userID)`
+            - **Purpose**: Get all routes for a user.
+            - **Input**:
+                - userID: The unique identifier of the user.
+            - **Output**: A list of routes with the start and end locations.
+        4. `deleteRoute(tripID)`
+            - **Purpose**: Delete an existing route.
+            - **Input**:
+                - tripID: The unique identifier assigned to the trip upon its creation.
+            - **Output**: A success message that the route has been deleted, else an error message indicating that it could not be found.
+
+3. **Notification**
+    - **Purpose**: The purpose is to allow users to subscribe to notifications about new discounts posted by grocery stores.
+    - **Interfaces**: 
+        1. `subscribe(userID, fcmToken)`
+            - **Purpose**: Subscribe to notifications about new discounts.
+            - **Input**: 
+                - userID: The unique identifier of the user.
+                - fcmToken: The firebase cloud messaging token associated with the user’s device.
+            - **Output**: A confirmation that the user has subscribed.
+        2. `unsubscribe(userID)`
+            - **Purpose**: Unsubscribe from notifications about new discounts.
+            - **Input**:
+                - userID: The unique identifier of the user.
+            - **Output**: A confimation the user has unsubscribed, or an error message if the user was never subscribed.
+       
+4. **Preference**
+    - **Purpose**: The purpose is to allow users to set preferences for food like allergies to avoid in recipes.
+    - **Interfaces**: 
+        1. `addAllergy(userID, allergy)`
+            - **Purpose**: To add an allergy to a specific ingredient that should be avoided.
+            - **Input**:
+                - userID: The unique identifier of the user.
+                - allergy: The ingredient to which the user has an allergy.
+            - **Output**: A success message.
+        2. `getAllergies(userID)`
+            - **Purpose**: Get a list of all ingredients to which a user is allergic to.
+            - **Input**:
+                - userID: The unique identifier of the user.
+            - **Output**: A list of ingredients.
+        2. `deleteAllergy(userID, allergy)`
+            - **Purpose**: Delete a user allergy.
+            - **Input**:
+                - userID: The unique identifier of the user.
+                - allergy: The ingredient which has been added as an allergy. 
+            - **Output**: A success message if the allergy was found and deleted, and an error message otherwise.
+            
+
+5. **Recipe**
     - **Purpose**: 
     - **Interfaces**: 
-        1. Optimize_reuse
-            - **Purpose**: Attempt to alter recipes to maximize ingredient reuse betweeen recipes
-            - **Input**: recipes, the list of selected recipes for a virtual trip
-                        groceries, the list of groceries required for the selected recipes
-            - **Output**: status, indicating whether or not any ingredients were changed
-                        changes, a list of ingredients that were altered, if any
-        2. Generate_grocery_trip
-            - **Purpose**: Creates a route to local grocery stores using GoogleMaps API.
-            - **Input**: userlocation, the users' location, which should be the start and end point
-                        groceries, the list of ingredients required for the selected recipes
-            - **Output**: GroceryTrip, a sequence of coordinates as specified by the polyline class in the GoogleMaps API documentation
-        3. Add_ingredient
-            - **Purpose**: AJAX PUT request to add an ingredient to a shopping list
-            - **Input**: ingredient, the name of the ingredient to add
-                        number, the amount of the ingredient to add
-            - **Output**: status, whether or not the operation succeeded
-        4. Remove_Ingredient
-            - **Purpose**: AJAX DELETE request to remove an ingredient from a shopping list
-            - **Input**: ingredient, the name of the ingredient to remove
-                        number, the amount of the ingredient to remove
-            - **Output**: status, whether or not the operation succeeded
-        5. Change_quantity
-            - **Purpose**: An AJAX PUT request to change the quantity of an ingredient 
-            - **Input**: ingredient, the name of the ingredient to remove
-                        number, the amount of the ingredient to remove
-            - **Output**: status, whether or not the operation succeeded
-3. **[Frontend]**
-    - **Purpose**: Allows users to interact with all other components. Users should be able to select important information such as starting and end points for virtual trips, as well as which trip they may want to share on social media
-    - **Interfaces**: 
-        1. Begin Virtual Trip
-            - **Purpose**: Allows the user to begin planning a virtual trip
-            - **Input**: A Google Maps interface and popup to enter virtual trip settings and dietary preferences
-            - **Output**: A sequence of routes and the list of recipes associated with those routes
-        2. Share_Trip
-            - **Purpose**: Allows users to create a social media post using Meta API and their list of trips from the Trips database
-            - **Input**: An interface asking which social media platform the user would like to post to, as well as which of their virtual trips they would like to post
-            - **Output**: Redirect to login of the platform of choice, which would then lead to the "create post" interface for that given platform 
-        3. Manage_Grocery_Trip
-            - **Purpose**: Allows the user to use Google Maps API to plan a trip to local grocery stores to guy ingredients 
-            - **Input**: Asks for location permissions if they are not already given. An interface selecting which grocery list the user would like to plan a trip for. 
-            - **Output**: A Google Maps route starting at the users' location and passing through local grocery stores. The user has a button to generate a different route if needed
-        4. Manage_Grocery_List
-            - **Purpose**: Allows the user to issue AJAX requests to change the ingredients on a given grocery list, retrieved and updating the groceries database
-            - **Input**: A screen displaying a list of ingredients and their quantity, with buttons to adjust the quantity, add or remove ingredients
-            - **Output**: Whether or not a given operation was successful
+        1. `createRecipesfromRoute(tripID)`
+            - **Purpose**: Create a list of recipes from a route that includes a start and end location and a number of stops.
+            - **Input**:
+                - tripID: The unique identifier of the trip which was assigned when the route was created.
+            - **Output**: A list of recipes, ingredients, and steps to complete the recipe.
+        2. `getRecipes(tripID)`
+            - **Purpose**: Get the list of recipes for a particular trip.
+            - **Input**: 
+                - tripID: The unique identifier of the trip.
+            - **Output**: A list of recipes, ingredients, and steps to complete the recipe for the trip.
+        3. `deleteRecipes(tripID)`
+            - **Purpose**: Delete a list of recipes for a particular trip.
+            - **Input**: 
+                - tripID: The unique identifier of the trip.
+            - **Output**: A success message if the list of recipes was found and delete, and an error message otherwise.
 
 ### **4.2. Databases**
-1. **[Users]**
-    - **Purpose**: Stores user account information, including authentication details, dietary preferences, saved trips, and any personalized settings
-2. **[Trips]**
-    - **Purpose**: Stores all trips for a given user and the recipes used in that trip
-3. **[Groceries]**
-    - **Purpose**: Stores all grocery lists for a given user
+1. **Route Data**
+    - **Purpose**: Stores all generated routes by users with information about the start location, end location and number of stops.
+2. **Preferences**
+    - **Purpose**: Store all information about user food preferences such as allergies.
+3. **Discount**
+    - **Purpose**: Stores all information about discounts posted by grocery stores and firebase tokens of users who have subscribed to notifications about new discounts.
+4. **Recipes**
+    - **Purpose**: Stores all previous recipes including their ingredients and steps to complete.
 
 ### **4.3. External Modules**
-1. **[Edamam API]** 
+1. **Edamam API** 
     - **Purpose**: Used to lookup recipes. Chosen for its ability to lookup 2.3 million recipes and 30 day free trial, as well as being utilized in other similar use cases requiring recipe lookup
-2. **[Google Maps]** 
-    - **Purpose**: Used for creating virtual trips and planning local grocery trips. Chosen for its popularity and abundant support/documentation
-3. **[Meta API]** 
-    - **Purpose**: Used to share recipes used in a virtual trip, the route taken in a virtual trip, or pictures of the food that users have made to a Meta platform(Facebook, Instagram, WhatsApp, etc.)
+2. **OpenStreetMap API**
+    - **Purpose**: Used to determine the coordinates of the start and end location. Chosen because of its ease of use (simple city name query), and because it requires no API keys, simplifying its use. 
+3. **Firebase Cloud Messaging** 
+    - **Purpose**: Used to set up notifications for alerting users when grocery items are discounted. It was chosen due to allowing implementation of push notifications for android with no monetary cost.
+4. **GeoNames database**
+    - **Purpose**: Used for a dataset of all cities around the world with a population of 15,000 or more. Selected because it has information about each city including the name, country code, coordinates and population. We chose to use the database rather than API since the API was unreliable and was often unreachable.
 
 
 ### **4.4. Frameworks**
@@ -359,59 +398,61 @@ Not necessary to explain our requirements.
     - **Purpose**: Backend API
     - **Reason**: All members are familiar with it, and it meets the project requirements. It also integrates well with MongoDB.
 
-
 ### **4.5. Dependencies Diagram**
 ![DEPENDENCIES_DIAGRAM_HERE](images/dependencyDiagram.png)
 
 
 ### **4.6. Functional Requirements Sequence Diagram**
-1. [Manage Food Trip](#fr1)\
-![SEQUENCE_DIAGRAM_HERE](images/sequenceManageTrip.png)
-2. [Manage Grocery List](#fr2)\
-![SEQUENCE_DIAGRAM](images/ManageGrocerySequence.png)
-3. [Sharing on Social Media](#fr3)\
-![SEQUENCE_DIAGRAM](images/SharingSequence.png)
-
+1. [Manage Trip](#fr1)\
+![SEQUENCE_DIAGRAM_HERE](images/ManageTripSeqDiagNew.png)
+2. [View Past Trips](#fr2)\
+![SEQUENCE_DIAGRAM](images/ViewPastSeqDiagNew.png)
+3. [View Recipes](#fr3)\
+![SEQUENCE_DIAGRAM](images/ViewRecipeSeqDiagNew.png)
+4. [Manage Groceries](#fr4)\
+![SEQUENCE_DIAGRAM](images/ManageGrocerySeqDiagNew.png)
+5. [Manage Discounts](#fr5)\
+![SEQUENCE_DIAGRAM](images/MangeDiscSeqDiagNew.png)
+6. [Set Preferences](#fr6)\
+![SEQUENCE_DIAGRAM](images/SetPrefSeqDiagNew.png)
 
 
 ### **4.7. Non-Functional Requirements Design**
 1. [Efficient performance](#nfr1)
-    - **Validation**: The system will use caching and asynchronous processing to improve response times. Frequently accessed data will be cached to reduce redundant computations, and background tasks will handle complex operations without blocking user interactions.
-2. [Scalability](#nfr1)
-    - **Cloud Computing**: The system will be hosted on AWS Cloud services and thus be able to dynamically scale to meet the needs of users. Recipes will be stored by name or ID on a MongoDB database, thus reducing their overall size from the entire recipe to just a list of strings, thus drastically reducing the size of recipes
+    - **Validation**: Extensive testing using multiple large concurrent requests(8 simultaneous requests of 21 stops each) and usage of jest functions to see how long each stage of processing takes (stages would be submitting inputs, creating route, and selecting recipes)
+2. [Usability](#nfr1)
+    - **Validation**: Front end tests developed with monkeys and espresso will ensure that all relevant use cases can be navigated to and finished within 3 clicks
 
 ### **4.8. Main Project Complexity Design**
-**[Convert_Virtual_Trip]**
-- **Description**: Converts a virtual trip from google maps into a list of ingredients. Formally, it takes a pair of coordinates and finds a combination of transportation methods between those points via google maps. Must be able to associate the path travelled to certain ethnic foods, then search for recipes for said food through edamam API, finally returning a series of recipes that an individual may reasonably find if they were to actually travel between the two inputs points. A dish would be considered reasonable if the region associated with it is within a certain distance of a virtual path between the points as given by google maps. The user may specify dietary restrictions and the number of subcultures within a given country, which would be relevant as it may arbitrarily restrict the recipes that are associated with the selected virtual path
-- **Why complex?**: Since users are expected to travel across multiple countries, many different paths could be taken depending on the forms of transportation available, meaning that there are many different viable virtual paths. For any given virtual path, the algorithm must be able to determine what recipes are associated with that path, and then find a combination of recipes that satisfies the number of dishes per country whilst obeying user dietary restrictions
+**Generate Recipes and Route**
+- **Description**: Converts a virtual trip from a pair of city names into a list of recipes. Formally, it takes a pair of strings and an integer, converts the strings into a route(series of coordinates) by via ~ API, then searches for the names of cities nearby. After cities are found, recipes for each city is found by extracting the name of the city from the route and quering through Edamam API. The user may specify dietary restrictions, which would be relevant as it may arbitrarily restrict the recipes that are associated with the selected virtual path
+- **Why complex?**: Since virtually trips are meant to be somewhat feasible to physically travel, many different paths could be taken depending on the forms of transportation available, meaning that there are many different viable virtual paths. For any given virtual path, the algorithm must be able to determine what recipes are associated with that path, and then find a combination of recipes that satisfies the number of dishes whilst obeying user dietary restrictions
 - **Design**:
-    - **Input**: firstpoint, The starting location of the virtual trip
-                secondpoint, The end location of the virtual trip
-                stops_per_country, the number of dishes to select per country
-                 dietary_restrictions, a list of ingredients to avoid
+    - **Input**: start, The name of the city to begin at
+                destination, The name of the city to end at
+                total_dishes, the number of dishes for the trip
+                dietary_restrictions, a list of ingredients to avoid
     - **Output**: a list of recipes associated with the virtual path between input points
     - **Main computational logic**: ...
     - **Pseudo-code**: ...
         ```
-        attempted_paths = 0
-        viable_routes = []
+        final_route = null
         recipes = []
         countries = []
         while (attemptedpaths < attempt_limit) // to prevent insane delays from trying every possible path
-            route = find_route(firstpoint, secondpoint)
-            countries = find_countries_from_route(route)
-            for country in countries
-                potential_recipes = find_recipes_for_country(route,country,relevance_distance)
+            route = find_route(start, destination)
+            cities = find_cities_from_route(route)
+            for city in cities
+                potential_recipes = find_recipes_for_city(route,city)
                 remove_violating_recipes(potential_recipes, dietary_restrictions)
-                if potential_recipes.length < stops_per_country
+                if potential_recipes.length < total_dishes
                     continue // try another path
-                selected_recipes = select_recipes(potential_recipes, stops_per_country, subcultures_per_country)
+                selected_recipes = select_recipes(potential_recipes, total_dishes)
                 recipes.add(selected_recipes)
-                viable_routes.add(route)
+                final_route = route
             attemptedpaths++
-        return(recipes,viable_routes)
+        return(recipes,final_route)
         ```
-
 
 ## 5. Contributions
 - Kenny Tang - Help review the details and the sequence diagrams. (Work Time: 3 hours)
