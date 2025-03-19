@@ -69,12 +69,16 @@ export async function createRecipesfromRoute(
     if (result.route.stops.length === 0) {
       throw new Error("No stops found in route");
     }
-
     const stopNames: string[] = [];
+
+    const startname:string = result.route.start_location.name;
+    const endname:string = result.route.end_location.name;
+    stopNames.push(startname);
     result.route.stops.forEach((stop: RouteStop) => {
       const stopName = stop.location.name;
       stopNames.push(stopName);
     });
+    stopNames.push(endname);
 
     const recipes: Recipe[] = [];
     for (const name of stopNames) {

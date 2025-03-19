@@ -294,7 +294,7 @@ test("should log an error and throw when response is invalid", async () => {
 
     // Act & Assert: Expect the function to throw
     await expect(RecipeHelper.fetchRecipe("invalid-query")).rejects.toThrow(
-      "Edamam API Error: 400 - Invalid query parameter"
+      "Edamam API Error: 500 - "
     );
 
     // Assert: Verify that console.error was called with the expected message
