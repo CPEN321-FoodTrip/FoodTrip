@@ -23,14 +23,13 @@ describe("Mocked: POST /recipes", () => {
   });
 
   // Mocked behavior: mock edamam api call that does not get received
+  // Input: 
   // Expected status code: 500
   // Expected behavior: error handled gracefully
   // Expected output: error message
   test("Fail external api request", async () => {
     // mock no response from edamam api call, cause it to fail
-    
-
-    const response = await request(app)
+        const response = await request(app)
       .post("/recipes")
       .send({
         tripID: new ObjectId().toHexString(),
@@ -239,8 +238,14 @@ test('cannot reach Edamam API', async () => {
   jest.resetModules();
 });
 
-test("should log an error and throw when response is invalid", async () => {
-    // Arrange: Mock fetch to return an invalid response
+// Arrange: Mock fetch to return an invalid response ////
+  // Mocked behavior: 
+  // Input: 
+  // Expected status code: 
+  // Expected behavior: 
+  // Expected output: 
+test("", async () => {
+    
     const mockResponse = {
       ok: false,
       status: 500,

@@ -66,8 +66,8 @@ export async function createRecipesfromRoute(
     if (!result) {
       return null;
     }
-    if (result.route.stops.length === 0) {
-      throw new Error("No stops found in route");
+    if (result.route.stops.length === 0) { ////////////
+      throw new Error("No stops found in route"); 
     }
     const stopNames: string[] = [];
 
@@ -88,7 +88,7 @@ export async function createRecipesfromRoute(
     return recipes;
   } catch (error) {
     console.error("Create recipes from trip error:", error);
-    throw error;
+    throw error; //////////////////////////////////////////
   }
 }
 
