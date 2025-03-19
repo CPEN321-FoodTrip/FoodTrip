@@ -71,6 +71,7 @@
     EDAMAM_APP_ID=
     EDAMAM_API_KEY=
     FIREBASE_SERVICE_ACCOUNT_KEY=
+    (Optional, only for performance test) GATEWAY_BASE_URL=
     ```
 
 5. **Run the tests with or without coverage:**
@@ -143,8 +144,8 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 
 | **Non-Functional Requirement**  | **Location in Git**                              |
 | ------------------------------- | ------------------------------------------------ |
-| **Performance (Response Time)** | [`FoodTrip/backend/__tests__/nonfunctional/response_time.test.js`](#) |
-| **Usability (Clicks to navigate)**          | [`FoodTrip/frontend/app/src/androidTest/java/com/example/FoodTripFrontend/ExampleInstrumentedTest.kt`](#) |
+| **Performance (Response Time)** | [`FoodTrip/backend/__tests__/nonfunctional/response_time.test.js`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/7c3f062d172a2513bd869e9608b622d048b1c94b/backend/__tests__/non_functional_requirements/performance.test.ts) |
+| **Usability (Clicks to navigate)**          | [`FoodTrip/frontend/app/src/androidTest/java/com/example/FoodTripFrontend/ExampleInstrumentedTest.kt`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/7c3f062d172a2513bd869e9608b622d048b1c94b/frontend/app/src/androidTest/java/com/example/FoodTripFrontend/ExampleInstrumentedTest.kt) |
 
 ### 3.2. Test Verification and Logs
 
