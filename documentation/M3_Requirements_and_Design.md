@@ -26,10 +26,11 @@ The reason for changing our diagram is based on comments from our M3. We also re
     - Section 3.5: After discussion with instructors, updates sources and added brief explanations after each source
     - Section 4.7: Updated description of Non-Functional Requirements testing to accurately reflect the tests performed
     - Section 4.8: Updated main complexity description and pseudocode to reflect expected functionality for final release
+    - Section 2: Updated project description to match the scope of the functional requirements.
   
 
 ## 2. Project Description
-FoodTrip is an android app that helps users explore global cuisines by planning a virtual food trip. Users can choose a starting and ending country, and the app will generate a travel route with recipes from different locations along the way. It also creates a smart grocery list which can be used to optimize ingredient reuse and allow users to see local store discounts. Additionally, FoodTrip allows dietary preference customization and social media sharing, so users can tailor their meals to their needs and share their journeys with friends.
+FoodTrip is an Android app that helps users explore global cuisines by planning a virtual food trip. Users can choose a starting and ending location, and the app will generate a travel route with recipes from different locations along the way. It also creates a grocery list that compiles ingredients from all recipes, making it easier for users to shop, and displays available discounts for the ingredients. Additionally, users can set preferences such as allergies and subscribe to notifications about new discounts as soon as they are posted.
 
 
 ## 3. Requirements Specification
