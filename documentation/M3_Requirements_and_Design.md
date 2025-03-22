@@ -21,6 +21,12 @@ The reason for changing our diagram is based on comments from our M3. We also re
     - Section 4.4: Likewise updated frameworks to reflect changes in use cases
     - Section 4.6: Updated sequence diagrams to reflect every main use case and to follow REST call structure
     - Section 4.7: Updated to reflect non-functional requirement changes
+  -March 21, 2025
+    - These updates happened after the mutual handoff, and thus should not be considered if referenced by code review
+    - Section 3.5: After discussion with instructors, updates sources and added brief explanations after each source
+    - Section 4.7: Updated description of Non-Functional Requirements testing to accurately reflect the tests performed
+    - Section 4.8: Updated main complexity description and pseudocode to reflect expected functionality for final release
+  
 
 ## 2. Project Description
 FoodTrip is an android app that helps users explore global cuisines by planning a virtual food trip. Users can choose a starting and ending country, and the app will generate a travel route with recipes from different locations along the way. It also creates a smart grocery list which can be used to optimize ingredient reuse and allow users to see local store discounts. Additionally, FoodTrip allows dietary preference customization and social media sharing, so users can tailor their meals to their needs and share their journeys with friends.
@@ -243,16 +249,16 @@ Not necessary to explain our requirements.
 <a name="nfr1"></a>
 
 1. **Efficient performance**
-    - **Description**: Virtual routes and their corresponding recipes should be generated and displayed in under 2 seconds.
-    - **Justification**: Responding to users within 2 seconds of them perceiving requests being sent ensures minimal frustration when using the app. Sources for time selection and user frustration are below
-        - https://developer.android.com/topic/performance/vitals/launch-time#av
-        - https://web.dev/articles/rail
-        - https://studiomosaicapps.com/2023/12/13/from-launch-to-loyalty-optimizing-your-apps-load-time-for-success/
+    - **Description**: Virtual routes and their corresponding recipes should be generated and displayed in under 2.7 seconds.
+    - **Justification**: Responding to users within 2.7 seconds of them perceiving requests being sent ensures minimal frustration when using the app. Ideally, responses should be loaded within 2 seconds, but from testing 2.7 seconds was a consistently achievable metric.
+        - https://developer.android.com/topic/performance/vitals/launch-time#av (Android developer resource, delays longer than 2 seconds are considered excessive)
+        - https://web.dev/articles/rail (tasks with 1000+ ms latency tend to lose user attention, blog created by Paul Kinlan, 15 years of mobile app development Google employee)
+        - https://dl.acm.org/doi/abs/10.1145/2750858.2805847 (During most tasks, significant frustration is experienced if delays are longer than 1000ms)
 2. **Usability**
     - **Description**: Users should be able to navigate and finish any use case within 3 clicks, if assuming all parameter filling counts as 1 click
-    - **Justification**: A simple and easy-to-use app can give users a user-friendly experience. An over-complicated interface will make user confused and frustrated.
-        - https://www.acsij.org/index.php/acsij/article/view/132/128
-        - https://zeldman.com/talent/Taking_Your_Talent_to_the_Web.pdf
+    - **Justification**: A simple and easy-to-use app can give users a user-friendly experience. An over-complicated interface will make user confused and frustrated. Tasks exceeding 3 clicks are perceived as more difficult, but are acceptable as long as the flow of information is consistent, hence why parameter filling is counted as a single click
+        - https://aisel.aisnet.org/mwais2016/2/ (flow of information is a better heuristic for longer tasks, in practice there the 3 click rule is not as strongly related to usability as expected)
+        - https://diposit.ub.edu/dspace/handle/2445/121349 (increasing number of clicks tends to increase perceived difficulty, but is not directly related to failure rates)
 
 
 ## 4. Designs Specification
@@ -419,9 +425,9 @@ Not necessary to explain our requirements.
 
 ### **4.7. Non-Functional Requirements Design**
 1. [Efficient performance](#nfr1)
-    - **Validation**: Extensive testing using multiple large concurrent requests(8 simultaneous requests of 21 stops each) and usage of jest functions to see how long each stage of processing takes (stages would be submitting inputs, creating route, and selecting recipes)
+    - **Validation**: Extensive testing of each endpoint, including to 10 sequential requests for recipes, discounts, and subscriptions, with timing beginning when when requests are made and ending after teardown. In the case of route creation, these tests are a good indicator of general latency, and in other cases is a good indicator of overall latency experienced during creation, viewing, and deletion
 2. [Usability](#nfr1)
-    - **Validation**: Front end tests developed with monkeys and espresso will ensure that all relevant use cases can be navigated to and finished within 3 clicks
+    - **Validation**: Front end tests developed with espresso will ensure that all relevant use cases can be navigated to and finished within 3 clicks, if all parameter population is counted as a singular click. This is tested by navigating to all resources and tracking each click used with a custom click action.
 
 ### **4.8. Main Project Complexity Design**
 **Generate Recipes and Route**
@@ -431,26 +437,33 @@ Not necessary to explain our requirements.
     - **Input**: start, The name of the city to begin at
                 destination, The name of the city to end at
                 total_dishes, the number of dishes for the trip
-                dietary_restrictions, a list of ingredients to avoid
-    - **Output**: a list of recipes associated with the virtual path between input points
+                userID, a userID to store the trip under, and check for allergies
+    - **Output**: a list of recipes associated with the virtual path between input points, excluding any ingredients that are listed under the user's allegens
     - **Main computational logic**: ...
     - **Pseudo-code**: ...
         ```
         final_route = null
         recipes = []
         countries = []
+        allergies = []
+        if (have_allergies(userID)){
+            allergies = get_allergies(userID)
+        }
         while (attemptedpaths < attempt_limit) // to prevent insane delays from trying every possible path
             route = find_route(start, destination)
             cities = find_cities_from_route(route)
+
             for city in cities
-                potential_recipes = find_recipes_for_city(route,city)
-                remove_violating_recipes(potential_recipes, dietary_restrictions)
-                if potential_recipes.length < total_dishes
+                potential_recipes = find_recipes_for_city(city)
+                no_allergen_recipes = remove_violating_recipes(potential_recipes, allergies)
+                if no_allergen_recipes.length < total_dishes
                     continue // try another path
-                selected_recipes = select_recipes(potential_recipes, total_dishes)
+                selected_recipes = select_recipes(no_allergen_recipes, total_dishes)
                 recipes.add(selected_recipes)
                 final_route = route
+
             attemptedpaths++
+
         return(recipes,final_route)
         ```
 
