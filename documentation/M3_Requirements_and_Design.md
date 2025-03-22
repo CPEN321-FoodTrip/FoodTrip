@@ -21,7 +21,7 @@ The reason for changing our diagram is based on comments from our M3. We also re
     - Section 4.4: Likewise updated frameworks to reflect changes in use cases
     - Section 4.6: Updated sequence diagrams to reflect every main use case and to follow REST call structure
     - Section 4.7: Updated to reflect non-functional requirement changes
-  -March 21, 2025
+- March 21, 2025
     - These updates happened after the mutual handoff, and thus should not be considered if referenced by code review
     - Section 3.5: After discussion with instructors, updates sources and added brief explanations after each source
     - Section 4.7: Updated description of Non-Functional Requirements testing to accurately reflect the tests performed
@@ -431,7 +431,7 @@ Not necessary to explain our requirements.
 
 ### **4.8. Main Project Complexity Design**
 **Generate Recipes and Route**
-- **Description**: Converts a virtual trip from a pair of city names into a list of recipes. Formally, it takes a pair of strings and an integer, converts the strings into a route(series of coordinates) by via ~ API, then searches for the names of cities nearby. After cities are found, recipes for each city is found by extracting the name of the city from the route and quering through Edamam API. The user may specify dietary restrictions, which would be relevant as it may arbitrarily restrict the recipes that are associated with the selected virtual path
+- **Description**: Converts a virtual trip from a pair of city names into a list of recipes. Formally, it takes a pair of strings and an integer, converts the strings into a route(series of coordinates) by via Edamam API, then searches for the names of cities nearby. After cities are found, recipes for each city is found by extracting the name of the city from the route and quering through Edamam API. The user may specify dietary restrictions, which would be relevant as it may arbitrarily restrict the recipes that are associated with the selected virtual path
 - **Why complex?**: Since virtually trips are meant to be somewhat feasible to physically travel, many different paths could be taken depending on the forms of transportation available, meaning that there are many different viable virtual paths. For any given virtual path, the algorithm must be able to determine what recipes are associated with that path, and then find a combination of recipes that satisfies the number of dishes whilst obeying user dietary restrictions
 - **Design**:
     - **Input**: start, The name of the city to begin at
