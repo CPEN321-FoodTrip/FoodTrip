@@ -21,6 +21,9 @@ The reason for changing our diagram is based on comments from our M3. We also re
     - Section 4.4: Likewise updated frameworks to reflect changes in use cases
     - Section 4.6: Updated sequence diagrams to reflect every main use case and to follow REST call structure
     - Section 4.7: Updated to reflect non-functional requirement changes
+  -March 21, 2025
+    - Section 3.5: After discussion with instructors, updates sources and added brief explanations after each source
+  
 
 ## 2. Project Description
 FoodTrip is an android app that helps users explore global cuisines by planning a virtual food trip. Users can choose a starting and ending country, and the app will generate a travel route with recipes from different locations along the way. It also creates a smart grocery list which can be used to optimize ingredient reuse and allow users to see local store discounts. Additionally, FoodTrip allows dietary preference customization and social media sharing, so users can tailor their meals to their needs and share their journeys with friends.
@@ -243,16 +246,16 @@ Not necessary to explain our requirements.
 <a name="nfr1"></a>
 
 1. **Efficient performance**
-    - **Description**: Virtual routes and their corresponding recipes should be generated and displayed in under 2 seconds.
-    - **Justification**: Responding to users within 2 seconds of them perceiving requests being sent ensures minimal frustration when using the app. Sources for time selection and user frustration are below
-        - https://developer.android.com/topic/performance/vitals/launch-time#av
-        - https://web.dev/articles/rail
-        - https://studiomosaicapps.com/2023/12/13/from-launch-to-loyalty-optimizing-your-apps-load-time-for-success/
+    - **Description**: Virtual routes and their corresponding recipes should be generated and displayed in under 2.7 seconds.
+    - **Justification**: Responding to users within 2.7 seconds of them perceiving requests being sent ensures minimal frustration when using the app. Ideally, responses should be loaded within 2 seconds, but from testing 2.7 seconds was a consistently achievable metric.
+        - https://developer.android.com/topic/performance/vitals/launch-time#av (Android developer resource, delays longer than 2 seconds are considered excessive)
+        - https://web.dev/articles/rail (tasks with 1000+ ms latency tend to lose user attention, blog created by Paul Kinlan, 15 years of mobile app development Google employee)
+        - https://dl.acm.org/doi/abs/10.1145/2750858.2805847 (During most tasks, significant frustration is experienced if delays are longer than 1000ms)
 2. **Usability**
     - **Description**: Users should be able to navigate and finish any use case within 3 clicks, if assuming all parameter filling counts as 1 click
-    - **Justification**: A simple and easy-to-use app can give users a user-friendly experience. An over-complicated interface will make user confused and frustrated.
-        - https://www.acsij.org/index.php/acsij/article/view/132/128
-        - https://zeldman.com/talent/Taking_Your_Talent_to_the_Web.pdf
+    - **Justification**: A simple and easy-to-use app can give users a user-friendly experience. An over-complicated interface will make user confused and frustrated. Tasks exceeding 3 clicks are perceived as more difficult, but are acceptable as long as the flow of information is consistent, hence why parameter filling is counted as a single click
+        - https://aisel.aisnet.org/mwais2016/2/ (flow of information is a better heuristic for longer tasks, in practice there the 3 click rule is not as strongly related to usability as expected)
+        - https://diposit.ub.edu/dspace/handle/2445/121349 (increasing number of clicks tends to increase perceived difficulty, but is not directly related to failure rates)
 
 
 ## 4. Designs Specification
