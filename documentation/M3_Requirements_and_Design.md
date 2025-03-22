@@ -222,9 +222,7 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
 6. **Manage Groceries** 
     - **Overview**:
         1. Generate a list of required ingredients for the trip.
-        2. Optimize for ingredient reuse to reduce costs.
-        3. Display available discounts from partner grocery stores.
-        4. Let users know about out-of-stock items and offer other options.
+        2. Display available discounts for an ingredient.
     
     - **Detailed Flow for Each Independent Scenario**: 
         1. **Generating a Grocery List**:
@@ -234,13 +232,12 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
             - **Postconditions**: None
             - **Main success scenario**:
                 1. The app finds required ingredients from all recipes corresponding to a virtual trip.
-                2. It checks for reusable ingredients across multiple recipes.
-                3. The grocery list is created and shown to the user.
-                4. All ingredients are checked against available discounts
-                5. Any discounts found are displayed to the user
+                2. The grocery list is created and shown to the user.
+                3. The user press on any ingredient on the list
+                4. Available discounts are displayed to the user
             - **Failure scenario(s)**:
-                - 1a. Some ingredients are not available.
-                    - 1a1. Let user know and suggest replacement options.
+                - 4a. No discount to selected ingredient
+                    - 4a1. The app displays a pop-up message: "No available discount"
 
 ### **3.4. Screen Mockups**
 Not necessary to explain our requirements.
