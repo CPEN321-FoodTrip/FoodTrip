@@ -21,12 +21,16 @@ The reason for changing our diagram is based on comments from our M3. We also re
     - Section 4.4: Likewise updated frameworks to reflect changes in use cases
     - Section 4.6: Updated sequence diagrams to reflect every main use case and to follow REST call structure
     - Section 4.7: Updated to reflect non-functional requirement changes
-  -March 21, 2025
+- March 21, 2025
+    - These updates happened after the mutual handoff, and thus should not be considered if referenced by code review
     - Section 3.5: After discussion with instructors, updates sources and added brief explanations after each source
+    - Section 4.7: Updated description of Non-Functional Requirements testing to accurately reflect the tests performed
+    - Section 4.8: Updated main complexity description and pseudocode to reflect expected functionality for final release
+    - Section 2: Updated project description to match the scope of the functional requirements.
   
 
 ## 2. Project Description
-FoodTrip is an android app that helps users explore global cuisines by planning a virtual food trip. Users can choose a starting and ending country, and the app will generate a travel route with recipes from different locations along the way. It also creates a smart grocery list which can be used to optimize ingredient reuse and allow users to see local store discounts. Additionally, FoodTrip allows dietary preference customization and social media sharing, so users can tailor their meals to their needs and share their journeys with friends.
+FoodTrip is an Android app that helps users explore global cuisines by planning a virtual food trip. Users can choose a starting and ending location, and the app will generate a travel route with recipes from different locations along the way. It also creates a grocery list that compiles ingredients from all recipes, making it easier for users to shop, and displays available discounts for the ingredients. Additionally, users can set preferences such as allergies and subscribe to notifications about new discounts as soon as they are posted.
 
 
 ## 3. Requirements Specification
@@ -218,9 +222,7 @@ FoodTrip is an android app that helps users explore global cuisines by planning 
 6. **Manage Groceries** 
     - **Overview**:
         1. Generate a list of required ingredients for the trip.
-        2. Optimize for ingredient reuse to reduce costs.
-        3. Display available discounts from partner grocery stores.
-        4. Let users know about out-of-stock items and offer other options.
+        2. Display available discounts for an ingredient.
     
     - **Detailed Flow for Each Independent Scenario**: 
         1. **Generating a Grocery List**:
@@ -230,13 +232,12 @@ FoodTrip is an android app that helps users explore global cuisines by planning 
             - **Postconditions**: None
             - **Main success scenario**:
                 1. The app finds required ingredients from all recipes corresponding to a virtual trip.
-                2. It checks for reusable ingredients across multiple recipes.
-                3. The grocery list is created and shown to the user.
-                4. All ingredients are checked against available discounts
-                5. Any discounts found are displayed to the user
+                2. The grocery list is created and shown to the user.
+                3. The user press on any ingredient on the list
+                4. Available discounts are displayed to the user
             - **Failure scenario(s)**:
-                - 1a. Some ingredients are not available.
-                    - 1a1. Let user know and suggest replacement options.
+                - 4a. No discount to selected ingredient
+                    - 4a1. The app displays a pop-up message: "No available discount"
 
 ### **3.4. Screen Mockups**
 Not necessary to explain our requirements.
@@ -422,38 +423,45 @@ Not necessary to explain our requirements.
 
 ### **4.7. Non-Functional Requirements Design**
 1. [Efficient performance](#nfr1)
-    - **Validation**: Extensive testing using multiple large concurrent requests(8 simultaneous requests of 21 stops each) and usage of jest functions to see how long each stage of processing takes (stages would be submitting inputs, creating route, and selecting recipes)
+    - **Validation**: Extensive testing of each endpoint, including to 10 sequential requests for recipes, discounts, and subscriptions, with timing beginning when when requests are made and ending after teardown. In the case of route creation, these tests are a good indicator of general latency, and in other cases is a good indicator of overall latency experienced during creation, viewing, and deletion
 2. [Usability](#nfr1)
-    - **Validation**: Front end tests developed with monkeys and espresso will ensure that all relevant use cases can be navigated to and finished within 3 clicks
+    - **Validation**: Front end tests developed with espresso will ensure that all relevant use cases can be navigated to and finished within 3 clicks, if all parameter population is counted as a singular click. This is tested by navigating to all resources and tracking each click used with a custom click action.
 
 ### **4.8. Main Project Complexity Design**
 **Generate Recipes and Route**
-- **Description**: Converts a virtual trip from a pair of city names into a list of recipes. Formally, it takes a pair of strings and an integer, converts the strings into a route(series of coordinates) by via ~ API, then searches for the names of cities nearby. After cities are found, recipes for each city is found by extracting the name of the city from the route and quering through Edamam API. The user may specify dietary restrictions, which would be relevant as it may arbitrarily restrict the recipes that are associated with the selected virtual path
+- **Description**: Converts a virtual trip from a pair of city names into a list of recipes. Formally, it takes a pair of strings and an integer, converts the strings into a route(series of coordinates) by via Edamam API, then searches for the names of cities nearby. After cities are found, recipes for each city is found by extracting the name of the city from the route and quering through Edamam API. The user may specify dietary restrictions, which would be relevant as it may arbitrarily restrict the recipes that are associated with the selected virtual path
 - **Why complex?**: Since virtually trips are meant to be somewhat feasible to physically travel, many different paths could be taken depending on the forms of transportation available, meaning that there are many different viable virtual paths. For any given virtual path, the algorithm must be able to determine what recipes are associated with that path, and then find a combination of recipes that satisfies the number of dishes whilst obeying user dietary restrictions
 - **Design**:
     - **Input**: start, The name of the city to begin at
                 destination, The name of the city to end at
                 total_dishes, the number of dishes for the trip
-                dietary_restrictions, a list of ingredients to avoid
-    - **Output**: a list of recipes associated with the virtual path between input points
+                userID, a userID to store the trip under, and check for allergies
+    - **Output**: a list of recipes associated with the virtual path between input points, excluding any ingredients that are listed under the user's allegens
     - **Main computational logic**: ...
     - **Pseudo-code**: ...
         ```
         final_route = null
         recipes = []
         countries = []
+        allergies = []
+        if (have_allergies(userID)){
+            allergies = get_allergies(userID)
+        }
         while (attemptedpaths < attempt_limit) // to prevent insane delays from trying every possible path
             route = find_route(start, destination)
             cities = find_cities_from_route(route)
+
             for city in cities
-                potential_recipes = find_recipes_for_city(route,city)
-                remove_violating_recipes(potential_recipes, dietary_restrictions)
-                if potential_recipes.length < total_dishes
+                potential_recipes = find_recipes_for_city(city)
+                no_allergen_recipes = remove_violating_recipes(potential_recipes, allergies)
+                if no_allergen_recipes.length < total_dishes
                     continue // try another path
-                selected_recipes = select_recipes(potential_recipes, total_dishes)
+                selected_recipes = select_recipes(no_allergen_recipes, total_dishes)
                 recipes.add(selected_recipes)
                 final_route = route
+
             attemptedpaths++
+
         return(recipes,final_route)
         ```
 
