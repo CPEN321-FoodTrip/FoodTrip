@@ -39,7 +39,7 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
       recipeName: hit.recipe.label || "",
       recipeID: parseInt(hit.recipe.uri.split("_")[1] || "0", 10),
       url: hit.recipe.url,
-      ingredients: hit.recipe.ingredientLines,
+      ingredients: hit.recipe.ingredients,
     }));
   } catch (error) {
     console.error("Detailed recipe fetch error:", error);
