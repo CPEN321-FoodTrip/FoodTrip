@@ -239,7 +239,7 @@ describe("Mocked: POST /routes", () => {
 
     expect(response.body).toHaveProperty(
       "error",
-      "Same start and end city not allowed"
+      "Origin and destination cannot be the same"
     );
     expect(RouteHelpers.saveRouteToDb).not.toHaveBeenCalled();
   });
@@ -278,7 +278,7 @@ describe("Mocked: POST /routes", () => {
 
     expect(response.body).toHaveProperty(
       "error",
-      "Number of stops must be at most"
+      "Number of stops must be between 1 and 10"
     );
     expect(RouteHelpers.saveRouteToDb).not.toHaveBeenCalled();
   });
@@ -302,7 +302,7 @@ describe("Mocked: POST /routes", () => {
 
     expect(response.body).toHaveProperty(
       "error",
-      "Number of stops must be at least 1"
+      "Number of stops must be between 1 and 10"
     );
     expect(RouteHelpers.saveRouteToDb).not.toHaveBeenCalled();
   });
