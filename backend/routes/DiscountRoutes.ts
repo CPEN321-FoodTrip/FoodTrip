@@ -1,5 +1,10 @@
 import { body } from "express-validator";
-import { addDiscount, deleteDiscount, getAllDiscounts, getDiscounts } from "../controllers/DiscountController";
+import {
+  addDiscount,
+  deleteDiscount,
+  getAllDiscounts,
+  getDiscounts,
+} from "../controllers/DiscountController";
 
 export const DiscountRoutes = [
   {

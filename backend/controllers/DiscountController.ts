@@ -18,8 +18,12 @@ export const addDiscount = async (
   next: NextFunction
 ) => {
   try {
-    // validation of params performed by express-validator middleware
+    // existance and type validation of params performed by express-validator middleware
     const { storeID, storeName, ingredient, price } = req.body;
+
+    if (price < 0) {
+      return res.status(400).json({ error: "Price cannot be negative" });
+    }
 
     const discount: Discount = {
       storeID,
