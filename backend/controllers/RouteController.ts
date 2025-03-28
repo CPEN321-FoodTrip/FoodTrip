@@ -20,10 +20,10 @@ export const createRoute = async (
     // validation of params performed by express-validator middleware
     const { userID, origin, destination, numStops }: RouteRequest = req.body;
 
-    if (numStops < 1) {
+    if (numStops < 1 || numStops > 10) {
       return res
         .status(400)
-        .json({ error: "Number of stops must be at least 1" });
+        .json({ error: "Number of stops must be between 1 and 10" });
     }
 
     const originCityData = await fetchCityData(origin);
@@ -49,6 +49,12 @@ export const createRoute = async (
       longitude: parseFloat(destinationCityData.lon),
       population: 0, // not used for end location
     };
+
+    if (start.latitude === end.latitude && start.longitude === end.longitude) {
+      return res
+        .status(400)
+        .json({ error: "Origin and destination cannot be the same" });
+    }
 
     const stops = await generateRouteStops(start, end, numStops);
 

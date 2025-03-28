@@ -255,7 +255,9 @@ describe("Unmocked: POST /routes", () => {
       .expect(400);
 
     expect(response.body).toHaveProperty("error");
-    expect(response.body.error).toContain("Number of stops must be at least");
+    expect(response.body.error).toContain(
+      "Number of stops must be between 1 and 10"
+    );
 
     // verify db unchaged
     const dbCountAfter = await client
@@ -287,7 +289,9 @@ describe("Unmocked: POST /routes", () => {
       .expect(400);
 
     expect(response.body).toHaveProperty("error");
-    expect(response.body.error).toContain("Number of stops must be at most");
+    expect(response.body.error).toContain(
+      "Number of stops must be between 1 and 10"
+    );
 
     // verify db unchaged
     const dbCountAfter = await client
@@ -320,7 +324,7 @@ describe("Unmocked: POST /routes", () => {
 
     expect(response.body).toHaveProperty("error");
     expect(response.body.error).toContain(
-      "Same start and end city not allowed"
+      "Origin and destination cannot be the same"
     );
 
     // verify db unchaged
