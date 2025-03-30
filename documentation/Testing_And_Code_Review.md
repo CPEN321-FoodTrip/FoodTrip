@@ -4,7 +4,7 @@
 
 | **Change Date**   | **Modified Sections** | **Rationale** |
 | ----------------- | --------------------- | ------------- |
-| _Nothing to show_ |
+| March 30, 2025 | 3.2 | Updated required response time to 3s to match test implemenation |
 
 ---
 
