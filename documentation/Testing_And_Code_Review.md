@@ -4,7 +4,8 @@
 
 | **Change Date**   | **Modified Sections** | **Rationale** |
 | ----------------- | --------------------- | ------------- |
-| March 30, 2025 | 3.2 | Updated required response time to 3s to match test implemenation |
+| March 30, 2025 | 3.2 | Updated required response time to 3s to match test implementation |
+| March 30, 2025 | 2.3 & 2.4 | Updated screenshots of coverage to reflect changes in implementation |
 
 ---
 
@@ -125,8 +126,6 @@ The reason the `jest.config.ts` file does not have any coverage is simply becaus
 The `services.ts` file has no coverage because, during testing, an in-memory MongoDB client is injected. As a result, one branch of an if statement, responsible for assigning the production client, is never executed.
 
 ![Screenshot 2025-03-16 at 4.18.07 PM](images/screenshot-2.png)
-
-The reason for not having 100% coverage in RecipeController is due to a failing test for creating a valid recipe list which will be fix in the next milestone. The reason for not having 100% coverage in RecipeHelper is because those functions are for database operations which are mocked in these tests and therefore not reached. Additionally, they were thoroughly tested in the unmocked tests.
 
 ### 2.4. Jest Coverage Report Screenshots Without Mocks
 
