@@ -464,14 +464,14 @@ describe("Mocked: POST /recipes", () => {
     delete process.env.EDAMAM_API_KEY;
 
     // mock db to return a valid route
-    const mockCollection: Partial<Collection> = {
+    const mockCollection = {
       findOne: jest.fn().mockResolvedValue(MOCK_ROUTE),
     };
-    const mockDb: Partial<Db> = {
+    const mockDb = {
       collection: jest.fn().mockReturnValue(mockCollection),
       databaseName: "route_data",
-    };
-    jest.spyOn(MongoClient.prototype, "db").mockReturnValue(mockDb as Db);
+    } as unknown as Db;
+    jest.spyOn(MongoClient.prototype, "db").mockReturnValue(mockDb);
 
     const response = await request(app)
       .post("/recipes")
@@ -511,15 +511,15 @@ describe("Mocked: POST /recipes", () => {
     });
 
     // mock db to return a valid route
-    const mockCollection: Partial<Collection> = {
+    const mockCollection = {
       findOne: jest.fn().mockResolvedValue(MOCK_ROUTE),
       insertOne: jest.fn().mockResolvedValue({ insertedId: new ObjectId() }),
     };
-    const mockDb: Partial<Db> = {
+    const mockDb = {
       collection: jest.fn().mockReturnValue(mockCollection),
       databaseName: "route_data",
-    };
-    jest.spyOn(MongoClient.prototype, "db").mockReturnValue(mockDb as Db);
+    } as unknown as Db;
+    jest.spyOn(MongoClient.prototype, "db").mockReturnValue(mockDb);
 
     const response = await request(app)
       .post("/recipes")
