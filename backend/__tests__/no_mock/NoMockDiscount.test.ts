@@ -119,10 +119,7 @@ describe("Unmocked: POST /discounts", () => {
       .send(discount)
       .expect(400);
 
-    expect(response.body).toHaveProperty(
-      "error",
-      "Price must be a positive number"
-    );
+    expect(response.body).toHaveProperty("error", "Price cannot be negative");
 
     // check db is unchanged
     const dbCountAfter = await client

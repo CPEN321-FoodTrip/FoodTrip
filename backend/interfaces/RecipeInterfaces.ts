@@ -19,10 +19,12 @@ export interface EdamamResponse {
 export interface Ingredient {
   text: string;
   quantity: number;
-  measure: string;
+  measure: string | null;
   food: string;
   weight: number;
+  foodCategory: string;
   foodId: string;
+  image: string;
 }
 
 export interface RecipeDBEntry {

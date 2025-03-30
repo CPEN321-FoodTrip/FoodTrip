@@ -101,10 +101,10 @@ async function importGeoNamesToMongoDB(): Promise<void> {
 
 // helper function to fetch city data from OpenStreetMap API
 export async function fetchCityData(
-  city: string
+  city: string,
 ): Promise<{ lat: string; lon: string } | null> {
   const url = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(
-    city
+    city,
   )}&format=json&limit=1`;
   try {
     const response = await fetch(url);
@@ -124,7 +124,7 @@ export async function fetchCityData(
     throw new Error(
       `Error fetching city data: ${
         error instanceof Error ? error.message : "Unknown error"
-      }`
+      }`,
     );
   }
 }
@@ -156,7 +156,7 @@ function toRadians(degrees: number): number {
 function interpolatePoint(
   start: Location,
   end: Location,
-  fraction: number
+  fraction: number,
 ): { latitude: number; longitude: number } {
   const lat1 = toRadians(start.latitude);
   const lon1 = toRadians(start.longitude);
@@ -171,14 +171,9 @@ function interpolatePoint(
         Math.pow(Math.sin((lat2 - lat1) / 2), 2) +
           Math.cos(lat1) *
             Math.cos(lat2) *
-            Math.pow(Math.sin((lon2 - lon1) / 2), 2)
-      )
+            Math.pow(Math.sin((lon2 - lon1) / 2), 2),
+      ),
     );
-
-  // if distance is zero, return start point
-  if (Math.abs(d) < 1e-10) {
-    return { latitude: start.latitude, longitude: start.longitude };
-  }
 
   // calculate stop point
   const A = Math.sin((1 - fraction) * d) / Math.sin(d);
@@ -203,7 +198,7 @@ function interpolatePoint(
 export async function generateRouteStops(
   start: Location,
   end: Location,
-  numberOfStops: number
+  numberOfStops: number,
 ): Promise<RouteStop[]> {
   const stops: RouteStop[] = [];
   const db = client.db(CITIES_DB_NAME);
@@ -256,7 +251,7 @@ export async function generateRouteStops(
 
         const distanceFromIdealPoint = calculateDistance(
           { ...location, name: "", population: 0 },
-          { ...idealPoint, name: "", population: 0 }
+          { ...idealPoint, name: "", population: 0 },
         );
 
         const distanceFromStart = calculateDistance(start, location);
@@ -269,7 +264,7 @@ export async function generateRouteStops(
       });
 
       citiesWithDistance.sort(
-        (a, b) => a.distanceFromIdealPoint - b.distanceFromIdealPoint
+        (a, b) => a.distanceFromIdealPoint - b.distanceFromIdealPoint,
       );
 
       // closest city to ideal point
@@ -291,7 +286,7 @@ export async function generateRouteStops(
 // save route to MongoDB and return ID
 export async function saveRouteToDb(
   userID: string,
-  route: Route
+  route: Route,
 ): Promise<string> {
   const db = client.db(ROUTES_DB_NAME);
   const collection = db.collection<RouteDBEntry>(ROUTES_COLLECTION_NAME);

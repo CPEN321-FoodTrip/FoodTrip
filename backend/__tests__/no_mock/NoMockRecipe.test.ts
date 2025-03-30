@@ -59,19 +59,109 @@ const SAMPLE_RECIPE = {
   tripID: new ObjectId().toHexString(),
   recipes: [
     {
-      recipeName: "Winnipeg Chicken Curry",
-      recipeID: 1,
-      url: "http://www.food.com/recipe/winnipeg-chicken-curry-2930",
+      recipeName: "Biscotti Regina",
+      recipeID: 113,
+      url: "https://www.foodnetwork.com/recipes/biscotti-regina-3608012",
       ingredients: [
-        "3 tablespoons butter",
-        "2 onions, peeled and thinly sliced",
-        "2 tablespoons curry powder",
-        "2 chicken breasts",
-        "2 cups chicken stock, heated",
-        "1 tablespoon cornstarch",
-        "2 tablespoons water, cold",
-        "1⁄4 cup cream (I use milk)",
-        "salt & pepper",
+        {
+          text: "2 1/2 sticks unsalted butter",
+          quantity: 2.5,
+          measure: "stick",
+          food: "unsalted butter",
+          weight: 282.5,
+          foodCategory: "Dairy",
+          foodId: "food_awz3iefajbk1fwahq9logahmgltj",
+          image:
+            "https://www.edamam.com/food-img/713/71397239b670d88c04faa8d05035cab4.jpg",
+        },
+        {
+          text: "1 cup sugar",
+          quantity: 1,
+          measure: "cup",
+          food: "sugar",
+          weight: 200,
+          foodCategory: "sugars",
+          foodId: "food_axi2ijobrk819yb0adceobnhm1c2",
+          image:
+            "https://www.edamam.com/food-img/ecb/ecb3f5aaed96d0188c21b8369be07765.jpg",
+        },
+        {
+          text: "3 large eggs",
+          quantity: 3,
+          measure: "<unit>",
+          food: "eggs",
+          weight: 150,
+          foodCategory: "Eggs",
+          foodId: "food_bhpradua77pk16aipcvzeayg732r",
+          image:
+            "https://www.edamam.com/food-img/a7e/a7ec7c337cb47c6550b3b118e357f077.jpg",
+        },
+        {
+          text: "4 cups all-purpose flour",
+          quantity: 4,
+          measure: "cup",
+          food: "all-purpose flour",
+          weight: 500,
+          foodCategory: "grains",
+          foodId: "food_ar3x97tbq9o9p6b6gzwj0am0c81l",
+          image:
+            "https://www.edamam.com/food-img/368/368077bbcab62f862a8c766a56ea5dd1.jpg",
+        },
+        {
+          text: "1 tablespoon baking powder",
+          quantity: 1,
+          measure: "tablespoon",
+          food: "baking powder",
+          weight: 13.799999999066733,
+          foodCategory: "condiments and sauces",
+          foodId: "food_bad4zycbt4w60dbut111vaub2g3e",
+          image:
+            "https://www.edamam.com/food-img/a84/a8410ec57a2e62a1ad9955ac14d40af6.jpg",
+        },
+        {
+          text: "1 teaspoon vanilla extract",
+          quantity: 1,
+          measure: "teaspoon",
+          food: "vanilla extract",
+          weight: 4.2,
+          foodCategory: "Condiments and sauces",
+          foodId: "food_bh1wvnqaw3q7ciascfoygaabax2a",
+          image:
+            "https://www.edamam.com/food-img/90f/90f910b0bf82750d4f6528263e014cca.jpg",
+        },
+        {
+          text: "Zest of 1 small lemon",
+          quantity: 1,
+          measure: "<unit>",
+          food: "lemon",
+          weight: 63,
+          foodCategory: "fruit",
+          foodId: "food_a6uzc62astrxcgbtzyq59b6fncrr",
+          image:
+            "https://www.edamam.com/food-img/70a/70acba3d4c734d7c70ef4efeed85dc8f.jpg",
+        },
+        {
+          text: "1 cup milk",
+          quantity: 1,
+          measure: "cup",
+          food: "milk",
+          weight: 244,
+          foodCategory: "Milk",
+          foodId: "food_b49rs1kaw0jktabzkg2vvanvvsis",
+          image:
+            "https://www.edamam.com/food-img/7c9/7c9962acf83654a8d98ea6a2ade93735.jpg",
+        },
+        {
+          text: "2 cups sesame seeds",
+          quantity: 2,
+          measure: "cup",
+          food: "sesame seeds",
+          weight: 288,
+          foodCategory: "plant-based protein",
+          foodId: "food_bvxfnx8bwz2q3abs04kd6bbuf9w8",
+          image:
+            "https://www.edamam.com/food-img/291/291b355a7a0948716243164427697279.jpg",
+        },
       ],
     },
   ],
@@ -110,25 +200,22 @@ describe("Unmocked: POST /recipes", () => {
     // db verification
     const db = client.db(RECIPE_DB_NAME);
     const collection = db.collection<RecipeDBEntry>(RECIPE_COLLECTION_NAME);
-    const result = await collection.findOne({ _id: new ObjectId(tripID) });
+    const result = await collection.findOne({ tripID });
 
     expect(result).not.toBeNull();
     expect(Array.isArray(result?.recipes)).toBe(true);
-    expect(result).toHaveLength(4); // start, end, and 2 stops
+    expect(result?.recipes).toHaveLength(4); // start, end, and 2 stops
 
     // second recipe should be for Winnipeg Chicken Curry
-    expect(result?.recipes[1]).toHaveProperty(
-      "recipeName",
-      "Winnipeg Chicken Curry"
-    );
-    expect(result?.recipes[1]).toHaveProperty("recipeID", 1);
+    expect(result?.recipes[1]).toHaveProperty("recipeName", "Biscotti Regina");
+    expect(result?.recipes[1]).toHaveProperty("recipeID", 113);
     expect(result?.recipes[1]).toHaveProperty(
       "url",
-      "http://www.food.com/recipe/winnipeg-chicken-curry-2930"
+      "https://www.foodnetwork.com/recipes/biscotti-regina-3608012"
     );
     expect(result?.recipes[1]).toHaveProperty(
       "ingredients",
-      SAMPLE_RECIPE.recipes[1].ingredients
+      SAMPLE_RECIPE.recipes[0].ingredients
     );
   });
 

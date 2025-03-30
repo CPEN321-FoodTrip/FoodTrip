@@ -78,7 +78,7 @@ describe("Mocked: POST /discounts", () => {
 
     expect(response.body).toHaveProperty(
       "message",
-      "Discount created successfully"
+      "Discount created successfully",
     );
     expect(response.body).toHaveProperty("discountID", discountID);
     expect(DiscountHelpers.addDiscountToDb).toHaveBeenCalled();
@@ -109,7 +109,7 @@ describe("Mocked: POST /discounts", () => {
 
     expect(response.body).toHaveProperty(
       "message",
-      "Discount created successfully"
+      "Discount created successfully",
     );
     expect(response.body).toHaveProperty("discountID");
     expect(admin.messaging().sendEachForMulticast).toHaveBeenCalled();
@@ -140,7 +140,7 @@ describe("Mocked: POST /discounts", () => {
 
     expect(response.body).toHaveProperty(
       "message",
-      "Discount created successfully"
+      "Discount created successfully",
     );
     expect(response.body).toHaveProperty("discountID", discountID);
     expect(DiscountHelpers.addDiscountToDb).toHaveBeenCalled();
@@ -162,9 +162,11 @@ describe("Mocked: POST /discounts", () => {
     jest
       .spyOn(NotificationHelper, "getAllTokensFromDb")
       .mockResolvedValue(["token1", "token2"]);
-    jest
-      .spyOn(require("firebase-admin").messaging(), "sendEachForMulticast")
-      .mockResolvedValue({ failureCount: 1 });
+    jest.spyOn(admin.messaging(), "sendEachForMulticast").mockResolvedValue({
+      successCount: 0,
+      failureCount: 1,
+      responses: [{ success: false }],
+    });
 
     const response = await request(app)
       .post("/discounts")
@@ -178,7 +180,7 @@ describe("Mocked: POST /discounts", () => {
 
     expect(response.body).toHaveProperty(
       "message",
-      "Discount created successfully"
+      "Discount created successfully",
     );
     expect(response.body).toHaveProperty("discountID", discountID);
     expect(DiscountHelpers.addDiscountToDb).toHaveBeenCalled();
@@ -205,14 +207,37 @@ describe("Mocked: POST /discounts", () => {
     // error should include missing ingredient and price
     expect(
       response.body.errors.some((error: { msg: string }) =>
-        error.msg.includes("ingredient")
-      )
+        error.msg.includes("ingredient"),
+      ),
     ).toBe(true);
     expect(
       response.body.errors.some((error: { msg: string }) =>
-        error.msg.includes("price")
-      )
+        error.msg.includes("price"),
+      ),
     ).toBe(true);
+    expect(DiscountHelpers.addDiscountToDb).not.toHaveBeenCalled();
+    expect(admin.messaging().sendEachForMulticast).not.toHaveBeenCalled();
+  });
+
+  // Mocked behavior: DiscountHelpers.addDiscountToDb with empty imlementation
+  // Input: discount with negative price
+  // Expected status code: 400
+  // Expected behavior: error is handled gracefully and no notifications are sent
+  // Expected output: error message
+  test("Negative discount price", async () => {
+    jest.spyOn(DiscountHelpers, "addDiscountToDb").mockImplementation();
+
+    const response = await request(app)
+      .post("/discounts")
+      .send({
+        storeID: "123",
+        storeName: "Test Store",
+        ingredient: "apple",
+        price: -0.5,
+      })
+      .expect(400);
+
+    expect(response.body).toHaveProperty("error", "Price cannot be negative");
     expect(DiscountHelpers.addDiscountToDb).not.toHaveBeenCalled();
     expect(admin.messaging().sendEachForMulticast).not.toHaveBeenCalled();
   });
@@ -315,7 +340,7 @@ describe("Mocked: GET /discounts/:id", () => {
 
     expect(response.body).toHaveProperty(
       "error",
-      "No discounts found for this store"
+      "No discounts found for this store",
     );
   });
 });

@@ -6,7 +6,7 @@
 The reason for changing our diagram is based on comments from our M3. We also removed the "Share on Social Media" use case for the MVP since we didn’t think we would have enough time, however, we will try to add this functionality in the final version of the app.
 - February 12, 2025: Based on feedback from our M3, we added live updates through push notifications with Firebase. Every time a new discount is pushed by a grocery store, users subscribed to discount updates will receive a push notification about the discount.
 - February 26, 2025: Another change was made to the preferences option for "Manage Trip." This feature has been de-scoped for the MVP, so it is not included, however, we will try to add this functionality in the final version of the app.
-- February 27, 2025: Several changes were made to the databases. The new databases we now have are: geonames, route_data, food_data and discounts. The purpose of the geonames database is to store all cities with a population greater than 15,000 people in order to generate routes to these cities. We switched to this approach instead of using an API, as the API was unreliable and the server was often down. We also decided to remove the users database since we de-scoped preferences. It seemed better to separate routes and recipes for portability. Additionally, we got rid of the groceries database and now use the recipes database for ingredients.  
+- February 27, 2025: Several changes were made to the databases. The new databases we now have are: geonames, route_data, food_data and discounts. The purpose of the geonames database is to store all cities with a population greater than 15,000 people in order to generate routes to these cities. We switched to this approach instead of using an API, as the API was unreliable and the server was often down. We also decided to remove the users database since we de-scoped preferences. It seemed better to separate routes and recipes for portability. Additionally, we got rid of the groceries database and now use the recipes database for ingredients.
 
 **M5:**
 - March 16, 2025
@@ -27,7 +27,10 @@ The reason for changing our diagram is based on comments from our M3. We also re
     - Section 4.7: Updated description of Non-Functional Requirements testing to accurately reflect the tests performed
     - Section 4.8: Updated main complexity description and pseudocode to reflect expected functionality for final release
     - Section 2: Updated project description to match the scope of the functional requirements.
-  
+
+**M6:**
+- March 30, 2025: Update section 3.5 to use 3 seconds as the required response times to match test implementation.
+
 
 ## 2. Project Description
 FoodTrip is an Android app that helps users explore global cuisines by planning a virtual food trip. Users can choose a starting and ending location, and the app will generate a travel route with recipes from different locations along the way. It also creates a grocery list that compiles ingredients from all recipes, making it easier for users to shop, and displays available discounts for the ingredients. Additionally, users can set preferences such as allergies and subscribe to notifications about new discounts as soon as they are posted.
@@ -46,16 +49,16 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
 ### **3.3. Functional Requirements**
 <a name="fr1"></a>
 
-1. **Manage Discounts** 
+1. **Manage Discounts**
     - **Overview**:
         1. Grocery store owners may upload discounts, notifying users in real time. creating a discount requires:
-            - storeID, 
+            - storeID,
             - storeName,
             - ingredient,
             - price,
         3. Owners may delete discounts by discountID, which is created when discounts are added
-    
-    - **Detailed Flow for Each Independent Scenario**: 
+
+    - **Detailed Flow for Each Independent Scenario**:
         1. **Upload Discount**
             - **Description**: Grocery store owners can add a discount
             - **Primary actor(s)**: Grocery store owners (admin)
@@ -88,15 +91,15 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
                     - 1a1. The app shows an pop-up message prompting the user to select a discount to be deleted
                 - 1b. No internet connection
                     - 1b1. The app shows an pop-up message to tell user try again later
-    
-2. **Set Preferences** 
+
+2. **Set Preferences**
     - **Overview**:
         1. Users set "preferences" from the main menu
         2. App lets user enter their allergies and allows the option to turn on real-time notifications
         3. Users are able to individually change allergies and notification settings
         4. Users may choose to update their preferences or discard any changes
-    
-    - **Detailed Flow for Each Independent Scenario**: 
+
+    - **Detailed Flow for Each Independent Scenario**:
         1. **Set Allergies**:
             - **Description**: User sets their allergies
             - **Primary actor(s)**: App user
@@ -135,15 +138,15 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
             - **Failure scenario(s)**:
                 - 3a. Unable to set notification settings
                     - 3a1. The app shows an pop-up message telling the user notification settings failed to update and prompts them to try again
-                 
 
-3. **Manage trip** 
+
+3. **Manage trip**
     - **Overview**:
         1. Select a starting country and an ending city.
         2. Set the number of locations to explore.
         3. Generate a virtual travel route with associated recipes.
-    
-    - **Detailed Flow for Each Independent Scenario**: 
+
+    - **Detailed Flow for Each Independent Scenario**:
         1. **Creating a food trip**:
             - **Description**: The user inputs a start and end country, along with preferences.
             - **Primary actor(s)**: App user
@@ -162,14 +165,14 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
                 - 1c. The user enters the same city in the start and end fields and attempts to create a trip
                     - 1c1. The app displays a pop-up message saying that there can't be the same start and end city
                 - 2a. The user enters 0 as the number of stops
-                    - 2a1. The app displays a pop-up message saying that the number of stops is invalid 
-                 
+                    - 2a1. The app displays a pop-up message saying that the number of stops is invalid
 
-4. **View Past Trips** 
+
+4. **View Past Trips**
     - **Overview**:
         1. Users can view the past trips they have created.
-    
-    - **Detailed Flow for Each Independent Scenario**: 
+
+    - **Detailed Flow for Each Independent Scenario**:
         1. **View Past Trip**:
             - **Description**: User views their past trips and the corresponding map view and recipes
             - **Primary actor(s)**: App user
@@ -193,11 +196,11 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
                 - 2b. No internet connection
                     - 2b1. The app displays an error message: "No internet connection"
 
-5. **View Recipes** 
+5. **View Recipes**
     - **Overview**:
         1. Users can view the recipes that correspond to a virtual trip
-    
-    - **Detailed Flow for Each Independent Scenario**: 
+
+    - **Detailed Flow for Each Independent Scenario**:
         1. **Viewing A Recipe**:
             - **Description**: The user chooses a recipe linked to their selected trip and sees the recipe details
             - **Primary actor(s)**: App user
@@ -209,7 +212,7 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
                 3. User clicks a stop to get a recipe
                 4. The app displays the details of the recipe an a recipe url
                 5. User clicked on the url
-                6. The app displays a webview of the recipe 
+                6. The app displays a webview of the recipe
             - **Failure scenario(s)**:
                 - 1a. No trips have been taken
                     - 1a1. The app displays an pop-up message: "Must have virtual trip to view recipes"
@@ -219,12 +222,12 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
                 - 3a. Recipes cannot be retrieved
                     - 3a1. The app displays an pop-up message: "Cannot access recipes right now, please try again later"
 
-6. **Manage Groceries** 
+6. **Manage Groceries**
     - **Overview**:
         1. Generate a list of required ingredients for the trip.
         2. Display available discounts for an ingredient.
-    
-    - **Detailed Flow for Each Independent Scenario**: 
+
+    - **Detailed Flow for Each Independent Scenario**:
         1. **Generating a Grocery List**:
             - **Description**: The app creates a shopping list based on recipes.
             - **Primary actor(s)**: App user
@@ -247,8 +250,8 @@ Not necessary to explain our requirements.
 <a name="nfr1"></a>
 
 1. **Efficient performance**
-    - **Description**: Virtual routes and their corresponding recipes should be generated and displayed in under 2.7 seconds.
-    - **Justification**: Responding to users within 2.7 seconds of them perceiving requests being sent ensures minimal frustration when using the app. Ideally, responses should be loaded within 2 seconds, but from testing 2.7 seconds was a consistently achievable metric.
+    - **Description**: Virtual routes and their corresponding recipes should be generated and displayed in under 3 seconds.
+    - **Justification**: Responding to users within 3 seconds of them perceiving requests being sent ensures minimal frustration when using the app. Ideally, responses should be loaded within 2 seconds, but from testing 3 seconds was a consistently achievable metric.
         - https://developer.android.com/topic/performance/vitals/launch-time#av (Android developer resource, delays longer than 2 seconds are considered excessive)
         - https://web.dev/articles/rail (tasks with 1000+ ms latency tend to lose user attention, blog created by Paul Kinlan, 15 years of mobile app development Google employee)
         - https://dl.acm.org/doi/abs/10.1145/2750858.2805847 (During most tasks, significant frustration is experienced if delays are longer than 1000ms)
@@ -263,10 +266,10 @@ Not necessary to explain our requirements.
 ### **4.1. Main Components**
 1. **Discount**
     - **Purpose**: Allow grocery stores to upload and delete discounts for certain ingredients.
-    - **Interfaces**: 
+    - **Interfaces**:
         1. `addDiscount(storeID, storeName, ingredient, price)`
             - **Purpose**: Add new a discount for a particular ingredient.
-            - **Input**: 
+            - **Input**:
                 - storeID: A unique indetifier of the store uploading the discount.
                 - storeName: The name of the grocery store.
                 - ingredient: The ingredient to add the discount for.
@@ -274,12 +277,12 @@ Not necessary to explain our requirements.
             - **Output**: A success message along with a unique identifier for the discount.
         2. `getDiscounts(storeID)`
             - **Purpose**: Get all discounts for a particular store.
-            - **Input**: 
+            - **Input**:
                 - storeID: A unique indetifier of a store that has uploaded as least one discount.
             - **Output**: A list of discounts where each discount includes an ingredient and price.
         3. `getAllDiscounts(ingredient="")`
             - **Purpose**: Get all discounts for all stores with an optional ingredient parameter that can be used to filter.
-            - **Input**: 
+            - **Input**:
                 - ingredient (optional): The ingredient to search discounts for.
             - **Output**: All discounts available if no ingredient parameter is provided and all discounts for a particular ingredient if the parameter is provided.
         4. `deleteDiscount(discountID)`
@@ -289,7 +292,7 @@ Not necessary to explain our requirements.
 
 2. **Route**
     - **Purpose**: Generates a route for the virtual trip by taking a start and end location, along with the number of stops, and creates a route with evenly spaced stops between the two locations.
-    - **Interfaces**: 
+    - **Interfaces**:
         1. `createRoute(userID, origin, destination, numStops)`
             - **Purpose**: Generates a route betwen two locations with a provided number of stops.
             - **Input**:
@@ -299,7 +302,7 @@ Not necessary to explain our requirements.
                 - numStops: The number of stops to find between the start and end locations.
             - **Return**: The names and the coordinates of the start and end locations, a list of stops where each stop has the name of the city, its coordinates and its distance from the start, and a unique trip indentifier.
         2. `getRoute(tripID)`
-            - **Purpose**: Get information about a previous route including the start and end locations, and the stops along the route. 
+            - **Purpose**: Get information about a previous route including the start and end locations, and the stops along the route.
             - **Input**:
                 - tripID: The unique identifier assigned to the trip upon its creation.
             - **Output**: The names and the coordinates of the start and end locations, and a list of stops where each stop has the name of the city, its coordinates and its distance from the start.
@@ -316,10 +319,10 @@ Not necessary to explain our requirements.
 
 3. **Notification**
     - **Purpose**: The purpose is to allow users to subscribe to notifications about new discounts posted by grocery stores.
-    - **Interfaces**: 
+    - **Interfaces**:
         1. `subscribe(userID, fcmToken)`
             - **Purpose**: Subscribe to notifications about new discounts.
-            - **Input**: 
+            - **Input**:
                 - userID: The unique identifier of the user.
                 - fcmToken: The firebase cloud messaging token associated with the user’s device.
             - **Output**: A confirmation that the user has subscribed.
@@ -328,10 +331,10 @@ Not necessary to explain our requirements.
             - **Input**:
                 - userID: The unique identifier of the user.
             - **Output**: A confimation the user has unsubscribed, or an error message if the user was never subscribed.
-       
+
 4. **Preference**
     - **Purpose**: The purpose is to allow users to set preferences for food like allergies to avoid in recipes.
-    - **Interfaces**: 
+    - **Interfaces**:
         1. `addAllergy(userID, allergy)`
             - **Purpose**: To add an allergy to a specific ingredient that should be avoided.
             - **Input**:
@@ -347,13 +350,13 @@ Not necessary to explain our requirements.
             - **Purpose**: Delete a user allergy.
             - **Input**:
                 - userID: The unique identifier of the user.
-                - allergy: The ingredient which has been added as an allergy. 
+                - allergy: The ingredient which has been added as an allergy.
             - **Output**: A success message if the allergy was found and deleted, and an error message otherwise.
-            
+
 
 5. **Recipe**
-    - **Purpose**: 
-    - **Interfaces**: 
+    - **Purpose**:
+    - **Interfaces**:
         1. `createRecipesfromRoute(tripID)`
             - **Purpose**: Create a list of recipes from a route that includes a start and end location and a number of stops.
             - **Input**:
@@ -361,12 +364,12 @@ Not necessary to explain our requirements.
             - **Output**: A list of recipes, ingredients, and steps to complete the recipe.
         2. `getRecipes(tripID)`
             - **Purpose**: Get the list of recipes for a particular trip.
-            - **Input**: 
+            - **Input**:
                 - tripID: The unique identifier of the trip.
             - **Output**: A list of recipes, ingredients, and steps to complete the recipe for the trip.
         3. `deleteRecipes(tripID)`
             - **Purpose**: Delete a list of recipes for a particular trip.
-            - **Input**: 
+            - **Input**:
                 - tripID: The unique identifier of the trip.
             - **Output**: A success message if the list of recipes was found and delete, and an error message otherwise.
 
@@ -381,11 +384,11 @@ Not necessary to explain our requirements.
     - **Purpose**: Stores all previous recipes including their ingredients and steps to complete.
 
 ### **4.3. External Modules**
-1. **Edamam API** 
+1. **Edamam API**
     - **Purpose**: Used to lookup recipes. Chosen for its ability to lookup 2.3 million recipes and 30 day free trial, as well as being utilized in other similar use cases requiring recipe lookup
 2. **OpenStreetMap API**
-    - **Purpose**: Used to determine the coordinates of the start and end location. Chosen because of its ease of use (simple city name query), and because it requires no API keys, simplifying its use. 
-3. **Firebase Cloud Messaging** 
+    - **Purpose**: Used to determine the coordinates of the start and end location. Chosen because of its ease of use (simple city name query), and because it requires no API keys, simplifying its use.
+3. **Firebase Cloud Messaging**
     - **Purpose**: Used to set up notifications for alerting users when grocery items are discounted. It was chosen due to allowing implementation of push notifications for android with no monetary cost.
 4. **GeoNames database**
     - **Purpose**: Used for a dataset of all cities around the world with a population of 15,000 or more. Selected because it has information about each city including the name, country code, coordinates and population. We chose to use the database rather than API since the API was unreliable and was often unreachable.

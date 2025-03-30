@@ -12,7 +12,7 @@ import { ObjectId } from "mongodb";
 export const createRecipes = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     // validation of params performed by express-validator middleware
@@ -39,7 +39,7 @@ export const createRecipes = async (
 export const getRecipes = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const tripID = req.params.id;
@@ -64,7 +64,7 @@ export const getRecipes = async (
 export const deleteRecipes = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const tripID = req.params.id;

@@ -49,12 +49,12 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
 
 // helper function to extract locations from a route and fetch recipes
 export async function createRecipesfromRoute(
-  tripID: string
+  tripID: string,
 ): Promise<Recipe[] | null> {
   try {
     const route_db = client.db(ROUTES_DB_NAME);
     const route_collection = route_db.collection<RouteDBEntry>(
-      ROUTES_COLLECTION_NAME
+      ROUTES_COLLECTION_NAME,
     );
     const result = await route_collection.findOne({
       _id: new ObjectId(tripID),
@@ -90,7 +90,7 @@ export async function createRecipesfromRoute(
 
 export async function saveRecipesToDb(
   tripID: string,
-  recipes: Recipe[]
+  recipes: Recipe[],
 ): Promise<void> {
   const db = client.db(RECIPE_DB_NAME);
   const collection = db.collection<RecipeDBEntry>(RECIPE_COLLECTION_NAME);
@@ -101,7 +101,7 @@ export async function saveRecipesToDb(
 }
 
 export async function getRecipesFromDb(
-  tripID: string
+  tripID: string,
 ): Promise<Recipe[] | null> {
   const result: RecipeDBEntry | null = await client
     .db(RECIPE_DB_NAME)
