@@ -162,9 +162,11 @@ describe("Mocked: POST /discounts", () => {
     jest
       .spyOn(NotificationHelper, "getAllTokensFromDb")
       .mockResolvedValue(["token1", "token2"]);
-    jest
-      .spyOn(require("firebase-admin").messaging(), "sendEachForMulticast")
-      .mockResolvedValue({ failureCount: 1 });
+    jest.spyOn(admin.messaging(), "sendEachForMulticast").mockResolvedValue({
+      successCount: 0,
+      failureCount: 1,
+      responses: [{ success: false }],
+    });
 
     const response = await request(app)
       .post("/discounts")
