@@ -19,15 +19,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Install dependencies
         working-directory: backend
-        run: npm install
+        run: npm ci
 
       - name: Run Jest tests with coverage
         working-directory: backend
-        run: npm run test:coverage
+        # don't run non-functional requirements tests automatically since may conflict with ec2 deploy
+        run: npm run test:coverage -- --testPathIgnorePatterns="(/non_functional_requirements/)"
         env:
           EDAMAM_APP_ID: ${{ secrets.EDAMAM_APP_ID }}
           EDAMAM_API_KEY: ${{ secrets.EDAMAM_API_KEY }}

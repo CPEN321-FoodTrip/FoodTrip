@@ -1,6 +1,5 @@
 describe("Unmocked Performance test", () => {
   beforeAll(async () => {
-    jest.setTimeout(20000); //20s
     // sleep 2 seconds to allow proper setup
     await new Promise((resolve) => setTimeout(resolve, 2000));
   });
