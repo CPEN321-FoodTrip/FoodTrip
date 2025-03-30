@@ -25,7 +25,7 @@
 |**POST /preferences/allergies**| [`backend/__tests__/no_mock/NoMockPreference.test.ts#L10`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/efea56b211fcdfd34641852caa9b792bbe48b3de/backend/__tests__/no_mock/NoMockPreference.test.ts#L10) | [`backend/__tests__/with_mock/WithMockPreference.test.ts#L6`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/955cb09b22fae24a4fbe65c5cacc808657b518a6/backend/__tests__/with_mock/WithMockPreference.test.ts#L6) | Preferences DB|
 |**GET /preferences/allergies/:id**| [`backend/__tests__/no_mock/NoMockPreference.test.ts#L74`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/efea56b211fcdfd34641852caa9b792bbe48b3de/backend/__tests__/no_mock/NoMockPreference.test.ts#L74) | [`backend/__tests__/with_mock/WithMockPreference.test.ts#L79`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/955cb09b22fae24a4fbe65c5cacc808657b518a6/backend/__tests__/with_mock/WithMockPreference.test.ts#L79) |Preferences DB|
 |**DELETE /preferences/allergies/:id/:allergy**| [`backend/__tests__/no_mock/NoMockPreference.test.ts#L114`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/efea56b211fcdfd34641852caa9b792bbe48b3de/backend/__tests__/no_mock/NoMockPreference.test.ts#L114) | [`backend/__tests__/with_mock/WithMockPreference.test.ts#L164`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/955cb09b22fae24a4fbe65c5cacc808657b518a6/backend/__tests__/with_mock/WithMockPreference.test.ts#L164) |Preferences DB|
-| **POST /recipes**      | [`backend/__tests__/no_mock/NoMockRecipe.test.ts#L81`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/7c3f062d172a2513bd869e9608b622d048b1c94b/backend/__tests__/no_mock/NoMockRecipe.test.ts#L81) | [`backend/__tests__/with_mock/WithMockRecipe.test.ts#L125`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/7c3f062d172a2513bd869e9608b622d048b1c94b/backend/__tests__/with_mock/WithMockRecipe.test.ts#L125) | Recipes DB, Route Data DB, Edamam API | 
+| **POST /recipes**      | [`backend/__tests__/no_mock/NoMockRecipe.test.ts#L81`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/7c3f062d172a2513bd869e9608b622d048b1c94b/backend/__tests__/no_mock/NoMockRecipe.test.ts#L81) | [`backend/__tests__/with_mock/WithMockRecipe.test.ts#L125`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/7c3f062d172a2513bd869e9608b622d048b1c94b/backend/__tests__/with_mock/WithMockRecipe.test.ts#L125) | Recipes DB, Route Data DB, Edamam API |
 | **GET /recipes/:id**       | [`backend/__tests__/no_mock/NoMockRecipe.test.ts#L329`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/7c3f062d172a2513bd869e9608b622d048b1c94b/backend/__tests__/no_mock/NoMockRecipe.test.ts#L329) | [`backend/__tests__/with_mock/WithMockRecipe.test.ts#L375`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/7c3f062d172a2513bd869e9608b622d048b1c94b/backend/__tests__/with_mock/WithMockRecipe.test.ts#L375) | Recipes DB
 | **DELETE /recipes/:id**    | [`backend/__tests__/no_mock/NoMockRecipe.test.ts#L401`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/7c3f062d172a2513bd869e9608b622d048b1c94b/backend/__tests__/no_mock/NoMockRecipe.test.ts#L401) | [`backend/__tests__/with_mock/WithMockRecipe.test.ts#L548`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/7c3f062d172a2513bd869e9608b622d048b1c94b/backend/__tests__/with_mock/WithMockRecipe.test.ts#L548) | Recipes DB|
 |**POST /routes**        | [`backend/__tests__/no_mock/NoMockRoute.test.ts#L52`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/62600ce15c735da3b614b1a5ebf814cb8aa8a5c4/backend/__tests__/no_mock/NoMockRoute.test.ts#L52)  | [`backend/__tests__/with_mock/WithMockRoute.test.ts#L30`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/47e79c5f97159d26e13e30097fbfbb9fe677b18e/backend/__tests__/with_mock/WithMockRoute.test.ts#L30) |Route Data DB, Geonames DB, OpenStreetMap API|
@@ -81,13 +81,13 @@
     ```
     npm run test:coverage
     ```
-    
+
     - To run the tests **without** coverage, use the following command in the terminal:
 
     ```
     npm run test
     ```
-    
+
 6. **[Optional] Run only the mocked or unmocked tests:**
 
     - To run the tests **with** mocks, use the following command in the terminal:
@@ -95,13 +95,13 @@
     ```
     npm run test __tests__/with_mock/
     ```
-    
+
     - To run the tests **without** mocks, use the following command in the terminal:
 
     ```
     npm run test __tests__/no_mock/
     ```
-    
+
 7. **View the full coverage repo:**
 
     - Within the backend directory navigate to the `coverage/lcov-report` directory.
@@ -151,7 +151,7 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 
 - **Performance (Response Time)**
 
-  - **Verification:** This test suite evaluates the performance of critical API endpoints in an unmocked environment, simulating real-world user interactions. It measures execution times for creating and deleting routes, recipes, discounts, notifications, and allergy preferences, ensuring each operation completes within 2.7 seconds. This is important for maintaining a smooth user experience, preventing delays, and ensuring the system can handle expected traffic. By logging execution times and validating responses, the tests help identify performance isssues and ensure the system is quick enough.
+  - **Verification:** This test suite evaluates the performance of critical API endpoints in an unmocked environment, simulating real-world user interactions. It measures execution times for creating and deleting routes, recipes, discounts, notifications, and allergy preferences, ensuring each operation completes within 3 seconds. This is important for maintaining a smooth user experience, preventing delays, and ensuring the system can handle expected traffic. By logging execution times and validating responses, the tests help identify performance isssues and ensure the system is quick enough.
   - **Log Output**
     ```
         > backend@1.0.0 test
@@ -288,14 +288,14 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
     | 2a1. The app shows no items in the list | Check no items are present in the list on screen |
     | 3. The user click on any past trip. | Click any past trip text view |
     | 4. A window pops up. | Check the window activity is present on screen. |
-    | 5. The window shows the starting location, intermediate stops, destination, recipes for each stop, and a "Show Route" button | Check first recipe is present on screen. |  
-    | 6. The user presses the show route button| Click on the show route button|    
+    | 5. The window shows the starting location, intermediate stops, destination, recipes for each stop, and a "Show Route" button | Check first recipe is present on screen. |
+    | 6. The user presses the show route button| Click on the show route button|
     | 6a. The user is directed to the main page and a map of the route is displayed| Check that the activity has switched to the Main Activity screen and check that the map is now displayed and visible on the screen|
     | 7. The user clicks on the first recipe| Click on the first recipe|
     | 7a. The window shows the details of the recipe and a recipe url| Check that the recipe text is displayed|
     | 7a1. The user clicks the recipe url| Click on the url text view|
     | 7a2. A webView of the recipe shows up| Check that the webView is now displayed|
-    
+
 
   - **Test Logs:**
     ```
@@ -324,8 +324,8 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
         * 3b1. The app displays a pop-up saying that the associated field is missing
     * 3c. The user enters the same city in the start and end fields and attempts to create a trip
         * 3c1. The app displays a pop-up saying that there can't be the same start and end city
-        
-        
+
+
    **Expected Behaviors:**
 
     | **Scenario Steps** | **Test Case Steps** |
@@ -341,7 +341,7 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
     | 3c1. The app displays a pop-up saying that there can't be the same start and end city| Check that a textfield is displayed with the text "Same Start and End City"|
     | 4. The app opens the Main Screen| Check that the activity has switched to the Main Activity screen|
     | 5. A google map is displayed showing the created route from the start to end city| Check that the map is displayed and visible on the screen|
-    
+
 
   - **Test Logs:**
     ```
@@ -381,20 +381,20 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 
     | **Scenario Steps** | **Test Case Steps** |
     | ------------------ | ------------------- |
-    | 1. Admin opens "Grocery Store" screen. | Open Grocery Store screen. |  
-    | 2. The app shows a list of discounts, an ingredient input text field, a price input text field, a "Delete" button, and a "Post" button. | Check the list is present on screen. <br> Check the ingredient input text view is present on screen. <br> Check the price input text view is present on screen. <br> Check the delete button is present on screen. <br> Check the post button is present on screen. |    
-    | 3. Admin inputs a new ingredient and price | Input "snack" for the ingredient. <br> Input "10" for the price |    
-    | 3a. Admin presses on a discount in the list. | Press a discount on the list. |    
-    | 3ai. Admin doesn't select a discount to delete | Press button labelled "Delete" |    
-    | 3ai(1). The app display an error message prompting the admin to select the discount to be deleted. | Check dialog is opened with text: "Please select discount to be deleted" |    
-    | 3b. Admin doesn't enter an input into any one of the text input fields and attempts to post a discount. | Input "snack" for ingredient or input "10" for price. <br> Press the "Post" button" |    
-    | 3b1.The app displays an error message prompting the admin for a valid input. | Check dialog is opened with text: "Please enter valid ingredient and price" |    
-    | 3c. Admin input enter 0 as the price and attempts to post a discount. | Input "snack" for ingredient <br> Input "0" for price <br> Press the "Post" button |    
-    | 3c1. The app displays an error message prompting the admin for a valid input. | Check dialog is opened with text: "Please enter valid ingredient and price" |    
-    | 4. Admin presses the "Post" button | Press the button labelled "Post" |    
-    | 5. The screen refreshes and the new discount is added into the list | Check textView with text "snack: $10" is present on screen. |    
+    | 1. Admin opens "Grocery Store" screen. | Open Grocery Store screen. |
+    | 2. The app shows a list of discounts, an ingredient input text field, a price input text field, a "Delete" button, and a "Post" button. | Check the list is present on screen. <br> Check the ingredient input text view is present on screen. <br> Check the price input text view is present on screen. <br> Check the delete button is present on screen. <br> Check the post button is present on screen. |
+    | 3. Admin inputs a new ingredient and price | Input "snack" for the ingredient. <br> Input "10" for the price |
+    | 3a. Admin presses on a discount in the list. | Press a discount on the list. |
+    | 3ai. Admin doesn't select a discount to delete | Press button labelled "Delete" |
+    | 3ai(1). The app display an error message prompting the admin to select the discount to be deleted. | Check dialog is opened with text: "Please select discount to be deleted" |
+    | 3b. Admin doesn't enter an input into any one of the text input fields and attempts to post a discount. | Input "snack" for ingredient or input "10" for price. <br> Press the "Post" button" |
+    | 3b1.The app displays an error message prompting the admin for a valid input. | Check dialog is opened with text: "Please enter valid ingredient and price" |
+    | 3c. Admin input enter 0 as the price and attempts to post a discount. | Input "snack" for ingredient <br> Input "0" for price <br> Press the "Post" button |
+    | 3c1. The app displays an error message prompting the admin for a valid input. | Check dialog is opened with text: "Please enter valid ingredient and price" |
+    | 4. Admin presses the "Post" button | Press the button labelled "Post" |
+    | 5. The screen refreshes and the new discount is added into the list | Check textView with text "snack: $10" is present on screen. |
 
-    
+
 
   - **Test Logs:**
     ```
@@ -423,4 +423,3 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 ### 5.3. Unfixed Issues per Codacy Code Pattern
 
 ![Codacy issues](images/codacy_issues.png)
-

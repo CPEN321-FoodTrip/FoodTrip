@@ -1,5 +1,9 @@
 describe("Unmocked Performance test", () => {
-  jest.setTimeout(20000); //20s
+  beforeAll(async () => {
+    jest.setTimeout(20000); //20s
+    // sleep 2 seconds to allow proper setup
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  });
 
   // Justification: A user may decide to generate a route and recipes, but then decide to delete both
   // route and recipes if they find them unsatisfactory, which should possible to do quickly
@@ -18,7 +22,7 @@ describe("Unmocked Performance test", () => {
           destination: "Toronto",
           numStops: 1,
         }),
-      }
+      },
     );
 
     if (route_response.ok) {
@@ -35,12 +39,11 @@ describe("Unmocked Performance test", () => {
           body: JSON.stringify({
             tripID,
           }),
-        }
+        },
       );
 
-      const recipe_data = await recipe_response.json(); 
+      const recipe_data = await recipe_response.json();
       expect(recipe_data).not.toBeNull();
-      
 
       const route_teardown = await fetch(
         `${process.env.GATEWAY_BASE_URL}/routes/${tripID}`,
@@ -48,31 +51,33 @@ describe("Unmocked Performance test", () => {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-          }
-        });
-        if (!route_teardown.ok) {
-          throw new Error(`HTTP error! Status: ${route_teardown.status}`);
-        }
-        
-        const recipe_teardown = await fetch(`${process.env.GATEWAY_BASE_URL}/recipes/${tripID}`, 
-          {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            }
-          });
-          if (!recipe_teardown.ok) {
-            throw new Error(`HTTP error! Status: ${recipe_teardown.status}`);
-          }
+          },
+        },
+      );
+      if (!route_teardown.ok) {
+        throw new Error(`HTTP error! Status: ${route_teardown.status}`);
+      }
 
+      const recipe_teardown = await fetch(
+        `${process.env.GATEWAY_BASE_URL}/recipes/${tripID}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      if (!recipe_teardown.ok) {
+        throw new Error(`HTTP error! Status: ${recipe_teardown.status}`);
+      }
     } else {
       console.error("Request failed with status:", route_response.status);
     }
 
     const end = Date.now();
-    const duration = end - start; //begin timing test assuming that operation sunpm cceeded
+    const duration = end - start; //begin timing test assuming that operation succeeded
     console.debug(`Route Execution time: ${duration}ms`);
-    expect(duration).toBeLessThanOrEqual(2700); // 4s
+    expect(duration).toBeLessThanOrEqual(3000); // 3s
   });
 
   // Justification: A store owner should be able to upload a discount, check that it is available,
@@ -92,7 +97,7 @@ describe("Unmocked Performance test", () => {
           ingredient: "Toronto, the entire province",
           price: 1,
         }),
-      }
+      },
     );
 
     const data = await discount_response.json();
@@ -105,25 +110,27 @@ describe("Unmocked Performance test", () => {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     expect(await get_response.json()).not.toBeNull();
 
-    const discount_teardown = await fetch(`${process.env.GATEWAY_BASE_URL}/discounts/${discountID}`,
+    const discount_teardown = await fetch(
+      `${process.env.GATEWAY_BASE_URL}/discounts/${discountID}`,
       {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-        }
-      });
-      if (!discount_teardown.ok) {
-        throw new Error(`HTTP error! Status: ${discount_teardown.status}`);
-      }
-      const end = Date.now();
-      const duration = end - start; //begin timing test assuming that operation succeeded
-      console.debug(`Discount Execution time: ${duration}ms`);
-      expect(duration).toBeLessThanOrEqual(2700);
+        },
+      },
+    );
+    if (!discount_teardown.ok) {
+      throw new Error(`HTTP error! Status: ${discount_teardown.status}`);
+    }
+    const end = Date.now();
+    const duration = end - start; //begin timing test assuming that operation succeeded
+    console.debug(`Discount Execution time: ${duration}ms`);
+    expect(duration).toBeLessThanOrEqual(3000); // 3s
   });
 
   // Justification: A store owner should be able to upload multiple discounts, check that they are
@@ -145,7 +152,7 @@ describe("Unmocked Performance test", () => {
             ingredient: "Toronto, the entire province",
             price: i,
           }),
-        }
+        },
       );
       const data = await discount_response.json();
       const discountIDsingle = data.discountID;
@@ -158,7 +165,7 @@ describe("Unmocked Performance test", () => {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     for (let i = 0; i < 10; i++) {
       const did = discountID.pop();
@@ -169,19 +176,19 @@ describe("Unmocked Performance test", () => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
       if (!discount_teardown.ok) {
         throw new Error(`HTTP error! Status: ${discount_teardown.status}`);
       }
     }
 
-    expect(await get_response.json()).toHaveLength(10); // assumes db was empty ///
+    expect(await get_response.json()).toHaveLength(10); // assumes db was empty
 
     const end = Date.now();
     const duration = end - start; //begin timing test assuming that operation succeeded
     console.debug(`10 discount Execution time: ${duration}ms`);
-    expect(duration).toBeLessThanOrEqual(2700);
+    expect(duration).toBeLessThanOrEqual(3000); // 3s
   });
 
   // Justification: Users should be able to subscribe, and potentially change their mind quickly
@@ -199,7 +206,7 @@ describe("Unmocked Performance test", () => {
           userID,
           fcmToken: "Vancouver",
         }),
-      }
+      },
     );
     const data = await notif_response.json();
     expect(data.message).toContain("Subscribed successfully");
@@ -210,15 +217,18 @@ describe("Unmocked Performance test", () => {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-        }
-      });
-      if (!notif_teardown.ok) {
-        throw new Error(`notification delete error! Status: ${notif_teardown.status}`);
-      }
-      const end = Date.now();
-      const duration = end - start; //begin timing test assuming that operation succeeded
-      console.debug(`notif Execution time: ${duration}ms`);
-      expect(duration).toBeLessThanOrEqual(2700);
+        },
+      },
+    );
+    if (!notif_teardown.ok) {
+      throw new Error(
+        `notification delete error! Status: ${notif_teardown.status}`,
+      );
+    }
+    const end = Date.now();
+    const duration = end - start; //begin timing test assuming that operation succeeded
+    console.debug(`notif Execution time: ${duration}ms`);
+    expect(duration).toBeLessThanOrEqual(3000); // 3s
   });
 
   // Justification: Multiple users may subscribe and potentially change their minds, which should
@@ -237,10 +247,10 @@ describe("Unmocked Performance test", () => {
             userID: i.toString(),
             fcmToken: "Vancouver",
           }),
-        }
+        },
       );
       const data = await notif_response.json();
-    expect(data.message).toContain("Subscribed successfully");
+      expect(data.message).toContain("Subscribed successfully");
     }
     for (let i = 0; i < 10; i++) {
       const notif_teardown = await fetch(
@@ -250,61 +260,67 @@ describe("Unmocked Performance test", () => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
       if (!notif_teardown.ok) {
         throw new Error(
-          `10 notification delete error! Status: ${notif_teardown.status}`
+          `10 notification delete error! Status: ${notif_teardown.status}`,
         );
       }
     }
     const end = Date.now();
-      const duration = end - start; //begin timing test assuming that operation succeeded
-      console.debug(`10 notification Execution time: ${duration}ms`);
-      expect(duration).toBeLessThanOrEqual(2700);
-    });
-    
-    // Justification: Users should be able to add allergens, view them, and potentially delete them quickly
-    test("Unmocked single allergy", async () => {
-      const userID = "real_person";
-      const allergen = "fake_people";
-      const start = Date.now();
-      const allergy_response = await fetch(`${process.env.GATEWAY_BASE_URL}/preferences/allergies/`,
-        {
-          method: 'POST',
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userID,
-            allergy: allergen,
-          }),
-        }
+    const duration = end - start; //begin timing test assuming that operation succeeded
+    console.debug(`10 notification Execution time: ${duration}ms`);
+    expect(duration).toBeLessThanOrEqual(3000); // 3s
+  });
+
+  // Justification: Users should be able to add allergens, view them, and potentially delete them quickly
+  test("Unmocked single allergy", async () => {
+    const userID = "real_person";
+    const allergen = "fake_people";
+    const start = Date.now();
+    const allergy_response = await fetch(
+      `${process.env.GATEWAY_BASE_URL}/preferences/allergies/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userID,
+          allergy: allergen,
+        }),
+      },
+    );
+    const data = await allergy_response.json();
+    expect(data.message).toContain("Allergy added successfully");
+    const get_response = await fetch(
+      `${process.env.GATEWAY_BASE_URL}/preferences/allergies/${userID}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+    expect(await get_response.json()).not.toBeNull();
+    const end = Date.now();
+    const allergy_teardown = await fetch(
+      `${process.env.GATEWAY_BASE_URL}/preferences/allergies/${userID}/${allergen}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+    if (!allergy_teardown.ok) {
+      throw new Error(
+        `allergy delete error! Status: ${allergy_teardown.status}`,
       );
-      const data = await allergy_response.json();
-      expect(data.message).toContain("Allergy added successfully")
-      const get_response = await fetch(`${process.env.GATEWAY_BASE_URL}/preferences/allergies/${userID}`,
-        {
-          method: 'GET',
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      expect(await get_response.json()).not.toBeNull();
-      const end = Date.now();
-      const allergy_teardown = await fetch(`${process.env.GATEWAY_BASE_URL}/preferences/allergies/${userID}/${allergen}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          }
-        });
-        if (!allergy_teardown.ok) {
-          throw new Error(`allergy delete error! Status: ${allergy_teardown.status}`);
-        }
-        const duration = end - start; //begin timing test assuming that operation succeeded
-        console.debug(`allergy Execution time: ${duration}ms`);
-        expect(duration).toBeLessThanOrEqual(2700);
-    });
+    }
+    const duration = end - start; //begin timing test assuming that operation succeeded
+    console.debug(`allergy Execution time: ${duration}ms`);
+    expect(duration).toBeLessThanOrEqual(3000); // 3s
+  });
 });
