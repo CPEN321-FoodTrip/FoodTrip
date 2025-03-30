@@ -12,59 +12,258 @@ jest.mock("node-fetch", () => jest.fn());
 const RECIPES_DB_NAME = "recipes";
 const RECIPE_COLLECTION_NAME = "recipes";
 
-const SAMPLE_RECIPE = {
-  tripID: "1234",
-  recipes: [
+const SAMPLE_RECIPE: Recipe = {
+  recipeName: "Strawberry and Wild Rice Tartlets",
+  recipeID: 3,
+  url: "https://www.epicurious.com/recipes/food/views/ba-syn-strawberry-wild-rice-tartlets",
+  ingredients: [
     {
-      recipeName: "Winnipeg Chicken Curry",
-      recipeID: 1,
-      url: "http://www.food.com/recipe/winnipeg-chicken-curry-2930",
-      ingredients: [
-        "3 tablespoons butter",
-        "2 onions, peeled and thinly sliced",
-        "2 tablespoons curry powder",
-        "2 chicken breasts",
-        "2 cups chicken stock, heated",
-        "1 tablespoon cornstarch",
-        "2 tablespoons water, cold",
-        "1⁄4 cup cream (I use milk)",
-        "salt & pepper",
-      ],
+      text: "Vegetable oil (for pan)",
+      quantity: 0,
+      measure: null,
+      food: "Vegetable oil",
+      weight: 11.459884348,
+      foodCategory: "Oils",
+      foodId: "food_bt1mzi2ah2sfg8bv7no1qai83w8s",
+      image:
+        "https://www.edamam.com/food-img/6e5/6e51a63a6300a8ea1b4c4cc68dfaba33.jpg",
+    },
+    {
+      text: "Kosher salt",
+      quantity: 0,
+      measure: null,
+      food: "Kosher salt",
+      weight: 5.05583133,
+      foodCategory: "Condiments and sauces",
+      foodId: "food_a1vgrj1bs8rd1majvmd9ubz8ttkg",
+      image:
+        "https://www.edamam.com/food-img/694/6943ea510918c6025795e8dc6e6eaaeb.jpg",
+    },
+    {
+      text: "1 cup wild rice",
+      quantity: 1,
+      measure: "cup",
+      food: "wild rice",
+      weight: 160,
+      foodCategory: "grains",
+      foodId: "food_at0h9hean2v4bobxbjzvgbhm51h7",
+      image:
+        "https://www.edamam.com/food-img/1bc/1bcfd41e4d9869c95647b8040069408c.jpg",
+    },
+    {
+      text: "8 oz. dried tart cherries",
+      quantity: 8,
+      measure: "ounce",
+      food: "tart cherries",
+      weight: 226.796185,
+      foodCategory: "fruit",
+      foodId: "food_b7r68adakprkpxa1rd3rtb33wvaj",
+      image:
+        "https://www.edamam.com/food-img/553/553b626901dcbde9a74ee66c85f459bc.jpg",
+    },
+    {
+      text: "1 lb. strawberries, hulled, plus halved strawberries for serving",
+      quantity: 1,
+      measure: "pound",
+      food: "strawberries",
+      weight: 453.59237,
+      foodCategory: "fruit",
+      foodId: "food_b4s2ibkbrrucmbabbaxhfau8ay42",
+      image:
+        "https://www.edamam.com/food-img/00c/00c8851e401bf7975be7f73499b4b573.jpg",
+    },
+    {
+      text: "Small mint leaves (for serving)",
+      quantity: 1,
+      measure: "serving",
+      food: "mint leaves",
+      weight: 2.25,
+      foodCategory: "Condiments and sauces",
+      foodId: "food_bxl4xoga4owdkeay51sy8anesxj5",
+      image:
+        "https://www.edamam.com/food-img/7f0/7f01cc4f71c5c6ad31051ed74b9c058b.jpg",
     },
   ],
 };
 
 const SAMPLE_RECIPES_LIST: Recipe[] = [
   {
-    recipeName: "Winnipeg Chicken Curry",
-    recipeID: 1,
-    url: "http://www.food.com/recipe/winnipeg-chicken-curry-2930",
+    recipeName: "Biscotti Regina",
+    recipeID: 113,
+    url: "https://www.foodnetwork.com/recipes/biscotti-regina-3608012",
     ingredients: [
-      "3 tablespoons butter",
-      "2 onions, peeled and thinly sliced",
-      "2 tablespoons curry powder",
-      "2 chicken breasts",
-      "2 cups chicken stock, heated",
-      "1 tablespoon cornstarch",
-      "2 tablespoons water, cold",
-      "1⁄4 cup cream (I use milk)",
-      "salt & pepper",
+      {
+        text: "2 1/2 sticks unsalted butter",
+        quantity: 2.5,
+        measure: "stick",
+        food: "unsalted butter",
+        weight: 282.5,
+        foodCategory: "Dairy",
+        foodId: "food_awz3iefajbk1fwahq9logahmgltj",
+        image:
+          "https://www.edamam.com/food-img/713/71397239b670d88c04faa8d05035cab4.jpg",
+      },
+      {
+        text: "1 cup sugar",
+        quantity: 1,
+        measure: "cup",
+        food: "sugar",
+        weight: 200,
+        foodCategory: "sugars",
+        foodId: "food_axi2ijobrk819yb0adceobnhm1c2",
+        image:
+          "https://www.edamam.com/food-img/ecb/ecb3f5aaed96d0188c21b8369be07765.jpg",
+      },
+      {
+        text: "3 large eggs",
+        quantity: 3,
+        measure: "<unit>",
+        food: "eggs",
+        weight: 150,
+        foodCategory: "Eggs",
+        foodId: "food_bhpradua77pk16aipcvzeayg732r",
+        image:
+          "https://www.edamam.com/food-img/a7e/a7ec7c337cb47c6550b3b118e357f077.jpg",
+      },
+      {
+        text: "4 cups all-purpose flour",
+        quantity: 4,
+        measure: "cup",
+        food: "all-purpose flour",
+        weight: 500,
+        foodCategory: "grains",
+        foodId: "food_ar3x97tbq9o9p6b6gzwj0am0c81l",
+        image:
+          "https://www.edamam.com/food-img/368/368077bbcab62f862a8c766a56ea5dd1.jpg",
+      },
+      {
+        text: "1 tablespoon baking powder",
+        quantity: 1,
+        measure: "tablespoon",
+        food: "baking powder",
+        weight: 13.799999999066733,
+        foodCategory: "condiments and sauces",
+        foodId: "food_bad4zycbt4w60dbut111vaub2g3e",
+        image:
+          "https://www.edamam.com/food-img/a84/a8410ec57a2e62a1ad9955ac14d40af6.jpg",
+      },
+      {
+        text: "1 teaspoon vanilla extract",
+        quantity: 1,
+        measure: "teaspoon",
+        food: "vanilla extract",
+        weight: 4.2,
+        foodCategory: "Condiments and sauces",
+        foodId: "food_bh1wvnqaw3q7ciascfoygaabax2a",
+        image:
+          "https://www.edamam.com/food-img/90f/90f910b0bf82750d4f6528263e014cca.jpg",
+      },
+      {
+        text: "Zest of 1 small lemon",
+        quantity: 1,
+        measure: "<unit>",
+        food: "lemon",
+        weight: 63,
+        foodCategory: "fruit",
+        foodId: "food_a6uzc62astrxcgbtzyq59b6fncrr",
+        image:
+          "https://www.edamam.com/food-img/70a/70acba3d4c734d7c70ef4efeed85dc8f.jpg",
+      },
+      {
+        text: "1 cup milk",
+        quantity: 1,
+        measure: "cup",
+        food: "milk",
+        weight: 244,
+        foodCategory: "Milk",
+        foodId: "food_b49rs1kaw0jktabzkg2vvanvvsis",
+        image:
+          "https://www.edamam.com/food-img/7c9/7c9962acf83654a8d98ea6a2ade93735.jpg",
+      },
+      {
+        text: "2 cups sesame seeds",
+        quantity: 2,
+        measure: "cup",
+        food: "sesame seeds",
+        weight: 288,
+        foodCategory: "plant-based protein",
+        foodId: "food_bvxfnx8bwz2q3abs04kd6bbuf9w8",
+        image:
+          "https://www.edamam.com/food-img/291/291b355a7a0948716243164427697279.jpg",
+      },
     ],
   },
   {
-    recipeName: "Chicken Curry",
-    recipeID: 2,
-    url: "http://www.food.com/recipe/chicken-curry-2930",
+    recipeName: "Strawberry and Wild Rice Tartlets",
+    recipeID: 3,
+    url: "https://www.epicurious.com/recipes/food/views/ba-syn-strawberry-wild-rice-tartlets",
     ingredients: [
-      "3 tablespoons butter",
-      "2 onions, peeled and thinly sliced",
-      "2 tablespoons curry powder",
-      "2 chicken breasts",
-      "2 cups chicken stock, heated",
-      "1 tablespoon cornstarch",
-      "2 tablespoons water, cold",
-      "1⁄4 cup cream (I use milk)",
-      "salt & pepper",
+      {
+        text: "Vegetable oil (for pan)",
+        quantity: 0,
+        measure: null,
+        food: "Vegetable oil",
+        weight: 11.459884348,
+        foodCategory: "Oils",
+        foodId: "food_bt1mzi2ah2sfg8bv7no1qai83w8s",
+        image:
+          "https://www.edamam.com/food-img/6e5/6e51a63a6300a8ea1b4c4cc68dfaba33.jpg",
+      },
+      {
+        text: "Kosher salt",
+        quantity: 0,
+        measure: null,
+        food: "Kosher salt",
+        weight: 5.05583133,
+        foodCategory: "Condiments and sauces",
+        foodId: "food_a1vgrj1bs8rd1majvmd9ubz8ttkg",
+        image:
+          "https://www.edamam.com/food-img/694/6943ea510918c6025795e8dc6e6eaaeb.jpg",
+      },
+      {
+        text: "1 cup wild rice",
+        quantity: 1,
+        measure: "cup",
+        food: "wild rice",
+        weight: 160,
+        foodCategory: "grains",
+        foodId: "food_at0h9hean2v4bobxbjzvgbhm51h7",
+        image:
+          "https://www.edamam.com/food-img/1bc/1bcfd41e4d9869c95647b8040069408c.jpg",
+      },
+      {
+        text: "8 oz. dried tart cherries",
+        quantity: 8,
+        measure: "ounce",
+        food: "tart cherries",
+        weight: 226.796185,
+        foodCategory: "fruit",
+        foodId: "food_b7r68adakprkpxa1rd3rtb33wvaj",
+        image:
+          "https://www.edamam.com/food-img/553/553b626901dcbde9a74ee66c85f459bc.jpg",
+      },
+      {
+        text: "1 lb. strawberries, hulled, plus halved strawberries for serving",
+        quantity: 1,
+        measure: "pound",
+        food: "strawberries",
+        weight: 453.59237,
+        foodCategory: "fruit",
+        foodId: "food_b4s2ibkbrrucmbabbaxhfau8ay42",
+        image:
+          "https://www.edamam.com/food-img/00c/00c8851e401bf7975be7f73499b4b573.jpg",
+      },
+      {
+        text: "Small mint leaves (for serving)",
+        quantity: 1,
+        measure: "serving",
+        food: "mint leaves",
+        weight: 2.25,
+        foodCategory: "Condiments and sauces",
+        foodId: "food_bxl4xoga4owdkeay51sy8anesxj5",
+        image:
+          "https://www.edamam.com/food-img/7f0/7f01cc4f71c5c6ad31051ed74b9c058b.jpg",
+      },
     ],
   },
 ];
@@ -196,7 +395,7 @@ describe("Mocked: POST /recipes", () => {
         recipeName: "recipe",
         recipeID: 1,
         url: "url",
-        ingredients: ["ingredient"],
+        ingredients: SAMPLE_RECIPE.ingredients,
       },
     ]);
 
@@ -293,7 +492,7 @@ describe("Mocked: POST /recipes", () => {
     // verify that console.error was called with the expected message
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       "Detailed recipe fetch error:",
-      expect.any(Error)
+      expect.any(Error),
     );
 
     if (originalApiKey !== undefined) {
@@ -412,7 +611,7 @@ describe("Mocked: GET /recipes/:id", () => {
       .expect(404);
     expect(response.body).toHaveProperty(
       "error",
-      "No recipes found for tripID"
+      "No recipes found for tripID",
     );
   });
 
@@ -435,32 +634,10 @@ describe("Mocked: GET /recipes/:id", () => {
   // Expected behavior: recipes are added to database
   // Expected output: a list of all recipes
   test("Insert database success", async () => {
-    // Mock data that matches the expected structure
-    const mockRecipeData = {
-      recipes: [
-        {
-          recipeName: "Winnipeg Chicken Curry",
-          recipeID: 1,
-          url: "http://www.food.com/recipe/winnipeg-chicken-curry-2930",
-          ingredients: [
-            "3 tablespoons butter",
-            "2 onions, peeled and thinly sliced",
-            "2 tablespoons curry powder",
-            "2 chicken breasts",
-            "2 cups chicken stock, heated",
-            "1 tablespoon cornstarch",
-            "2 tablespoons water, cold",
-            "1⁄4 cup cream (I use milk)",
-            "salt & pepper",
-          ],
-        },
-      ],
-    };
-
     // Mock the database response
     jest
       .spyOn(RecipeHelper, "getRecipesFromDb")
-      .mockResolvedValue(mockRecipeData.recipes); // Return the `recipes` array
+      .mockResolvedValue(SAMPLE_RECIPES_LIST); // Return the `recipes` array
 
     const tripID = new ObjectId(123);
 
@@ -470,9 +647,9 @@ describe("Mocked: GET /recipes/:id", () => {
       .expect(200);
 
     // Assertions
-    expect(response.body).toEqual(mockRecipeData.recipes);
+    expect(response.body).toEqual(SAMPLE_RECIPES_LIST);
     expect(RecipeHelper.getRecipesFromDb).toHaveBeenCalledWith(
-      tripID.toHexString()
+      tripID.toHexString(),
     );
   });
 
@@ -482,34 +659,18 @@ describe("Mocked: GET /recipes/:id", () => {
   // Expected behavior: recipe retrieved from db successfully
   // Expected output: recipe object
   test("Retrieve valid recipe from in-mem", async () => {
+    const tripID = new ObjectId().toHexString();
+
     // setup: insert sample recipe into db
     const db = client.db(RECIPES_DB_NAME);
     const collection = db.collection<RecipeDBEntry>(RECIPE_COLLECTION_NAME);
-    await collection.insertOne(SAMPLE_RECIPE);
+    await collection.insertOne({ tripID, recipes: SAMPLE_RECIPES_LIST });
 
-    const response = await request(app)
-      .get(`/recipes/${SAMPLE_RECIPE.tripID}`)
-      .expect(200);
+    const response = await request(app).get(`/recipes/${tripID}`).expect(200);
 
     expect(Array.isArray(response.body)).toBe(true);
-    expect(response.body).toHaveLength(1);
-    expect(response.body[0]).toHaveProperty(
-      "recipeName",
-      SAMPLE_RECIPE.recipes[0].recipeName
-    );
-    expect(response.body[0]).toHaveProperty(
-      "recipeID",
-      SAMPLE_RECIPE.recipes[0].recipeID
-    );
-    expect(response.body[0]).toHaveProperty(
-      "url",
-      SAMPLE_RECIPE.recipes[0].url
-    );
-    expect(response.body[0]).toHaveProperty(
-      "ingredients",
-      SAMPLE_RECIPE.recipes[0].ingredients
-    );
-    expect(response.body).toEqual(SAMPLE_RECIPE.recipes);
+    expect(response.body).toHaveLength(2);
+    expect(response.body).toEqual(SAMPLE_RECIPES_LIST);
 
     // db cleanup happens in afterEach in jest.setup.ts
   });
@@ -523,7 +684,7 @@ describe("Mocked: GET /recipes/:id", () => {
     // Mock data that matches the expected structure
     const mockRecipeData = {
       tripID: "1234",
-      recipes: SAMPLE_RECIPE.recipes, // Use the recipes array from SAMPLE_RECIPE
+      recipes: SAMPLE_RECIPES_LIST, // Use the recipes array from SAMPLE_RECIPE
     };
 
     // Mock the database response
@@ -531,16 +692,12 @@ describe("Mocked: GET /recipes/:id", () => {
       .spyOn(RecipeHelper, "getRecipesFromDb")
       .mockResolvedValue(mockRecipeData.recipes); // Return the full object with `recipes` property
 
-    // Make the request to the endpoint
-    const response = await request(app)
-      .get(`/recipes/${SAMPLE_RECIPE.tripID}`)
-      .expect(200);
+    const tripID = new ObjectId().toHexString();
+    const response = await request(app).get(`/recipes/${tripID}`).expect(200);
 
     // Assertions
-    expect(response.body).toEqual(SAMPLE_RECIPE.recipes);
-    expect(RecipeHelper.getRecipesFromDb).toHaveBeenCalledWith(
-      SAMPLE_RECIPE.tripID
-    );
+    expect(response.body).toEqual(SAMPLE_RECIPES_LIST);
+    expect(RecipeHelper.getRecipesFromDb).toHaveBeenCalledWith(tripID);
   });
 });
 
@@ -586,7 +743,7 @@ describe("Mocked: DELETE /recipes/:id", () => {
       .expect(404);
     expect(response.body).toHaveProperty(
       "error",
-      "No recipes found for tripID"
+      "No recipes found for tripID",
     );
   });
 
