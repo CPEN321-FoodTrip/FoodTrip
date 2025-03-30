@@ -5,6 +5,7 @@ import { Recipe, RecipeDBEntry } from "../../interfaces/RecipeInterfaces";
 import { client } from "../../services";
 import { Collection, Db, MongoClient, ObjectId } from "mongodb";
 import { RouteDBEntry } from "../../interfaces/RouteInterfaces";
+import { Response } from "node-fetch";
 
 jest.mock("node-fetch", () => jest.fn());
 
@@ -534,6 +535,23 @@ describe("Mocked: POST /recipes", () => {
       }),
     );
     expect(MongoClient.prototype.db).toHaveBeenCalled();
+  });
+
+  // Mocked behavior: fetchRecipe returns a valid recipe
+  // Input: valid tripID
+  // Expected status code: 404
+  // Expected behavior: recipe added to database
+  // Expected output: list of recipes
+  test("No route for tripID", async () => {
+    jest.spyOn(RecipeHelper, "saveRecipesToDb").mockImplementation();
+
+    const response = await request(app)
+      .post("/recipes")
+      .send({ tripID: new ObjectId().toHexString() }) // nonexistant tripID
+      .expect(404);
+
+    expect(response.body).toHaveProperty("error", "Trip not found");
+    expect(RecipeHelper.saveRecipesToDb).not.toHaveBeenCalled();
   });
 
   // Mocked behavior: fetchRecipe returns a valid recipe
