@@ -327,7 +327,7 @@ describe("Mocked: POST /recipes", () => {
     jest.restoreAllMocks();
   });
 
-  // Mocked behavior: mock edamam api call that does not get received
+  // Mocked behavior: mock edamam api call that does not get received and mock route in db
   // Input: valid tripID
   // Expected status code: 500
   // Expected behavior: error handled gracefully
@@ -336,7 +336,7 @@ describe("Mocked: POST /recipes", () => {
     // mock no response from edamam api call, cause it to fail
     global.fetch = jest.fn();
 
-    // add mock route to db
+    // add mock route to in-mem db
     const result = await client
       .db("route_data")
       .collection<RouteDBEntry>("routes")
@@ -352,7 +352,7 @@ describe("Mocked: POST /recipes", () => {
     expect(response.body).toHaveProperty("error", "Internal server error");
   });
 
-  // Mocked behavior: mock edamam api call to return 503 status response
+  // Mocked behavior: mock edamam api call to return 503 status response and mock route in db
   // Input: valid tripID
   // Expected status code: 500
   // Expected behavior: error handled gracefully
@@ -365,7 +365,7 @@ describe("Mocked: POST /recipes", () => {
       json: async () => Promise.resolve({ error: "Service Unavailable" }),
     });
 
-    // add mock route to db
+    // add mock route to in-mem db
     const route_response = await client
       .db("route_data")
       .collection<RouteDBEntry>("routes")
@@ -424,7 +424,7 @@ describe("Mocked: POST /recipes", () => {
 
     const response = await request(app)
       .post("/recipes")
-      .send({ tripID: "invalidObjectId" }); // Invalid ObjectId format
+      .send({ tripID: "invalidObjectId" }); // invalid ObjectId format
 
     expect(response.status).toBe(400);
     expect(response.body.error).toBe("Invalid tripID format");
@@ -434,7 +434,7 @@ describe("Mocked: POST /recipes", () => {
   /// Mocked behavior: RecipeHelper.saveRecipesToDb has an empty implementation
   // Input: valid tripID and route with no stops in db
   // Expected status code: 500
-  // Expected behavior: error handled gracefully
+  // Expected behavior: saveRecipesToDb not called
   // Expected output: error message
   test("No stops found in route", async () => {
     jest.spyOn(RecipeHelper, "saveRecipesToDb").mockImplementation();
@@ -450,10 +450,11 @@ describe("Mocked: POST /recipes", () => {
       .expect(500);
 
     expect(response.body).toHaveProperty("error", "Internal server error");
+    expect(RecipeHelper.saveRecipesToDb).not.toHaveBeenCalled();
   });
 
-  // Mocked behavior: fetch response with 401 status
-  // Input: valid tripID and route with no stops in db
+  // Mocked behavior: missing API key and db returns a valid route
+  // Input: valid tripID
   // Expected status code: 500
   // Expected behavior: error handled gracefully
   // Expected output: error message
@@ -485,7 +486,8 @@ describe("Mocked: POST /recipes", () => {
     process.env.EDAMAM_APP_ID = originalAppId;
   });
 
-  /// Mocked behavior: fetch response with valid recipe but missing recipeName and uri
+  // Mocked behavior: fetch response with valid recipe but missing label and uri
+  //                  and db returns a valid route
   // Input: valid tripID
   // Expected status code: 201
   // Expected behavior: recipe added to database
@@ -538,11 +540,11 @@ describe("Mocked: POST /recipes", () => {
     expect(MongoClient.prototype.db).toHaveBeenCalled();
   });
 
-  // Mocked behavior: fetchRecipe returns a valid recipe
-  // Input: valid tripID
+  // Mocked behavior: RecipeHelper.saveRecipesToDb has an empty implementation
+  // Input: valid tripID with no route in db
   // Expected status code: 404
-  // Expected behavior: recipe added to database
-  // Expected output: list of recipes
+  // Expected behavior: saveRecipesToDb not called
+  // Expected output: error message
   test("No route for tripID", async () => {
     jest.spyOn(RecipeHelper, "saveRecipesToDb").mockImplementation();
 
@@ -555,10 +557,11 @@ describe("Mocked: POST /recipes", () => {
     expect(RecipeHelper.saveRecipesToDb).not.toHaveBeenCalled();
   });
 
-  // Mocked behavior: fetchRecipe returns a valid recipe
+  // Mocked behavior: RecipeHelper.createRecipesfromRoute returns a valid recipe list
+  //                  and in-mem db contains a valid route
   // Input: valid tripID
   // Expected status code: 201
-  // Expected behavior: recipe added to database
+  // Expected behavior: createRecipesfromRoute called
   // Expected output: list of recipes
   test("Valid recipes returned", async () => {
     jest
@@ -638,40 +641,37 @@ describe("Mocked: GET /recipes/:id", () => {
     expect(RecipeHelper.getRecipesFromDb).not.toHaveBeenCalled();
   });
 
-  // Mocked behavior: RecipeHelper.getRecipesFromDb
+  // Mocked behavior: RecipeHelper.getRecipesFromDb returns valid recipe list
   // Input: valid tripID
-  // Expected status code: 200 ok
-  // Expected behavior: recipes are added to database
+  // Expected status code: 200
+  // Expected behavior: getRecipesFromDb called with input tripID
   // Expected output: a list of all recipes
   test("Insert database success", async () => {
-    // Mock the database response
+    // mock db response
     jest
       .spyOn(RecipeHelper, "getRecipesFromDb")
-      .mockResolvedValue(SAMPLE_RECIPES_LIST); // Return the `recipes` array
+      .mockResolvedValue(SAMPLE_RECIPES_LIST);
 
     const tripID = new ObjectId(123);
-
-    // Make the request to the endpoint
     const response = await request(app)
       .get(`/recipes/${tripID.toHexString()}`)
       .expect(200);
 
-    // Assertions
     expect(response.body).toEqual(SAMPLE_RECIPES_LIST);
     expect(RecipeHelper.getRecipesFromDb).toHaveBeenCalledWith(
       tripID.toHexString(),
     );
   });
 
-  // Mocked behavior: in-memory db with valid recipe
-  // Input: valid trip id with mocked valid recipe
+  // Mocked behavior: in-memory db with valid recipe list
+  // Input: valid trip id with mocked valid recipe list
   // Expected status code: 200
   // Expected behavior: recipe retrieved from db successfully
-  // Expected output: recipe object
+  // Expected output: recipe list
   test("Retrieve valid recipe from in-mem", async () => {
     const tripID = new ObjectId().toHexString();
 
-    // setup: insert sample recipe into db
+    // setup: insert sample recipes into in-memory db
     const db = client.db(RECIPES_DB_NAME);
     const collection = db.collection<RecipeDBEntry>(RECIPE_COLLECTION_NAME);
     await collection.insertOne({ tripID, recipes: SAMPLE_RECIPES_LIST });
@@ -685,27 +685,25 @@ describe("Mocked: GET /recipes/:id", () => {
     // db cleanup happens in afterEach in jest.setup.ts
   });
 
-  // Mocked behavior: RecipeHelper.getRecipesFromDb with mocked recipe object
-  // Input: valid trip id with mocked valid recipe
+  // Mocked behavior: RecipeHelper.getRecipesFromDb with mocked recipe list
+  // Input: valid tripID
   // Expected status code: 200
-  // Expected behavior: recipe returned successfully
-  // Expected output: recipe object
+  // Expected behavior: getRecipesFromDb called with input tripID
+  // Expected output: recipe list
   test("Valid tripID and recipe returned", async () => {
-    // Mock data that matches the expected structure
     const mockRecipeData = {
       tripID: "1234",
-      recipes: SAMPLE_RECIPES_LIST, // Use the recipes array from SAMPLE_RECIPE
+      recipes: SAMPLE_RECIPES_LIST,
     };
 
-    // Mock the database response
+    // mock db response
     jest
       .spyOn(RecipeHelper, "getRecipesFromDb")
-      .mockResolvedValue(mockRecipeData.recipes); // Return the full object with `recipes` property
+      .mockResolvedValue(mockRecipeData.recipes);
 
     const tripID = new ObjectId().toHexString();
     const response = await request(app).get(`/recipes/${tripID}`).expect(200);
 
-    // Assertions
     expect(response.body).toEqual(SAMPLE_RECIPES_LIST);
     expect(RecipeHelper.getRecipesFromDb).toHaveBeenCalledWith(tripID);
   });
@@ -775,9 +773,9 @@ describe("Mocked: DELETE /recipes/:id", () => {
   });
 
   // Mocked behavior: RecipeHelper.deleteRecipesFromDb with mocked successful deletion
-  // Input: valid tripID with mocked successful deletion
+  // Input: valid tripID
   // Expected status code: 200
-  // Expected behavior: recipes deleted successfully
+  // Expected behavior: deleteRecipesFromDb called
   // Expected output: success message
   test("Valid tripID and recipes deleted", async () => {
     jest.spyOn(RecipeHelper, "deleteRecipesFromDb").mockResolvedValue(1);
