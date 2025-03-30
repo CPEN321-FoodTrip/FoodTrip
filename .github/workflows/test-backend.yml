@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: backend
-        run: npm install
+        run: npm ci
 
       - name: Run Jest tests with coverage
         working-directory: backend
