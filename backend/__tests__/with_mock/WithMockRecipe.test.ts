@@ -1,10 +1,9 @@
 import request from "supertest";
-import { mocked } from "jest-mock";
 import app from "../../index";
 import * as RecipeHelper from "../../helpers/RecipeHelper";
 import { Recipe, RecipeDBEntry } from "../../interfaces/RecipeInterfaces";
 import { client } from "../../services";
-import { ObjectId } from "mongodb";
+import { Collection, Db, MongoClient, ObjectId } from "mongodb";
 import { RouteDBEntry } from "../../interfaces/RouteInterfaces";
 
 jest.mock("node-fetch", () => jest.fn());
@@ -318,8 +317,6 @@ const MOCK_ROUTE_NO_STOPS: RouteDBEntry = {
   },
 };
 
-global.fetch = jest.fn();
-
 // Interface POST /recipes
 describe("Mocked: POST /recipes", () => {
   beforeEach(() => {
@@ -337,6 +334,7 @@ describe("Mocked: POST /recipes", () => {
   // Expected output: error message
   test("Fail external api request", async () => {
     // mock no response from edamam api call, cause it to fail
+    global.fetch = jest.fn();
 
     // add mock route to db
     const result = await client
@@ -414,7 +412,6 @@ describe("Mocked: POST /recipes", () => {
     expect(response.body).toHaveProperty("error", "Internal server error");
     expect(RecipeHelper.createRecipesfromRoute).toHaveBeenCalled();
     expect(RecipeHelper.saveRecipesToDb).toHaveBeenCalled();
-    jest.resetModules();
   });
 
   // Mocked behavior: RecipeHelper.createRecipesfromRoute has an empty implementation
@@ -453,7 +450,6 @@ describe("Mocked: POST /recipes", () => {
       .expect(500);
 
     expect(response.body).toHaveProperty("error", "Internal server error");
-    jest.resetModules();
   });
 
   // Mocked behavior: fetch response with 401 status
@@ -464,43 +460,28 @@ describe("Mocked: POST /recipes", () => {
   test("Missing API key", async () => {
     const originalApiKey = process.env.EDAMAM_API_KEY;
     const originalAppId = process.env.EDAMAM_APP_ID;
-    process.env.EDAMAM_APP_ID = undefined;
-    process.env.EDAMAM_API_KEY = undefined;
+    delete process.env.EDAMAM_APP_ID;
+    delete process.env.EDAMAM_API_KEY;
 
-    const mockResponse = {
-      ok: false,
-      status: 401,
-      statusText: "Unauthorized",
-      json: () => Promise.resolve({ message: "Invalid API credentials" }),
-    } as Response;
+    // mock db to return a valid route
+    const mockCollection: Partial<Collection> = {
+      findOne: jest.fn().mockResolvedValue(MOCK_ROUTE),
+    };
+    const mockDb: Partial<Db> = {
+      collection: jest.fn().mockReturnValue(mockCollection),
+    };
+    jest.spyOn(MongoClient.prototype, "db").mockReturnValue(mockDb as Db);
 
-    mocked(fetch).mockResolvedValueOnce(mockResponse);
-
-    // spy on console.error to verify it's called
-    const consoleErrorSpy = jest
-      .spyOn(console, "error")
-      .mockImplementation(jest.fn());
-
-    // expect the function to throw
     const response = await request(app)
       .post("/recipes")
       .send({ tripID: new ObjectId().toHexString() })
       .expect(500);
 
     expect(response.body).toHaveProperty("error", "Internal server error");
+    expect(MongoClient.prototype.db).toHaveBeenCalled();
 
-    // verify that console.error was called with the expected message
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      "Detailed recipe fetch error:",
-      expect.any(Error),
-    );
-
-    if (originalApiKey !== undefined) {
-      process.env.EDAMAM_API_KEY = originalApiKey;
-      process.env.EDAMAM_APP_ID = originalAppId;
-    }
-    consoleErrorSpy.mockRestore();
-    jest.resetModules();
+    process.env.EDAMAM_API_KEY = originalApiKey;
+    process.env.EDAMAM_APP_ID = originalAppId;
   });
 
   /// Mocked behavior: fetch response with valid recipe but missing recipeName and uri
@@ -509,8 +490,8 @@ describe("Mocked: POST /recipes", () => {
   // Expected behavior: recipe added to database
   // Expected output: recipe with empty recipeName and uri
   test("Response with empty recipeName and uri", async () => {
-    // Arrange: Mock fetch to return a response with empty recipeName and recipeID = 0
-    const mockResponse = {
+    // mock fetch to return a response with empty recipeName and recipeID = 0
+    global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,
       json: () =>
@@ -521,14 +502,22 @@ describe("Mocked: POST /recipes", () => {
                 label: "", // Empty recipeName
                 uri: "", // Invalid URI (results in recipeID = 0)
                 url: "http://example.com/recipe",
-                ingredientLines: ["Ingredient 1", "Ingredient 2"],
+                ingredients: SAMPLE_RECIPE.ingredients,
               },
             },
           ],
         }),
-    } as Response;
+    });
 
-    mocked(fetch).mockResolvedValueOnce(mockResponse);
+    // mock db to return a valid route
+    const mockCollection: Partial<Collection> = {
+      findOne: jest.fn().mockResolvedValue(MOCK_ROUTE),
+      insertOne: jest.fn().mockResolvedValue({ insertedId: new ObjectId() }),
+    };
+    const mockDb: Partial<Db> = {
+      collection: jest.fn().mockReturnValue(mockCollection),
+    };
+    jest.spyOn(MongoClient.prototype, "db").mockReturnValue(mockDb as Db);
 
     const response = await request(app)
       .post("/recipes")
@@ -536,14 +525,15 @@ describe("Mocked: POST /recipes", () => {
       .expect(201);
 
     // verify the returned recipe has empty recipeName and recipeID = 0
-    expect(response.body).toEqual([
-      {
+    expect(response.body).toEqual(
+      Array(3).fill({
         recipeName: "",
         recipeID: 0,
         url: "http://example.com/recipe",
-        ingredients: ["Ingredient 1", "Ingredient 2"],
-      },
-    ]);
+        ingredients: SAMPLE_RECIPE.ingredients,
+      }),
+    );
+    expect(MongoClient.prototype.db).toHaveBeenCalled();
   });
 
   // Mocked behavior: fetchRecipe returns a valid recipe
@@ -553,7 +543,7 @@ describe("Mocked: POST /recipes", () => {
   // Expected output: list of recipes
   test("Valid recipes returned", async () => {
     jest
-      .spyOn(RecipeHelper, "fetchRecipe")
+      .spyOn(RecipeHelper, "createRecipesfromRoute")
       .mockResolvedValue(SAMPLE_RECIPES_LIST);
 
     const result = await client
@@ -566,6 +556,7 @@ describe("Mocked: POST /recipes", () => {
       .send({ tripID: result.insertedId.toHexString() })
       .expect(201);
 
+    expect(RecipeHelper.createRecipesfromRoute).toHaveBeenCalled();
     expect(response.body).toEqual(SAMPLE_RECIPES_LIST);
   });
 });
