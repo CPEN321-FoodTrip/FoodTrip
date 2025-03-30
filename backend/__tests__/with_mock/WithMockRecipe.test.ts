@@ -5,7 +5,6 @@ import { Recipe, RecipeDBEntry } from "../../interfaces/RecipeInterfaces";
 import { client } from "../../services";
 import { Collection, Db, MongoClient, ObjectId } from "mongodb";
 import { RouteDBEntry } from "../../interfaces/RouteInterfaces";
-import { Response } from "node-fetch";
 
 jest.mock("node-fetch", () => jest.fn());
 
@@ -470,6 +469,7 @@ describe("Mocked: POST /recipes", () => {
     };
     const mockDb: Partial<Db> = {
       collection: jest.fn().mockReturnValue(mockCollection),
+      databaseName: "route_data",
     };
     jest.spyOn(MongoClient.prototype, "db").mockReturnValue(mockDb as Db);
 
@@ -517,6 +517,7 @@ describe("Mocked: POST /recipes", () => {
     };
     const mockDb: Partial<Db> = {
       collection: jest.fn().mockReturnValue(mockCollection),
+      databaseName: "route_data",
     };
     jest.spyOn(MongoClient.prototype, "db").mockReturnValue(mockDb as Db);
 
