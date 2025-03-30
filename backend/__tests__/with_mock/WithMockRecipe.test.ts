@@ -3,7 +3,7 @@ import app from "../../index";
 import * as RecipeHelper from "../../helpers/RecipeHelper";
 import { Recipe, RecipeDBEntry } from "../../interfaces/RecipeInterfaces";
 import { client } from "../../services";
-import { Collection, Db, MongoClient, ObjectId } from "mongodb";
+import { Db, MongoClient, ObjectId } from "mongodb";
 import { RouteDBEntry } from "../../interfaces/RouteInterfaces";
 
 jest.mock("node-fetch", () => jest.fn());
