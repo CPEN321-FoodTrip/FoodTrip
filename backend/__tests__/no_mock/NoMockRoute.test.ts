@@ -64,8 +64,8 @@ describe("Unmocked: POST /routes", () => {
       .send({
         userID: "test-user",
         origin: "Vancouver",
-        destination: "Toronto",
-        numStops: 1,
+        destination: "Nanaimo",
+        numStops: 6,
       })
       .expect(201);
 
@@ -74,7 +74,7 @@ describe("Unmocked: POST /routes", () => {
     expect(response.body).toHaveProperty("start_location");
     expect(response.body).toHaveProperty("end_location");
     expect(Array.isArray(response.body.stops)).toBe(true);
-    expect(response.body.stops).toHaveLength(1); // 1 stop
+    expect(response.body.stops).toHaveLength(6); // 6 stops
 
     // db verification
     const db = client.db(ROUTES_DB_NAME);
@@ -85,9 +85,9 @@ describe("Unmocked: POST /routes", () => {
     expect(result).not.toBeNull();
     expect(result).toHaveProperty("userID", "test-user");
     expect(result?.route.start_location).toHaveProperty("name", "Vancouver");
-    expect(result?.route.end_location).toHaveProperty("name", "Toronto");
+    expect(result?.route.end_location).toHaveProperty("name", "Nanaimo");
     expect(Array.isArray(result?.route.stops)).toBe(true);
-    expect(result?.route.stops).toHaveLength(1); // 1 stop
+    expect(result?.route.stops).toHaveLength(6); // 6 stops
 
     // db cleanup happens in afterEach in jest.setup.ts
   });
@@ -106,23 +106,23 @@ describe("Unmocked: POST /routes", () => {
     // error should mention parameters missing
     expect(
       response.body.errors.some((error: { msg: string }) =>
-        error.msg.includes("userID")
-      )
+        error.msg.includes("userID"),
+      ),
     ).toBe(true);
     expect(
       response.body.errors.some((error: { msg: string }) =>
-        error.msg.includes("origin")
-      )
+        error.msg.includes("origin"),
+      ),
     ).toBe(true);
     expect(
       response.body.errors.some((error: { msg: string }) =>
-        error.msg.includes("destination")
-      )
+        error.msg.includes("destination"),
+      ),
     ).toBe(true);
     expect(
       response.body.errors.some((error: { msg: string }) =>
-        error.msg.includes("numStops")
-      )
+        error.msg.includes("numStops"),
+      ),
     ).toBe(true);
 
     // verify db unchaged
@@ -221,8 +221,8 @@ describe("Unmocked: POST /routes", () => {
     expect(response.body).toHaveProperty("errors");
     expect(
       response.body.errors.some((error: { msg: string }) =>
-        error.msg.includes("must be an integer")
-      )
+        error.msg.includes("must be an integer"),
+      ),
     ).toBe(true);
 
     // verify db unchaged
@@ -256,7 +256,7 @@ describe("Unmocked: POST /routes", () => {
 
     expect(response.body).toHaveProperty("error");
     expect(response.body.error).toContain(
-      "Number of stops must be between 1 and 10"
+      "Number of stops must be between 1 and 10",
     );
 
     // verify db unchaged
@@ -290,7 +290,7 @@ describe("Unmocked: POST /routes", () => {
 
     expect(response.body).toHaveProperty("error");
     expect(response.body.error).toContain(
-      "Number of stops must be between 1 and 10"
+      "Number of stops must be between 1 and 10",
     );
 
     // verify db unchaged
@@ -324,7 +324,7 @@ describe("Unmocked: POST /routes", () => {
 
     expect(response.body).toHaveProperty("error");
     expect(response.body.error).toContain(
-      "Origin and destination cannot be the same"
+      "Origin and destination cannot be the same",
     );
 
     // verify db unchaged
@@ -357,11 +357,11 @@ describe("Unmocked: GET /routes/:id", () => {
 
     expect(response.body).toHaveProperty(
       "start_location",
-      SAMPLE_ROUTE.start_location
+      SAMPLE_ROUTE.start_location,
     );
     expect(response.body).toHaveProperty(
       "end_location",
-      SAMPLE_ROUTE.end_location
+      SAMPLE_ROUTE.end_location,
     );
     expect(response.body).toHaveProperty("stops", SAMPLE_ROUTE.stops);
 
