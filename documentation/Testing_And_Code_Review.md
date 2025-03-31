@@ -6,6 +6,9 @@
 | ----------------- | --------------------- | ------------- |
 | March 30, 2025 | 3.2 | Updated required response time to 3s to match test implementation |
 | March 30, 2025 | 2.3 & 2.4 | Updated screenshots of coverage to reflect changes in implementation |
+| March 30, 2025 | 5.1 - 5.3 | Updated screenshots of codacy and commit hash where run to reflect changes in implementation |
+| March 30, 2025 | 2.1 | Updated links of backend tests and commit hash where run to reflect changes in implementation |
+| March 30, 2025 | 3.1 | Updated links of non-functional tests to reflect changes in implementation |
 
 ---
 
