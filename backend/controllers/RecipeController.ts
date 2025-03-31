@@ -28,10 +28,8 @@ export const createRecipes = async (
       return res.status(404).json({ error: "Trip not found" });
     }
 
+    // allergies are optional
     const allergies = await getAllergiesFromDb(userID);
-    if (!allergies) {
-      return res.status(404).json({ error: "User not found" });
-    }
 
     const recipes = await createRecipesfromRoute(
       route,
