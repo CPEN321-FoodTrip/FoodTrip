@@ -1,5 +1,9 @@
 import { body } from "express-validator";
-import { createRecipes, deleteRecipes, getRecipes } from "../controllers/RecipeController";
+import {
+  createRecipes,
+  deleteRecipes,
+  getRecipes,
+} from "../controllers/RecipeController";
 
 export const RecipeRoutes = [
   {
@@ -11,6 +15,10 @@ export const RecipeRoutes = [
         .exists()
         .isString()
         .withMessage("tripID is required and must be a string"),
+      body("userID")
+        .exists()
+        .isString()
+        .withMessage("userID is required and must be a string"),
     ],
   },
   {

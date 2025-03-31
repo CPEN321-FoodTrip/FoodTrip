@@ -169,7 +169,7 @@ const SAMPLE_RECIPE = {
 
 // Interface POST /recipes
 describe("Unmocked: POST /recipes", () => {
-  // Input: string tripID of a route that has already been created and stored in route DB
+  // Input: string tripID of a route that has already been created and stored in route DB and userID
   // Expected status code: 201
   // Expected behavior: recipes are successfully generated and saved in db
   // Expected output: object with tripID and array of recipes objects. recipes contain recipeName,
@@ -178,7 +178,7 @@ describe("Unmocked: POST /recipes", () => {
     // setup: insert sample route into db
     const route_db = client.db(ROUTES_DB_NAME);
     const route_collection = route_db.collection<RouteDBEntry>(
-      ROUTES_COLLECTION_NAME
+      ROUTES_COLLECTION_NAME,
     );
     const route_result = await route_collection.insertOne(SAMPLE_ROUTE);
     const tripID = route_result.insertedId.toHexString();
@@ -186,6 +186,7 @@ describe("Unmocked: POST /recipes", () => {
       .post("/recipes")
       .send({
         tripID,
+        userID: "test-user",
       })
       .expect(201);
 
@@ -211,15 +212,15 @@ describe("Unmocked: POST /recipes", () => {
     expect(result?.recipes[1]).toHaveProperty("recipeID", 113);
     expect(result?.recipes[1]).toHaveProperty(
       "url",
-      "https://www.foodnetwork.com/recipes/biscotti-regina-3608012"
+      "https://www.foodnetwork.com/recipes/biscotti-regina-3608012",
     );
     expect(result?.recipes[1]).toHaveProperty(
       "ingredients",
-      SAMPLE_RECIPE.recipes[0].ingredients
+      SAMPLE_RECIPE.recipes[0].ingredients,
     );
   });
 
-  // Input: missing body parameters
+  // Input: missing body parameters (tripID and userID)
   // Expected status code: 400
   // Expected behavior: database is unchanged
   // Expected output: error message indicating missing parameters
@@ -234,8 +235,13 @@ describe("Unmocked: POST /recipes", () => {
     // error should mention parameters missing
     expect(
       response.body.errors.some((error: { msg: string }) =>
-        error.msg.includes("tripID")
-      )
+        error.msg.includes("tripID"),
+      ),
+    ).toBe(true);
+    expect(
+      response.body.errors.some((error: { msg: string }) =>
+        error.msg.includes("userID"),
+      ),
     ).toBe(true);
 
     // verify db unchaged
@@ -247,7 +253,7 @@ describe("Unmocked: POST /recipes", () => {
     expect(dbCountBefore).toBe(dbCountAfter);
   });
 
-  // Input: Malformed parameters (tripID is not an ObjectId)
+  // Input: Malformed parameter (tripID is not an ObjectId) and valid userID
   // Expected status code: 400
   // Expected behavior: database is unchanged
   // Expected output: error message indicating invalid tripID
@@ -261,6 +267,7 @@ describe("Unmocked: POST /recipes", () => {
       .post("/recipes")
       .send({
         tripID: "123", // tripID should be an ObjectId
+        userID: "test-user",
       })
       .expect(400);
 
@@ -276,7 +283,7 @@ describe("Unmocked: POST /recipes", () => {
     expect(dbCountBefore).toBe(dbCountAfter);
   });
 
-  // Input: tripID is not in the route database
+  // Input: tripID is not in the route database and valid userID
   // Expected status code: 404
   // Expected behavior: database is unchanged
   // Expected output: error message indicating route does not exist
@@ -290,6 +297,7 @@ describe("Unmocked: POST /recipes", () => {
       .post("/recipes")
       .send({
         tripID: new ObjectId().toHexString(), // nonexistant tripID
+        userID: "test-user",
       })
       .expect(404);
 
@@ -305,7 +313,7 @@ describe("Unmocked: POST /recipes", () => {
     expect(dbCountBefore).toBe(dbCountAfter);
   });
 
-  // Input: tripID points to a route with no stops
+  // Input: tripID points to a route with no stops and valid userID
   // Expected status code: 500
   // Expected behavior: database is unchanged
   // Expected output: error message indicating internal issue
@@ -313,7 +321,7 @@ describe("Unmocked: POST /recipes", () => {
     // insert route with no stops
     const route_db = client.db(ROUTES_DB_NAME);
     const route_collection = route_db.collection<RouteDBEntry>(
-      ROUTES_COLLECTION_NAME
+      ROUTES_COLLECTION_NAME,
     );
     const route_result = await route_collection.insertOne({
       userID: "test-user",
@@ -343,6 +351,7 @@ describe("Unmocked: POST /recipes", () => {
       .post("/recipes")
       .send({
         tripID: route_result.insertedId.toHexString(),
+        userID: "test-user",
       })
       .expect(500);
 
@@ -358,34 +367,29 @@ describe("Unmocked: POST /recipes", () => {
     expect(dbCountBefore).toBe(dbCountAfter);
   });
 
-  // Input: tripID points to a route with no stops
-  // Expected status code: 500
+  // Input: userID points to list of allergies and tripID points to a route with stops
+  // Expected status code: 404
   // Expected behavior: database is unchanged
-  // Expected output: error message indicating internal issue
-  test("Malformed route with no stops", async () => {
-    // insert route with no stops
+  // Expected output: error message indicating no recipes found
+  test("Can't generate recipes that meet allergy restrictions", async () => {
+    // insert allergies for user
+    const allergy_db = client.db("preferences");
+    const allergy_collection = allergy_db.collection("allergies");
+    await allergy_collection.insertMany(
+      ["nuts", "sesame", "eggs", "sugar", "salt", "flour", "Pineapple"].map(
+        (allergy) => ({
+          userID: "test-user",
+          allergy,
+        }),
+      ),
+    );
+
+    // insert valid route
     const route_db = client.db(ROUTES_DB_NAME);
     const route_collection = route_db.collection<RouteDBEntry>(
-      ROUTES_COLLECTION_NAME
+      ROUTES_COLLECTION_NAME,
     );
-    const route_result = await route_collection.insertOne({
-      userID: "test-user",
-      route: {
-        start_location: {
-          name: "Vancouver",
-          latitude: 49.2608724,
-          longitude: -123.113952,
-          population: 631486,
-        },
-        end_location: {
-          name: "Toronto",
-          latitude: 43.6534817,
-          longitude: -79.3839347,
-          population: 2731571,
-        },
-        stops: [],
-      },
-    });
+    const route_result = await route_collection.insertOne(SAMPLE_ROUTE);
 
     const dbCountBefore = await client
       .db(RECIPE_DB_NAME)
@@ -396,11 +400,14 @@ describe("Unmocked: POST /recipes", () => {
       .post("/recipes")
       .send({
         tripID: route_result.insertedId.toHexString(),
+        userID: "test-user",
       })
-      .expect(500);
+      .expect(404);
 
-    expect(response.body).toHaveProperty("error");
-    expect(response.body.error).toContain("Internal server error");
+    expect(response.body).toHaveProperty(
+      "error",
+      "Could not find recipes that match user preferences",
+    );
 
     // verfify db unchaged
     const dbCountAfter = await client
@@ -432,19 +439,19 @@ describe("Unmocked: GET /recipes/:id", () => {
     expect(response.body).toHaveLength(1);
     expect(response.body[0]).toHaveProperty(
       "recipeName",
-      SAMPLE_RECIPE.recipes[0].recipeName
+      SAMPLE_RECIPE.recipes[0].recipeName,
     );
     expect(response.body[0]).toHaveProperty(
       "recipeID",
-      SAMPLE_RECIPE.recipes[0].recipeID
+      SAMPLE_RECIPE.recipes[0].recipeID,
     );
     expect(response.body[0]).toHaveProperty(
       "url",
-      SAMPLE_RECIPE.recipes[0].url
+      SAMPLE_RECIPE.recipes[0].url,
     );
     expect(response.body[0]).toHaveProperty(
       "ingredients",
-      SAMPLE_RECIPE.recipes[0].ingredients
+      SAMPLE_RECIPE.recipes[0].ingredients,
     );
     expect(response.body).toEqual(SAMPLE_RECIPE.recipes);
 
@@ -479,7 +486,7 @@ describe("Unmocked: GET /recipes/:id", () => {
     const response = await request(app).get(`/recipes/${tripID}`).expect(404);
     expect(response.body).toHaveProperty(
       "error",
-      "No recipes found for tripID"
+      "No recipes found for tripID",
     );
   });
 });
@@ -558,14 +565,14 @@ describe("Unmocked: DELETE /recipes/:id", () => {
     // setup: insert sample route
     const route_db = client.db(ROUTES_DB_NAME);
     const route_collection = route_db.collection<RouteDBEntry>(
-      ROUTES_COLLECTION_NAME
+      ROUTES_COLLECTION_NAME,
     );
     const route_result = await route_collection.insertOne(SAMPLE_ROUTE);
     const tripID = route_result.insertedId.toHexString();
 
     const recipe_db = client.db(RECIPE_DB_NAME);
     const recipe_collection = recipe_db.collection<RecipeDBEntry>(
-      RECIPE_COLLECTION_NAME
+      RECIPE_COLLECTION_NAME,
     );
     const originalCount = await recipe_collection.countDocuments();
 
@@ -574,7 +581,7 @@ describe("Unmocked: DELETE /recipes/:id", () => {
       .expect(404);
     expect(response.body).toHaveProperty(
       "error",
-      "No recipes found for tripID"
+      "No recipes found for tripID",
     );
 
     // check db to make sure nothing was deleted
@@ -599,7 +606,7 @@ describe("Unmocked: DELETE /recipes/:id", () => {
       .expect(404);
     expect(response.body).toHaveProperty(
       "error",
-      "No recipes found for tripID"
+      "No recipes found for tripID",
     );
 
     // check nothing in db

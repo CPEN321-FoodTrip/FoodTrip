@@ -1,9 +1,11 @@
 import request from "supertest";
 import app from "../../index";
 import * as RecipeHelper from "../../helpers/RecipeHelper";
+import * as RouteHelper from "../../helpers/RouteHelpers";
+import * as PreferenceHelper from "../../helpers/PreferenceHelper";
 import { Recipe, RecipeDBEntry } from "../../interfaces/RecipeInterfaces";
 import { client } from "../../services";
-import { Db, MongoClient, ObjectId } from "mongodb";
+import { ObjectId } from "mongodb";
 import { RouteDBEntry } from "../../interfaces/RouteInterfaces";
 
 jest.mock("node-fetch", () => jest.fn());
@@ -319,8 +321,12 @@ const MOCK_ROUTE_NO_STOPS: RouteDBEntry = {
 
 // Interface POST /recipes
 describe("Mocked: POST /recipes", () => {
+  // Mocked behavior: mock valid route returned from db
   beforeEach(() => {
     jest.clearAllMocks();
+    jest
+      .spyOn(RouteHelper, "getRouteFromDb")
+      .mockResolvedValue(MOCK_ROUTE.route);
   });
 
   afterEach(() => {
@@ -328,7 +334,7 @@ describe("Mocked: POST /recipes", () => {
   });
 
   // Mocked behavior: mock edamam api call that does not get received and mock route in db
-  // Input: valid tripID
+  // Input: valid tripID and userID
   // Expected status code: 500
   // Expected behavior: error handled gracefully
   // Expected output: error message
@@ -346,6 +352,7 @@ describe("Mocked: POST /recipes", () => {
       .post("/recipes")
       .send({
         tripID: result.insertedId.toHexString(),
+        userID: "test-user",
       })
       .expect(500);
 
@@ -353,7 +360,7 @@ describe("Mocked: POST /recipes", () => {
   });
 
   // Mocked behavior: mock edamam api call to return 503 status response and mock route in db
-  // Input: valid tripID
+  // Input: valid tripID and userID
   // Expected status code: 500
   // Expected behavior: error handled gracefully
   // Expected output: error message
@@ -375,6 +382,7 @@ describe("Mocked: POST /recipes", () => {
       .post("/recipes")
       .send({
         tripID: route_response.insertedId.toHexString(),
+        userID: "test-user",
       })
       .expect(500);
 
@@ -383,7 +391,7 @@ describe("Mocked: POST /recipes", () => {
 
   // Mocked behavior: RecipeHelper.saveRecipesToDb throws an error and RecipeHelper.createRecipesfromRoute
   //                  returns a valid recipe
-  // Input: tripID valid
+  // Input: tripID and userID valid
   // Expected status code: 500
   // Expected behavior: error handled gracefully
   // Expected output: error message
@@ -406,16 +414,18 @@ describe("Mocked: POST /recipes", () => {
       .post("/recipes")
       .send({
         tripID: new ObjectId().toHexString(),
+        userID: "test-user",
       })
       .expect(500);
 
     expect(response.body).toHaveProperty("error", "Internal server error");
+    expect(RouteHelper.getRouteFromDb).toHaveBeenCalled();
     expect(RecipeHelper.createRecipesfromRoute).toHaveBeenCalled();
     expect(RecipeHelper.saveRecipesToDb).toHaveBeenCalled();
   });
 
   // Mocked behavior: RecipeHelper.createRecipesfromRoute has an empty implementation
-  // Input: invalid tripID
+  // Input: invalid tripID and valid userID
   // Expected status code: 400
   // Expected behavior: createRecipesfromRoute not called
   // Expected output: error message for invalid tripID format
@@ -424,19 +434,21 @@ describe("Mocked: POST /recipes", () => {
 
     const response = await request(app)
       .post("/recipes")
-      .send({ tripID: "invalidObjectId" }); // invalid ObjectId format
+      .send({ tripID: "invalidObjectId", userID: "test-user" }); // invalid ObjectId format
 
     expect(response.status).toBe(400);
     expect(response.body.error).toBe("Invalid tripID format");
     expect(RecipeHelper.createRecipesfromRoute).not.toHaveBeenCalled();
   });
 
-  /// Mocked behavior: RecipeHelper.saveRecipesToDb has an empty implementation
-  // Input: valid tripID and route with no stops in db
+  // Mocked behavior: RecipeHelper.saveRecipesToDb has an empty implementation and route with
+  //                  no stops in in-memory db
+  // Input: valid tripID and userID
   // Expected status code: 500
   // Expected behavior: saveRecipesToDb not called
   // Expected output: error message
   test("No stops found in route", async () => {
+    jest.restoreAllMocks(); // clear mock from beforeEach
     jest.spyOn(RecipeHelper, "saveRecipesToDb").mockImplementation();
 
     const result = await client
@@ -446,15 +458,15 @@ describe("Mocked: POST /recipes", () => {
 
     const response = await request(app)
       .post("/recipes")
-      .send({ tripID: result.insertedId.toHexString() })
+      .send({ tripID: result.insertedId.toHexString(), userID: "test-user" })
       .expect(500);
 
     expect(response.body).toHaveProperty("error", "Internal server error");
     expect(RecipeHelper.saveRecipesToDb).not.toHaveBeenCalled();
   });
 
-  // Mocked behavior: missing API key and db returns a valid route
-  // Input: valid tripID
+  // Mocked behavior: missing API key and app id
+  // Input: valid tripID and userID
   // Expected status code: 500
   // Expected behavior: error handled gracefully
   // Expected output: error message
@@ -464,31 +476,19 @@ describe("Mocked: POST /recipes", () => {
     delete process.env.EDAMAM_APP_ID;
     delete process.env.EDAMAM_API_KEY;
 
-    // mock db to return a valid route
-    const mockCollection = {
-      findOne: jest.fn().mockResolvedValue(MOCK_ROUTE),
-    };
-    const mockDb = {
-      collection: jest.fn().mockReturnValue(mockCollection),
-      databaseName: "route_data",
-    } as unknown as Db;
-    jest.spyOn(MongoClient.prototype, "db").mockReturnValue(mockDb);
-
     const response = await request(app)
       .post("/recipes")
-      .send({ tripID: new ObjectId().toHexString() })
+      .send({ tripID: new ObjectId().toHexString(), userID: "test-user" })
       .expect(500);
 
     expect(response.body).toHaveProperty("error", "Internal server error");
-    expect(MongoClient.prototype.db).toHaveBeenCalled();
 
     process.env.EDAMAM_API_KEY = originalApiKey;
     process.env.EDAMAM_APP_ID = originalAppId;
   });
 
   // Mocked behavior: fetch response with valid recipe but missing label and uri
-  //                  and db returns a valid route
-  // Input: valid tripID
+  // Input: valid tripID and userID
   // Expected status code: 201
   // Expected behavior: recipe added to database
   // Expected output: recipe with empty recipeName and uri
@@ -512,20 +512,9 @@ describe("Mocked: POST /recipes", () => {
         }),
     });
 
-    // mock db to return a valid route
-    const mockCollection = {
-      findOne: jest.fn().mockResolvedValue(MOCK_ROUTE),
-      insertOne: jest.fn().mockResolvedValue({ insertedId: new ObjectId() }),
-    };
-    const mockDb = {
-      collection: jest.fn().mockReturnValue(mockCollection),
-      databaseName: "route_data",
-    } as unknown as Db;
-    jest.spyOn(MongoClient.prototype, "db").mockReturnValue(mockDb);
-
     const response = await request(app)
       .post("/recipes")
-      .send({ tripID: new ObjectId().toHexString() })
+      .send({ tripID: new ObjectId().toHexString(), userID: "test-user" })
       .expect(201);
 
     // verify the returned recipe has empty recipeName and recipeID = 0
@@ -537,7 +526,6 @@ describe("Mocked: POST /recipes", () => {
         ingredients: SAMPLE_RECIPE.ingredients,
       }),
     );
-    expect(MongoClient.prototype.db).toHaveBeenCalled();
   });
 
   // Mocked behavior: RecipeHelper.saveRecipesToDb has an empty implementation
@@ -546,24 +534,29 @@ describe("Mocked: POST /recipes", () => {
   // Expected behavior: saveRecipesToDb not called
   // Expected output: error message
   test("No route for tripID", async () => {
+    jest.restoreAllMocks(); // clear mock from beforeEach
     jest.spyOn(RecipeHelper, "saveRecipesToDb").mockImplementation();
 
     const response = await request(app)
       .post("/recipes")
-      .send({ tripID: new ObjectId().toHexString() }) // nonexistant tripID
+      .send({ tripID: new ObjectId().toHexString(), userID: "test-user" }) // nonexistant tripID
       .expect(404);
 
     expect(response.body).toHaveProperty("error", "Trip not found");
     expect(RecipeHelper.saveRecipesToDb).not.toHaveBeenCalled();
   });
 
-  // Mocked behavior: RecipeHelper.createRecipesfromRoute returns a valid recipe list
+  // Mocked behavior: PreferenceHelper.getAllergiesFromDb returns peanut allergy,
+  //                  RecipeHelper.createRecipesfromRoute returns a valid recipe list
   //                  and in-mem db contains a valid route
-  // Input: valid tripID
+  // Input: valid tripID and userID
   // Expected status code: 201
-  // Expected behavior: createRecipesfromRoute called
-  // Expected output: list of recipes
-  test("Valid recipes returned", async () => {
+  // Expected behavior: getAllergiesFromDb and createRecipesfromRoute called
+  // Expected output: list of recipes without peanut
+  test("Valid recipes for user with allergies", async () => {
+    jest
+      .spyOn(PreferenceHelper, "getAllergiesFromDb")
+      .mockResolvedValue([{ userID: "test-user", allergy: "peanut" }]);
     jest
       .spyOn(RecipeHelper, "createRecipesfromRoute")
       .mockResolvedValue(SAMPLE_RECIPES_LIST);
@@ -575,11 +568,56 @@ describe("Mocked: POST /recipes", () => {
 
     const response = await request(app)
       .post("/recipes")
-      .send({ tripID: result.insertedId.toHexString() })
+      .send({ tripID: result.insertedId.toHexString(), userID: "test-user" })
       .expect(201);
 
+    expect(PreferenceHelper.getAllergiesFromDb).toHaveBeenCalled();
     expect(RecipeHelper.createRecipesfromRoute).toHaveBeenCalled();
     expect(response.body).toEqual(SAMPLE_RECIPES_LIST);
+  });
+
+  // Mocked behavior: PreferenceHelper.getAllergiesFromDb returns strawberry allergy,
+  //                  edamam api returns a recipe with strawberries in ingredients,
+  //                  and RecipeHelper.saveRecipesToDb has an empty implementation
+  // Input: valid tripID and userID
+  // Expected status code: 404
+  // Expected behavior: getAllergiesFromDb and fetchRecipe called
+  // Expected output: error message
+  test("Can't find recipes for user with allergies", async () => {
+    jest
+      .spyOn(PreferenceHelper, "getAllergiesFromDb")
+      .mockResolvedValue([{ userID: "test-user", allergy: "strawberries" }]);
+    // edamam api mock response
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () =>
+        Promise.resolve({
+          hits: [
+            {
+              recipe: {
+                label: SAMPLE_RECIPE.recipeName,
+                uri: SAMPLE_RECIPE.recipeID.toString(),
+                url: SAMPLE_RECIPE.url,
+                ingredients: SAMPLE_RECIPE.ingredients,
+              },
+            },
+          ],
+        }),
+    });
+    jest.spyOn(RecipeHelper, "saveRecipesToDb").mockImplementation();
+
+    const response = await request(app)
+      .post("/recipes")
+      .send({ tripID: new ObjectId().toHexString(), userID: "test-user" })
+      .expect(404);
+
+    expect(PreferenceHelper.getAllergiesFromDb).toHaveBeenCalled();
+    expect(response.body).toHaveProperty(
+      "error",
+      "Could not find recipes that match user preferences",
+    );
+    expect(RecipeHelper.saveRecipesToDb).not.toHaveBeenCalled();
   });
 });
 
