@@ -76,7 +76,7 @@ export async function createRecipesfromRoute(
       }
 
       // no recipes found that match user's preferences
-      if (!recipe) {
+      if (recipe.length === 0) {
         return null;
       }
 

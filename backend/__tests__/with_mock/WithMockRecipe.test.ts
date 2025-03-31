@@ -2,6 +2,7 @@ import request from "supertest";
 import app from "../../index";
 import * as RecipeHelper from "../../helpers/RecipeHelper";
 import * as RouteHelper from "../../helpers/RouteHelpers";
+import * as PreferenceHelper from "../../helpers/PreferenceHelper";
 import { Recipe, RecipeDBEntry } from "../../interfaces/RecipeInterfaces";
 import { client } from "../../services";
 import { ObjectId } from "mongodb";
@@ -545,13 +546,17 @@ describe("Mocked: POST /recipes", () => {
     expect(RecipeHelper.saveRecipesToDb).not.toHaveBeenCalled();
   });
 
-  // Mocked behavior: RecipeHelper.createRecipesfromRoute returns a valid recipe list
+  // Mocked behavior: PreferenceHelper.getAllergiesFromDb returns peanut allergy,
+  //                  RecipeHelper.createRecipesfromRoute returns a valid recipe list
   //                  and in-mem db contains a valid route
   // Input: valid tripID and userID
   // Expected status code: 201
-  // Expected behavior: createRecipesfromRoute called
-  // Expected output: list of recipes
-  test("Valid recipes returned", async () => {
+  // Expected behavior: getAllergiesFromDb and createRecipesfromRoute called
+  // Expected output: list of recipes without peanut
+  test("Valid recipes for user with allergies", async () => {
+    jest
+      .spyOn(PreferenceHelper, "getAllergiesFromDb")
+      .mockResolvedValue([{ userID: "test-user", allergy: "peanut" }]);
     jest
       .spyOn(RecipeHelper, "createRecipesfromRoute")
       .mockResolvedValue(SAMPLE_RECIPES_LIST);
@@ -566,8 +571,53 @@ describe("Mocked: POST /recipes", () => {
       .send({ tripID: result.insertedId.toHexString(), userID: "test-user" })
       .expect(201);
 
+    expect(PreferenceHelper.getAllergiesFromDb).toHaveBeenCalled();
     expect(RecipeHelper.createRecipesfromRoute).toHaveBeenCalled();
     expect(response.body).toEqual(SAMPLE_RECIPES_LIST);
+  });
+
+  // Mocked behavior: PreferenceHelper.getAllergiesFromDb returns strawberry allergy,
+  //                  edamam api returns a recipe with strawberries in ingredients,
+  //                  and RecipeHelper.saveRecipesToDb has an empty implementation
+  // Input: valid tripID and userID
+  // Expected status code: 404
+  // Expected behavior: getAllergiesFromDb and fetchRecipe called
+  // Expected output: error message
+  test("Can't find recipes for user with allergies", async () => {
+    jest
+      .spyOn(PreferenceHelper, "getAllergiesFromDb")
+      .mockResolvedValue([{ userID: "test-user", allergy: "strawberries" }]);
+    // edamam api mock response
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () =>
+        Promise.resolve({
+          hits: [
+            {
+              recipe: {
+                label: SAMPLE_RECIPE.recipeName,
+                uri: SAMPLE_RECIPE.recipeID.toString(),
+                url: SAMPLE_RECIPE.url,
+                ingredients: SAMPLE_RECIPE.ingredients,
+              },
+            },
+          ],
+        }),
+    });
+    jest.spyOn(RecipeHelper, "saveRecipesToDb").mockImplementation();
+
+    const response = await request(app)
+      .post("/recipes")
+      .send({ tripID: new ObjectId().toHexString(), userID: "test-user" })
+      .expect(404);
+
+    expect(PreferenceHelper.getAllergiesFromDb).toHaveBeenCalled();
+    expect(response.body).toHaveProperty(
+      "error",
+      "Could not find recipes that match user preferences",
+    );
+    expect(RecipeHelper.saveRecipesToDb).not.toHaveBeenCalled();
   });
 });
 
