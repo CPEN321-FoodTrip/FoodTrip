@@ -169,7 +169,7 @@ const SAMPLE_RECIPE = {
 
 // Interface POST /recipes
 describe("Unmocked: POST /recipes", () => {
-  // Input: string tripID of a route that has already been created and stored in route DB
+  // Input: string tripID of a route that has already been created and stored in route DB and userID
   // Expected status code: 201
   // Expected behavior: recipes are successfully generated and saved in db
   // Expected output: object with tripID and array of recipes objects. recipes contain recipeName,
@@ -220,7 +220,7 @@ describe("Unmocked: POST /recipes", () => {
     );
   });
 
-  // Input: missing body parameters
+  // Input: missing body parameters (tripID and userID)
   // Expected status code: 400
   // Expected behavior: database is unchanged
   // Expected output: error message indicating missing parameters
@@ -253,7 +253,7 @@ describe("Unmocked: POST /recipes", () => {
     expect(dbCountBefore).toBe(dbCountAfter);
   });
 
-  // Input: Malformed parameters (tripID is not an ObjectId)
+  // Input: Malformed parameter (tripID is not an ObjectId) and valid userID
   // Expected status code: 400
   // Expected behavior: database is unchanged
   // Expected output: error message indicating invalid tripID
@@ -283,7 +283,7 @@ describe("Unmocked: POST /recipes", () => {
     expect(dbCountBefore).toBe(dbCountAfter);
   });
 
-  // Input: tripID is not in the route database
+  // Input: tripID is not in the route database and valid userID
   // Expected status code: 404
   // Expected behavior: database is unchanged
   // Expected output: error message indicating route does not exist
@@ -313,7 +313,7 @@ describe("Unmocked: POST /recipes", () => {
     expect(dbCountBefore).toBe(dbCountAfter);
   });
 
-  // Input: tripID points to a route with no stops
+  // Input: tripID points to a route with no stops and valid userID
   // Expected status code: 500
   // Expected behavior: database is unchanged
   // Expected output: error message indicating internal issue
