@@ -70,7 +70,7 @@ export async function createRecipesfromRoute(
       for (const allergy of allergies) {
         recipe = recipe.filter((r) => {
           return !r.ingredients.some((ingredient) =>
-            ingredient.food.match(new RegExp(allergy, "i")),
+            ingredient.food.toLowerCase().includes(allergy.toLowerCase()),
           );
         });
       }
