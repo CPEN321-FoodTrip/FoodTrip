@@ -6,6 +6,8 @@ import {
   deleteRecipesFromDb,
 } from "../helpers/RecipeHelper";
 import { ObjectId } from "mongodb";
+import { getRouteFromDb } from "../helpers/RouteHelpers";
+import { getAllergiesFromDb } from "../helpers/PreferenceHelper";
 
 // generate a list of recipes from a route
 // POST /recipes
@@ -16,14 +18,29 @@ export const createRecipes = async (
 ) => {
   try {
     // validation of params performed by express-validator middleware
-    const { tripID } = req.body as { tripID: string };
+    const { tripID, userID } = req.body as { tripID: string; userID: string };
     if (!ObjectId.isValid(tripID)) {
       return res.status(400).json({ error: "Invalid tripID format" });
     }
 
-    const recipes = await createRecipesfromRoute(tripID);
-    if (!recipes) {
+    const route = await getRouteFromDb(tripID);
+    if (!route) {
       return res.status(404).json({ error: "Trip not found" });
+    }
+
+    const allergies = await getAllergiesFromDb(userID);
+    if (!allergies) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const recipes = await createRecipesfromRoute(
+      route,
+      allergies.map((allergyObj) => allergyObj.allergy),
+    );
+    if (!recipes) {
+      return res
+        .status(404)
+        .json({ error: "Could not find recipes that match user preferences" });
     }
 
     // save recipes to db

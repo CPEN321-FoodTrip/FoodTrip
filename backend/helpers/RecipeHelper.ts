@@ -1,7 +1,5 @@
-import { ObjectId } from "mongodb";
 import { client } from "../services";
-
-import { RouteDBEntry, RouteStop } from "../interfaces/RouteInterfaces";
+import { Route, RouteStop } from "../interfaces/RouteInterfaces";
 import {
   Recipe,
   EdamamResponse,
@@ -13,10 +11,6 @@ const EDAMAM_BASE_URL = "https://api.edamam.com/api/recipes/v2";
 // constants for recipes saved in MongoDB
 const RECIPE_DB_NAME = "recipes";
 const RECIPE_COLLECTION_NAME = "recipes";
-
-// constants for routes saved in MongoDB
-const ROUTES_DB_NAME = "route_data";
-const ROUTES_COLLECTION_NAME = "routes";
 
 // helper function to fetch recipe data from Edamam API
 export async function fetchRecipe(query: string): Promise<Recipe[]> {
@@ -47,30 +41,22 @@ export async function fetchRecipe(query: string): Promise<Recipe[]> {
   }
 }
 
-// helper function to extract locations from a route and fetch recipes
+// helper function to fetch recipes that don't contain user's allergies
 export async function createRecipesfromRoute(
-  tripID: string,
+  route: Route,
+  allergies: string[],
 ): Promise<Recipe[] | null> {
   try {
-    const route_db = client.db(ROUTES_DB_NAME);
-    const route_collection = route_db.collection<RouteDBEntry>(
-      ROUTES_COLLECTION_NAME,
-    );
-    const result = await route_collection.findOne({
-      _id: new ObjectId(tripID),
-    });
-    if (!result || result === undefined) {
-      return null;
-    }
-    if (result.route.stops.length === 0) {
+    if (route.stops.length === 0) {
       throw new Error("No stops found in route");
     }
-    const stopNames: string[] = [];
 
-    const startname: string = result.route.start_location.name;
-    const endname: string = result.route.end_location.name;
+    const stopNames: string[] = [];
+    const startname: string = route.start_location.name;
+    const endname: string = route.end_location.name;
+
     stopNames.push(startname);
-    result.route.stops.forEach((stop: RouteStop) => {
+    route.stops.forEach((stop: RouteStop) => {
       const stopName = stop.location.name;
       stopNames.push(stopName);
     });
@@ -78,7 +64,22 @@ export async function createRecipesfromRoute(
 
     const recipes: Recipe[] = [];
     for (const name of stopNames) {
-      const recipe = await fetchRecipe(name);
+      let recipe = await fetchRecipe(name);
+
+      // filter out recipes that contain user's allergies
+      for (const allergy of allergies) {
+        recipe = recipe.filter((r) => {
+          return !r.ingredients.some((ingredient) =>
+            ingredient.food.match(new RegExp(allergy, "i")),
+          );
+        });
+      }
+
+      // no recipes found that match user's preferences
+      if (!recipe) {
+        return null;
+      }
+
       recipes.push(recipe[0]); // choose top match recipe
     }
     return recipes;
