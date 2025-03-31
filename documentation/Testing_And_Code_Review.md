@@ -146,7 +146,7 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 
 | **Non-Functional Requirement**  | **Location in Git**                              |
 | ------------------------------- | ------------------------------------------------ |
-| **Performance (Response Time)** | [`FoodTrip/backend/__tests__/non_functional_requirements/performance.test.ts`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/6ccb84af25ae10d9d3649238495f22ded40c3c05/backend/__tests__/non_functional_requirements/performance.test.ts) |
+| **Performance (Response Time)** | [`FoodTrip/backend/__tests__/non_functional_requirements/performance.test.ts`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/main/backend/__tests__/non_functional_requirements/performance.test.ts) |
 | **Usability (Clicks to navigate)**          | [`FoodTrip/frontend/app/src/androidTest/java/com/example/FoodTripFrontend/ExampleInstrumentedTest.kt`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/6ccb84af25ae10d9d3649238495f22ded40c3c05/frontend/app/src/androidTest/java/com/example/FoodTripFrontend/ExampleInstrumentedTest.kt) |
 
 ### 3.2. Test Verification and Logs
