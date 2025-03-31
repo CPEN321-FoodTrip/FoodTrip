@@ -36,7 +36,7 @@
 
 #### 2.1.2. Commit Hash Where Tests Run
 
-`dec99a62494e8d9b553f9a39e6dedc8c2119fdfe`
+`6ccb84af25ae10d9d3649238495f22ded40c3c05`
 
 #### 2.1.3. Explanation on How to Run the Tests
 
@@ -413,7 +413,7 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 
 ### 5.1. Commit Hash Where Codacy Ran
 
-`dec99a62494e8d9b553f9a39e6dedc8c2119fdfe`
+`6ccb84af25ae10d9d3649238495f22ded40c3c05`
 
 ### 5.2. Unfixed Issues per Codacy Category
 
