@@ -1,4 +1,4 @@
-describe("Unmocked Performance test", () => {
+describe("Performance test", () => {
   beforeAll(async () => {
     // sleep 2 seconds to allow proper setup
     await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -6,7 +6,7 @@ describe("Unmocked Performance test", () => {
 
   // Justification: A user may decide to generate a route and recipes, but then decide to delete both
   // route and recipes if they find them unsatisfactory, which should possible to do quickly
-  test("Unmocked single route, 3 stops", async () => {
+  test("Single route, 3 stops", async () => {
     const start = Date.now();
     const route_response = await fetch(
       `${process.env.GATEWAY_BASE_URL}/routes`,
@@ -21,7 +21,7 @@ describe("Unmocked Performance test", () => {
           destination: "Toronto",
           numStops: 1,
         }),
-      },
+      }
     );
 
     if (route_response.ok) {
@@ -38,7 +38,7 @@ describe("Unmocked Performance test", () => {
           body: JSON.stringify({
             tripID,
           }),
-        },
+        }
       );
 
       const recipe_data = await recipe_response.json();
@@ -51,7 +51,7 @@ describe("Unmocked Performance test", () => {
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
       if (!route_teardown.ok) {
         throw new Error(`HTTP error! Status: ${route_teardown.status}`);
@@ -64,7 +64,7 @@ describe("Unmocked Performance test", () => {
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
       if (!recipe_teardown.ok) {
         throw new Error(`HTTP error! Status: ${recipe_teardown.status}`);
@@ -81,7 +81,7 @@ describe("Unmocked Performance test", () => {
 
   // Justification: A store owner should be able to upload a discount, check that it is available,
   // and potentially delete it quickly.
-  test("Unmocked single discount", async () => {
+  test("Single discount", async () => {
     const start = Date.now();
     const discount_response = await fetch(
       `${process.env.GATEWAY_BASE_URL}/discounts`,
@@ -96,7 +96,7 @@ describe("Unmocked Performance test", () => {
           ingredient: "Toronto, the entire province",
           price: 1,
         }),
-      },
+      }
     );
 
     const data = await discount_response.json();
@@ -109,7 +109,7 @@ describe("Unmocked Performance test", () => {
         headers: {
           "Content-Type": "application/json",
         },
-      },
+      }
     );
 
     expect(await get_response.json()).not.toBeNull();
@@ -121,7 +121,7 @@ describe("Unmocked Performance test", () => {
         headers: {
           "Content-Type": "application/json",
         },
-      },
+      }
     );
     if (!discount_teardown.ok) {
       throw new Error(`HTTP error! Status: ${discount_teardown.status}`);
@@ -134,7 +134,7 @@ describe("Unmocked Performance test", () => {
 
   // Justification: A store owner should be able to upload multiple discounts, check that they are
   //  available, and delete any number of them quickly.
-  test("Unmocked 10 discount", async () => {
+  test("10 discount", async () => {
     const start = Date.now();
     const discountID = [];
     for (let i = 0; i < 10; i++) {
@@ -151,7 +151,7 @@ describe("Unmocked Performance test", () => {
             ingredient: "Toronto, the entire province",
             price: i,
           }),
-        },
+        }
       );
       const data = await discount_response.json();
       const discountIDsingle = data.discountID;
@@ -164,7 +164,7 @@ describe("Unmocked Performance test", () => {
         headers: {
           "Content-Type": "application/json",
         },
-      },
+      }
     );
     for (let i = 0; i < 10; i++) {
       const did = discountID.pop();
@@ -175,7 +175,7 @@ describe("Unmocked Performance test", () => {
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
       if (!discount_teardown.ok) {
         throw new Error(`HTTP error! Status: ${discount_teardown.status}`);
@@ -191,7 +191,7 @@ describe("Unmocked Performance test", () => {
   });
 
   // Justification: Users should be able to subscribe, and potentially change their mind quickly
-  test("Unmocked single notification", async () => {
+  test("Single notification", async () => {
     const userID = "real_person";
     const start = Date.now();
     const notif_response = await fetch(
@@ -205,7 +205,7 @@ describe("Unmocked Performance test", () => {
           userID,
           fcmToken: "Vancouver",
         }),
-      },
+      }
     );
     const data = await notif_response.json();
     expect(data.message).toContain("Subscribed successfully");
@@ -217,11 +217,11 @@ describe("Unmocked Performance test", () => {
         headers: {
           "Content-Type": "application/json",
         },
-      },
+      }
     );
     if (!notif_teardown.ok) {
       throw new Error(
-        `notification delete error! Status: ${notif_teardown.status}`,
+        `notification delete error! Status: ${notif_teardown.status}`
       );
     }
     const end = Date.now();
@@ -232,7 +232,7 @@ describe("Unmocked Performance test", () => {
 
   // Justification: Multiple users may subscribe and potentially change their minds, which should
   // not cause significant delays
-  test("Unmocked 10 notification", async () => {
+  test("10 notification", async () => {
     const start = Date.now();
     for (let i = 0; i < 10; i++) {
       const notif_response = await fetch(
@@ -246,7 +246,7 @@ describe("Unmocked Performance test", () => {
             userID: i.toString(),
             fcmToken: "Vancouver",
           }),
-        },
+        }
       );
       const data = await notif_response.json();
       expect(data.message).toContain("Subscribed successfully");
@@ -259,11 +259,11 @@ describe("Unmocked Performance test", () => {
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
       if (!notif_teardown.ok) {
         throw new Error(
-          `10 notification delete error! Status: ${notif_teardown.status}`,
+          `10 notification delete error! Status: ${notif_teardown.status}`
         );
       }
     }
@@ -274,7 +274,7 @@ describe("Unmocked Performance test", () => {
   });
 
   // Justification: Users should be able to add allergens, view them, and potentially delete them quickly
-  test("Unmocked single allergy", async () => {
+  test("Single allergy", async () => {
     const userID = "real_person";
     const allergen = "fake_people";
     const start = Date.now();
@@ -289,7 +289,7 @@ describe("Unmocked Performance test", () => {
           userID,
           allergy: allergen,
         }),
-      },
+      }
     );
     const data = await allergy_response.json();
     expect(data.message).toContain("Allergy added successfully");
@@ -300,7 +300,7 @@ describe("Unmocked Performance test", () => {
         headers: {
           "Content-Type": "application/json",
         },
-      },
+      }
     );
     expect(await get_response.json()).not.toBeNull();
     const end = Date.now();
@@ -311,11 +311,11 @@ describe("Unmocked Performance test", () => {
         headers: {
           "Content-Type": "application/json",
         },
-      },
+      }
     );
     if (!allergy_teardown.ok) {
       throw new Error(
-        `allergy delete error! Status: ${allergy_teardown.status}`,
+        `allergy delete error! Status: ${allergy_teardown.status}`
       );
     }
     const duration = end - start; //begin timing test assuming that operation succeeded
