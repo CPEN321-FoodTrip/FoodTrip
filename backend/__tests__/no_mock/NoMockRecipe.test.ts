@@ -366,6 +366,57 @@ describe("Unmocked: POST /recipes", () => {
 
     expect(dbCountBefore).toBe(dbCountAfter);
   });
+
+  // Input: userID points to list of allergies and tripID points to a route with stops
+  // Expected status code: 404
+  // Expected behavior: database is unchanged
+  // Expected output: error message indicating no recipes found
+  test("Can't generate recipes that meet allergy restrictions", async () => {
+    // insert allergies for user
+    const allergy_db = client.db("preferences");
+    const allergy_collection = allergy_db.collection("allergies");
+    await allergy_collection.insertMany(
+      ["nuts", "sesame", "eggs", "sugar", "salt", "flour", "Pineapple"].map(
+        (allergy) => ({
+          userID: "test-user",
+          allergy,
+        }),
+      ),
+    );
+
+    // insert valid route
+    const route_db = client.db(ROUTES_DB_NAME);
+    const route_collection = route_db.collection<RouteDBEntry>(
+      ROUTES_COLLECTION_NAME,
+    );
+    const route_result = await route_collection.insertOne(SAMPLE_ROUTE);
+
+    const dbCountBefore = await client
+      .db(RECIPE_DB_NAME)
+      .collection<RecipeDBEntry>(RECIPE_COLLECTION_NAME)
+      .countDocuments();
+
+    const response = await request(app)
+      .post("/recipes")
+      .send({
+        tripID: route_result.insertedId.toHexString(),
+        userID: "test-user",
+      })
+      .expect(404);
+
+    expect(response.body).toHaveProperty(
+      "error",
+      "Could not find recipes that match user preferences",
+    );
+
+    // verfify db unchaged
+    const dbCountAfter = await client
+      .db(RECIPE_DB_NAME)
+      .collection(RECIPE_COLLECTION_NAME)
+      .countDocuments();
+
+    expect(dbCountBefore).toBe(dbCountAfter);
+  });
 });
 
 // Interface GET /recipes/:id
