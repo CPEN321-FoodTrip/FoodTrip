@@ -3,7 +3,7 @@
     <string name="grocery_title_text">Grocery</string>
     <string name="_grocery_store_title_text">Grocery - store 0</string>
     <string name="past_title_text">Past Trip</string>
-    <string name="account_title_text">Account</string>
+    <string name="account_title_text">Manage Preferences</string>
     <string name="back_button_text">Back</string>
     <string name="save_button_text">Save</string>
     <string name="change_button_text">Change</string>
