@@ -11,11 +11,10 @@
         android:id="@+id/account_title_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="104dp"
         android:text="@string/account_title_text"
-        android:textSize="40sp"
+        android:textSize="30sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -29,59 +28,77 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TableLayout
-        android:id="@+id/table_layout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="40dp"
-        android:layout_marginBottom="40dp"
-        android:stretchColumns="1"
-        app:layout_constraintBottom_toTopOf="@+id/buttons_layout"
+    <Switch
+        android:id="@+id/notifications_switch"
+        android:layout_width="62dp"
+        android:layout_height="34dp"
+        android:layout_marginStart="161dp"
+        android:layout_marginTop="96dp"
+        android:layout_marginEnd="162dp"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/account_title_text_view"
-        app:layout_constraintVertical_bias="0.6">
+        app:layout_constraintTop_toBottomOf="@+id/account_title_text_view" />
 
-        <TableRow android:layout_width="match_parent">
-
-            <TextView
-                android:padding="5dp"
-                android:text="@string/account_str_1_1"
-                android:textSize="20sp" />
-
-            <TextView
-                android:gravity="end"
-                android:padding="5dp"
-                android:text="@string/account_str_example"
-                android:textSize="20sp" />
-        </TableRow>
-    </TableLayout>
-
-    <LinearLayout
-        android:id="@+id/buttons_layout"
+    <TextView
+        android:id="@+id/enable_notifications_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginStart="90dp"
+        android:layout_marginTop="56dp"
+        android:layout_marginEnd="116dp"
+        android:text="Enable Notifications for New Discounts"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintHorizontal_bias="0.373"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/account_title_text_view" />
 
-        <Button
-            android:id="@+id/change_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="40dp"
-            android:text="@string/change_button_text" />
+    <TextView
+        android:id="@+id/allergies_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="88dp"
+        android:text="Your Allergies"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/enable_notifications_text" />
 
-        <Button
-            android:id="@+id/save_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="40dp"
-            android:text="@string/save_button_text" />
-    </LinearLayout>
+    <ListView
+        android:id="@+id/allergy_list"
+        android:layout_width="match_parent"
+        android:layout_height="280dp"
+        android:layout_marginTop="20dp"
+        android:scrollbars="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/allergies_title" />
+
+    <EditText
+        android:id="@+id/allergy_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="10dp"
+        android:hint="Add new allergy"
+        app:layout_constraintEnd_toStartOf="@id/add_allergy_button"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/allergy_list" />
+
+    <Button
+        android:id="@+id/add_allergy_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="16dp"
+        android:text="Add"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/allergy_list" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
