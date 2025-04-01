@@ -68,59 +68,66 @@ class AccountActivity : AppCompatActivity() {
     }
 
     private fun getFcmToken(callback: (String?) -> Unit) {
-        FirebaseMessaging.getInstance().token
-            .addOnCompleteListener { task ->
-                if (!task.isSuccessful) {
-                    Log.w("FCM", "Fetching FCM token failed", task.exception)
-                    callback(null)
-                    return@addOnCompleteListener
-                }
-
-                val token = task.result
-                Log.d("FCM", "FCM Token: $token")
-                callback(token)
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                task.result?.let { token ->
+                    Log.d("FCM", "FCM Token: $token")
+                    callback(token)
+                } ?: callback(null)
+            } else {
+                Log.w("FCM", "Fetching FCM token failed", task.exception)
+                callback(null)
             }
+        }
     }
 
     private fun subscribeNotifications(email: String) {
         getFcmToken { fcmToken ->
-            if (fcmToken == null) {
-                Log.e("FCM", "Failed to get FCM token")
-                return@getFcmToken
-            }
-
-            val jsonBody = JSONObject().apply {
-                put("userID", email)
-                put("fcmToken", fcmToken)
-            }
-            val body = jsonBody.toString().toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
-
-            val request = Request.Builder()
-                .url("${SERVER_URL}notifications")
-                .post(body)
-                .build()
-
-            client.newCall(request).enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    Log.e("Network", "Failed to update notifications", e)
+            if (fcmToken != null) {
+                val jsonBody = JSONObject().apply {
+                    put("userID", email)
+                    put("fcmToken", fcmToken)
                 }
+                val body = jsonBody.toString()
+                    .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
 
-                override fun onResponse(call: Call, response: Response) {
-                    response.use {
-                        if (response.isSuccessful) {
-                            runOnUiThread {
-                                Toast.makeText(this@AccountActivity, "Notifications updated successfully", Toast.LENGTH_SHORT).show()
-                            }
-                        } else if (response.code == 400) {
-                            Log.d("AccountActivity", "Already subscribed - ignoring error")
-                        } else {
-                            runOnUiThread {
-                                Toast.makeText(this@AccountActivity, "Failed to update notifications", Toast.LENGTH_SHORT).show()
+                val request = Request.Builder()
+                    .url("${SERVER_URL}notifications")
+                    .post(body)
+                    .build()
+
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        Log.e("Network", "Failed to update notifications", e)
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        response.use {
+                            if (response.isSuccessful) {
+                                runOnUiThread {
+                                    Toast.makeText(
+                                        this@AccountActivity,
+                                        "Notifications updated successfully",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            } else if (response.code == 400) {
+                                Log.d("AccountActivity", "Already subscribed - ignoring error")
+                            } else {
+                                runOnUiThread {
+                                    Toast.makeText(
+                                        this@AccountActivity,
+                                        "Failed to update notifications",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                             }
                         }
                     }
-                }
-            })
+                })
+            } else {
+                Log.e("FCM", "Failed to get FCM token")
+            }
         }
     }
 
