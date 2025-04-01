@@ -70,7 +70,7 @@ class GroceryStoreActivity : AppCompatActivity() {
 
     val selectedColor = "#A5E6D9"
 
-    lateinit var client: OkHttpClient
+    private var client = OkHttpClient()
     lateinit var discountList: LinearLayout
     private lateinit var selectedDiscountID: String
     private lateinit var selectedDiscountView: TextView
@@ -84,8 +84,6 @@ class GroceryStoreActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        client = OkHttpClient()
 
         sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE)
         val userEmail = getUserEmail()
@@ -125,8 +123,7 @@ class GroceryStoreActivity : AppCompatActivity() {
             val ingredient = inputIngredient.text.toString()
             val price = inputPrice.text.toString()
 
-            if (ingredient == "" ||
-                !price.matches(Regex("^[0-9]+$")) || price == "0") {
+            if (ingredient == "" || !price.matches(Regex("^[0-9]+$")) || price == "0") {
                 Snackbar.make(findViewById(android.R.id.content),
                     "Please enter valid ingredient and price",
                     Snackbar.LENGTH_SHORT).show()
