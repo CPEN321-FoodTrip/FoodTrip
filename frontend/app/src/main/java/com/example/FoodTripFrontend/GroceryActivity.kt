@@ -1,25 +1,28 @@
 package com.example.FoodTripFrontend
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.PopupMenu
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.FoodTripFrontend.recyclerViewHelper.adapter.RecipeAdapter
+import com.example.FoodTripFrontend.recyclerViewHelper.itemClass.*
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import okhttp3.Call
 import okhttp3.Callback
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okio.IOException
 
@@ -36,6 +39,11 @@ class GroceryActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "GroceryActivity"
     }
+
+    private val ERROR_MESSAGE = "Unexpected code"
+
+    private val sampleTripID = "67eaa53f02fdf04413318b3a"
+    private val sampleUserID = "test_person"
 
     /**
      * JSON format for API response in getDiscount()
@@ -54,7 +62,53 @@ class GroceryActivity : AppCompatActivity() {
         val price: Int
     )
 
+    /**
+     * class of sub-element in class RecipeItem
+     *
+     * @property text: full text of ingredient description
+     * @property quantity: amount of ingredient needed
+     * @property measure: unit of the amount
+     * @property food: name of the ingredient
+     * @property weight: net weight of the ingredient
+     * @property foodId: unique ID of the ingredient
+     */
+    data class Ingredient(
+        val text: String,
+        val quantity: Number,
+        val measure: String,
+        val food: String,
+        val weight: Number,
+        val foodId: String
+    )
+
+    /**
+     * class of sub-element in class EdamamResponse
+     *
+     * @property recipeName: name of the recipe
+     * @property recipeID: unique identifier of the recipe
+     * @property url: link to the recipe
+     * @property ingredients: list of ingredients needed for the recipe
+     */
+//    data class RecipeItem(
+//        val recipeName: String,
+//        val recipeID: String,
+//        val url: String,
+//        val ingredients: List<Ingredient>,
+//    )
+
+    /**
+     * JSON format for API response in getRecipes()
+     *
+     * @property hits: list of recipes
+     */
+    data class EdamamResponse (
+        val hits: List<RecipeItem>
+    )
+
     lateinit var client: OkHttpClient
+
+    lateinit var recipeList: LinearLayout
+    lateinit var recyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,7 +123,8 @@ class GroceryActivity : AppCompatActivity() {
         client = OkHttpClient()
 
         val backBtn = findViewById<Button>(R.id.back_button);
-        val recipeList = findViewById<LinearLayout>(R.id.recipe_list_layout)
+        recipeList = findViewById<LinearLayout>(R.id.recipe_list_layout)
+        recyclerView = findViewById<RecyclerView>(R.id.recipeRecyclerView)
 
         // Switch back to home page
         backBtn.setOnClickListener {
@@ -77,24 +132,14 @@ class GroceryActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        val textView1 = createTextView("beef", "ingred 1")
-
-        textView1.setOnClickListener {
-            val ingredient = (it as TextView).text.toString()
-            getDiscount(ingredient) {discounts -> processDiscount(discounts)}
+        // TODO: get tripID from GlobalData
+        getRecipe(sampleTripID, sampleUserID) { recipes ->
+            processRecipe(recipes)
         }
-        recipeList.addView(textView1)
-
-        val textView2 = createTextView("pork", "ingred 2")
-        textView2.setOnClickListener {
-            val ingredient = (it as TextView).text.toString()
-            getDiscount(ingredient) {discounts -> processDiscount(discounts)}
-        }
-        recipeList.addView(textView2)
     }
 
-    private fun getDiscount(ingredient : String, callback: (List<DiscountItem>) -> Unit) {
-        val url = "${BuildConfig.SERVER_URL}discounts?ingredient=${ingredient}"
+    private fun getRecipe(tripID: String, userID: String, callback: (List<RecipeItem>) -> Unit) {
+        val url = "${BuildConfig.SERVER_URL}recipes/$tripID"
         Log.d(TAG, url)
 
         val request = Request.Builder()
@@ -109,55 +154,89 @@ class GroceryActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
+                    // 404 not found for existing recipe to provided tripID, then create one
                     if (response.code == 404) {
-                        val discounts:List<DiscountItem> = emptyList()
-                        callback(discounts)
+                        callback(emptyList())
 
                         return
                     }
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE $response")
 
                     val json = response.body!!.string()
-                    val listType = object : TypeToken<List<DiscountItem>>() {}.type
-                    var discounts:List<DiscountItem> = Gson().fromJson(json, listType)
-                    callback(discounts)
+                    val listType = object : TypeToken<List<RecipeItem>>() {}.type
+                    var recipes:List<RecipeItem> = Gson().fromJson(json, listType)
+                    callback(recipes)
                 }
             }
         })
     }
 
-    private fun showDiscount(discounts: List<DiscountItem>) {
-        val names = arrayListOf<String>()
-        val prices = arrayListOf<Int>()
-
-        for (discount in discounts) {
-            names.add(discount.storeName)
-            prices.add(discount.price)
+    private fun processRecipe(recipes: List<RecipeItem>) {
+        if (recipes.isEmpty()) {
+//            runOnUiThread {
+//                Snackbar.make(findViewById(android.R.id.content),
+//                    "No recipe for this trip",
+//                    Snackbar.LENGTH_SHORT).show()
+//            }
+            // TODO: use GlobalData
+            createRecipe(sampleTripID, sampleUserID) { _recipes ->
+                showRecipe(_recipes)
+            }
+        } else {
+            showRecipe(recipes)
         }
-        val intent = Intent(applicationContext, PopActivity::class.java)
-        intent.putStringArrayListExtra("names", names)
-        intent.putIntegerArrayListExtra("prices", prices)
-        startActivity(intent)
     }
 
-    private fun createTextView(ingredient: String, tag: String): TextView {
+    private fun showRecipe(recipes: List<RecipeItem>) {
+        runOnUiThread {
+            recyclerView.layoutManager = LinearLayoutManager(this)
+
+            val adapter = RecipeAdapter(recipes)
+            recyclerView.adapter = adapter
+        }
+    }
+
+    private fun createRecipe(tripID: String, userID: String, callback: (List<RecipeItem>) -> Unit) {
+        val url = "${BuildConfig.SERVER_URL}recipes"
+
+        val jsonBody = """
+                {
+                    "tripID": "$tripID",
+                    "userID": "$userID"
+                }
+            """.trimIndent()
+
+        val body = jsonBody.toRequestBody("application/json; charset=utf-8".toMediaType())
+
+        val request = Request.Builder()
+            .url(url)
+            .post(body)
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.use {
+                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE:  $response")
+
+                    val json = response.body!!.string()
+                    val listType = object : TypeToken<List<RecipeItem>>() {}.type
+                    var recipes:List<RecipeItem> = Gson().fromJson(json, listType)
+                    callback(recipes)
+                }
+            }
+        })
+    }
+
+    private fun createTextView(str: String, tag: String): TextView {
         val textView = TextView(this)
         textView.textSize = 25f
-        textView.text = ingredient
+        textView.text = str
         textView.tag = tag
 
         return textView
-    }
-
-    private fun processDiscount(discounts: List<DiscountItem>) {
-        if (discounts.isEmpty()) {
-            runOnUiThread {
-                Snackbar.make(findViewById(android.R.id.content),
-                    "No discount available",
-                    Snackbar.LENGTH_SHORT).show()
-            }
-        } else {
-            showDiscount(discounts)
-        }
     }
 }

@@ -2,6 +2,7 @@ package com.example.FoodTripFrontend
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import android.webkit.WebView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -10,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import retrofit2.http.Tag
 
 /**
  * Activity showing details of the selected recipe from PopTripActivity
@@ -21,7 +23,8 @@ class PopRecipeActivity : Activity() {
 
     lateinit var name: String
     lateinit var url: String
-    lateinit var ingredients: ArrayList<String>
+    var ingredients: ArrayList<String> ?= null
+    lateinit var from: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,9 +37,10 @@ class PopRecipeActivity : Activity() {
 
         window.setLayout((width*.8).toInt(), (height*.7).toInt())
 
-        name = intent.getStringExtra("recipeName").toString()
-        url = intent.getStringExtra("url").toString()
-        ingredients = intent.getStringArrayListExtra("ingredients")!!
+        name = intent.getStringExtra("recipeName") ?: ""
+        url = intent.getStringExtra("url") ?: ""
+        ingredients = intent.getStringArrayListExtra("ingredients")
+        from = intent.getStringExtra("from") ?: ""
 
         recipeList = findViewById(R.id.recipe_list_layout)
 
@@ -46,34 +50,45 @@ class PopRecipeActivity : Activity() {
     private fun showRecipe() {
         recipeList.removeAllViews()
 
-        val nameTextView = TextView(this)
-        nameTextView.textSize = 25f
-        nameTextView.text = "$name"
-        recipeList.addView(nameTextView);
+        if (name.isNotEmpty()) {
+            val nameTextView = TextView(this)
+            nameTextView.textSize = 25f
+            nameTextView.text = name
+            recipeList.addView(nameTextView);
+            Log.d("temp", "name is printed")
+        }
 
-        if (url != null) {
-            val urlTextView = TextView(this)
-            urlTextView.textSize = 25f
-            urlTextView.text = "$url"
-            urlTextView.tag = "url"
-            urlTextView.setOnClickListener {
+        if (url.isNotEmpty()) {
+            if (from == "grocery") {
                 webView = WebView(this)
                 webView.tag = "recipe web"
                 webView.settings.javaScriptEnabled = true
                 webView.settings.domStorageEnabled = true
                 findViewById<ConstraintLayout>(R.id.main).addView(webView)
                 webView.loadUrl(url)
+            } else {
+                val urlTextView = TextView(this)
+                urlTextView.textSize = 25f
+                urlTextView.text = url
+                urlTextView.tag = "url"
+                urlTextView.setOnClickListener {
+                    webView = WebView(this)
+                    webView.tag = "recipe web"
+                    webView.settings.javaScriptEnabled = true
+                    webView.settings.domStorageEnabled = true
+                    findViewById<ConstraintLayout>(R.id.main).addView(webView)
+                    webView.loadUrl(url)
+                }
+                recipeList.addView(urlTextView)
             }
-
-            recipeList.addView(urlTextView)
         }
 
 
-        if (ingredients != null) {
-            for (i in 0..<ingredients.count()) {
+        if (!ingredients.isNullOrEmpty()) {
+            for (i in 0..<ingredients!!.count()) {
                 val newTextView = TextView(this)
                 newTextView.textSize = 25f
-                newTextView.text = "${ingredients[i]}"
+                newTextView.text = ingredients!![i]
                 recipeList.addView(newTextView);
             }
         }
@@ -81,10 +96,11 @@ class PopRecipeActivity : Activity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+        if (from == "grocery") {
+            finish()
+        }
         if (::webView.isInitialized && webView.parent != null) {
             findViewById<ConstraintLayout>(R.id.main).removeView(webView)
-
-            showRecipe()
         } else {
             super.onBackPressed()
         }
