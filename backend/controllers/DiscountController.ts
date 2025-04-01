@@ -15,7 +15,7 @@ import * as admin from "firebase-admin";
 export const addDiscount = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     // existance and type validation of params performed by express-validator middleware
@@ -65,7 +65,7 @@ export const addDiscount = async (
 export const getDiscounts = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     // storeID validation is performed by express-validator middleware
@@ -90,7 +90,7 @@ export const getDiscounts = async (
 export const getAllDiscounts = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const ingredient = (req.query.ingredient as string) || "";
@@ -112,7 +112,7 @@ export const getAllDiscounts = async (
 export const deleteDiscount = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const discountID = req.params.id;
