@@ -3,6 +3,7 @@ package com.example.FoodTripFrontend
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -30,6 +31,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar
 import org.json.JSONException
 import java.util.ArrayList
+import java.util.LinkedList
+import java.util.Queue
 
 /**
  * Activity that manages current trip.
@@ -41,6 +44,9 @@ import java.util.ArrayList
 class TripActivity : AppCompatActivity() {
 
     private val client = OkHttpClient()
+
+    private var snackbarQueue: Queue<String> = LinkedList()
+    private var isSnackbarShowing = false
 
     /**
      * Companion object for TripActivity.
@@ -88,28 +94,60 @@ class TripActivity : AppCompatActivity() {
 
             //Check if starting city is valid
             if (userStartInput.isNotEmpty() && !checkExistence(userStartInput)) {
+                Log.d(TAG, "in if")
                 isValid = false
-                Snackbar.make(findViewById(android.R.id.content), "Invalid Start City", Snackbar.LENGTH_SHORT).show()
+                showSnackbar(findViewById(android.R.id.content), "Invalid Start City")
+//                Snackbar.make(findViewById(android.R.id.content), "Invalid Start City", Snackbar.LENGTH_SHORT).show()
             }
 
             // Check if end city is valid
             if (userEndInput.isNotEmpty() && !checkExistence(userEndInput)) {
                 isValid = false
-                Snackbar.make(findViewById(android.R.id.content), "Invalid End City", Snackbar.LENGTH_SHORT).show()
+                showSnackbar(findViewById(android.R.id.content), "Invalid End City")
+//                Snackbar.make(findViewById(android.R.id.content), "Invalid End City", Snackbar.LENGTH_SHORT).show()
+            }
+
+            // Check if start and end city are the same
+            if (userStartInput == userEndInput) {
+                isValid = false
+                showSnackbar(findViewById(android.R.id.content), "Route Cannot Have Same Start/End")
+//                Snackbar.make(findViewById(android.R.id.content), "Route Cannot Have Same Start/End", Snackbar.LENGTH_SHORT).show()
+            }
+
+            //Check if start or end city is missing
+            if (userStartInput.isEmpty()) {
+                isValid = false
+                showSnackbar(findViewById(android.R.id.content), "Missing Start City")
+//                Snackbar.make(findViewById(android.R.id.content), "Missing Start City", Snackbar.LENGTH_SHORT).show()
+            } else if (userEndInput.isEmpty()) {
+                Log.d(TAG,"In missing end")
+                isValid = false
+                showSnackbar(findViewById(android.R.id.content), "Missing End City")
+//                Snackbar.make(findViewById(android.R.id.content), "Missing End City", Snackbar.LENGTH_SHORT).show()
+            }
+
+            if (userNumStops == null) {
+                Log.d(TAG,"In numStopsEmpty")
+                isValid = false
+                showSnackbar(findViewById(android.R.id.content), "Missing Number of Stops")
+//                Snackbar.make(findViewById(android.R.id.content), "Missing Number of Stops", Snackbar.LENGTH_SHORT).show()
             }
 
             // Check if the number of stops is valid (non null and at least 1 stop)
-            if (userNumStops == null || userNumStops < 1) {
+            if (userNumStops != null && userNumStops < 1) {
+                Log.d(TAG,"In numStops invalid")
                 isValid = false
-                Snackbar.make(findViewById(android.R.id.content), "Invalid Number of Stops", Snackbar.LENGTH_SHORT).show()
+                showSnackbar(findViewById(android.R.id.content), "Invalid Number of Stops")
+//                Snackbar.make(findViewById(android.R.id.content), "Invalid Number of Stops", Snackbar.LENGTH_SHORT).show()
             }
+
 
             // If all fields are valid, proceed to the next activity
             if (isValid) {
                 //Use "test_person" for developing and debugging
-                //val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
-                //val userEmail = sharedPref.getString("userEmail", "No email found")
-                val userEmail = "test_person"
+                val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
+                val userEmail = sharedPref.getString("userEmail", "No email found")
+//                val userEmail = "test_person"
 
                 Log.d(TAG, "User Email: $userEmail")
 
@@ -195,7 +233,6 @@ class TripActivity : AppCompatActivity() {
                 val coordsList = mutableListOf<LatLng>()
                 val nameList = mutableListOf<String>()
 
-
                 val startLocation = jsonObject.getJSONObject("start_location")
                 val startName = startLocation.getString("name")
                 val startLat = startLocation.getDouble(latName)
@@ -240,6 +277,30 @@ class TripActivity : AppCompatActivity() {
             }
         } else {
             Log.e(TAG, "Response is null")
+        }
+    }
+
+    fun showSnackbar(view: View, message: String) {
+        snackbarQueue.add(message)
+
+        if (!isSnackbarShowing) {
+            displayNextSnackbar(view)
+        }
+    }
+
+    fun displayNextSnackbar(view: View) {
+        if (snackbarQueue.isNotEmpty()) {
+            isSnackbarShowing = true
+            val message = snackbarQueue.poll()
+            val snackbar = Snackbar.make(view, message, Snackbar.LENGTH_SHORT)
+            snackbar.addCallback(object : Snackbar.Callback() {
+                override fun onDismissed(snackbar: Snackbar?, event: Int) {
+                    super.onDismissed(snackbar, event)
+                    isSnackbarShowing = false
+                    displayNextSnackbar(view)
+                }
+            })
+            snackbar.show()
         }
     }
 }
