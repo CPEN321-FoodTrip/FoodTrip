@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">My Application</string>
     <string name="grocery_title_text">Grocery</string>
-    <string name="_grocery_store_title_text">Grocery - store 0</string>
+    <string name="_grocery_store_title_text">Manage Discounts</string>
     <string name="past_title_text">Past Trip</string>
     <string name="account_title_text">Manage Preferences</string>
     <string name="back_button_text">Back</string>
@@ -10,7 +10,7 @@
     <string name="account_str_1_1">Name:</string>
     <string name="account_str_example">(something)</string>
     <string name="maps_api_key">${MAPS_API_KEY}</string>
-    <string name="post_button_text">Post</string>
+    <string name="post_button_text">Add</string>
     <string name="delete_button_text">Delete</string>
     <string name="show_route_button_text">Show Route</string>
 </resources>
