@@ -1,19 +1,28 @@
 package com.example.FoodTripFrontend
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
+import androidx.credentials.exceptions.ClearCredentialInterruptedException
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
@@ -22,13 +31,15 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okio.IOException
-import kotlin.math.E
 
 /**
  * Activity to manage the discount of the store
  * (can only be accessed in admin mode)
  */
 class GroceryStoreActivity : AppCompatActivity() {
+
+    private lateinit var sharedPreferences: SharedPreferences
+    private val activityScope = CoroutineScope(Dispatchers.Main)
 
     /**
      * Companion object for GroceryStoreActivity.
@@ -57,9 +68,6 @@ class GroceryStoreActivity : AppCompatActivity() {
         val price: Int
     )
 
-    val sampleID = "1"
-    val sampleName = "store 0"
-
     val selectedColor = "#A5E6D9"
 
     lateinit var client: OkHttpClient
@@ -79,23 +87,43 @@ class GroceryStoreActivity : AppCompatActivity() {
 
         client = OkHttpClient()
 
-        val backBtn = findViewById<Button>(R.id.back_button_grocery_store)
-        discountList = findViewById<LinearLayout>(R.id.discount_list_layout_store)
+        sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE)
+        val userEmail = getUserEmail()
+        val userName = getUserName()
+
+        // sign out button
+        findViewById<Button>(R.id.sign_out_button).setOnClickListener() {
+            Log.d(TAG, "Sign Out Button Clicked")
+
+            // sign out user and return to login page
+            val credentialManager = CredentialManager.create(this)
+            activityScope.launch {
+                try {
+                    credentialManager.clearCredentialState(ClearCredentialStateRequest())
+                    Toast.makeText(this@GroceryStoreActivity, "Logged Out Successfully",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    goToLoginPage()
+                } catch (e: ClearCredentialInterruptedException) {
+                    Log.e(TAG, "Error clearing credential state", e)
+                    Toast.makeText(
+                        this@GroceryStoreActivity,
+                        "Error clearing credentials",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+
+        discountList = findViewById(R.id.discount_list_layout_store)
         val postBtn = findViewById<Button>(R.id.post_button_grocery_store)
         val deleteBtn = findViewById<Button>(R.id.delete_button_grocery_store)
         val inputIngredient = findViewById<TextInputEditText>(R.id.ingredient_input)
         val inputPrice = findViewById<TextInputEditText>(R.id.price_input)
 
-        // Switch back to home page
-        backBtn.setOnClickListener {
-            val intent = Intent(this, MainActivityAdmin::class.java)
-            startActivity(intent)
-        }
-
         postBtn.setOnClickListener {
             val ingredient = inputIngredient.text.toString()
             val price = inputPrice.text.toString()
-//            Log.d(TAG, "${ingredient} $${price}")
 
             if (ingredient == "" ||
                 !price.matches(Regex("^[0-9]+$")) || price == "0") {
@@ -103,7 +131,7 @@ class GroceryStoreActivity : AppCompatActivity() {
                     "Please enter valid ingredient and price",
                     Snackbar.LENGTH_SHORT).show()
             } else {
-                postDiscount(sampleID, sampleName, ingredient, price)
+                postDiscount(userEmail, userName, ingredient, price)
             }
         }
 
@@ -114,19 +142,33 @@ class GroceryStoreActivity : AppCompatActivity() {
                     Snackbar.LENGTH_SHORT).show()
 
             } else {
-                deleteDiscount(selectedDiscountID)
+                deleteDiscount(userEmail)
             }
         }
 
         selectedDiscountID = ""
 
-        // TODO: get store ID from login (use "1" as for developing)
-        getDiscount(sampleID) {discounts -> processDiscount(discounts)}
+        getDiscount(userEmail) {discounts -> processDiscount(discounts)}
+    }
+
+    // get current user email (for storeID)
+    private fun getUserEmail(): String {
+        return sharedPreferences.getString("userEmail", "No email found").toString()
+    }
+
+    // get current user name (for storeName)
+    private fun getUserName(): String {
+        return sharedPreferences.getString("userName", "No user name found").toString()
+    }
+
+    private fun goToLoginPage() {
+        val intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 
     private fun getDiscount(storeID : String, callback: (List<DiscountItem>) -> Unit) {
         val url = "${BuildConfig.SERVER_URL}discounts/$storeID"
-//        Log.d(TAG, url)
 
         val request = Request.Builder()
             .url(url)
@@ -140,12 +182,15 @@ class GroceryStoreActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE: $response")
-
-                    val json = response.body!!.string()
-                    val listType = object : TypeToken<List<DiscountItem>>() {}.type
-                    var discounts:List<DiscountItem> = Gson().fromJson(json, listType)
-                    callback(discounts)
+                    if (!response.isSuccessful) {
+                        Log.d(TAG, "No discounts for store")
+                        callback(emptyList())
+                    } else {
+                        val json = response.body!!.string()
+                        val listType = object : TypeToken<List<DiscountItem>>() {}.type
+                        var discounts:List<DiscountItem> = Gson().fromJson(json, listType)
+                        callback(discounts)
+                    }
                 }
             }
         })
@@ -153,7 +198,6 @@ class GroceryStoreActivity : AppCompatActivity() {
 
     private fun postDiscount(storeID: String, storeName: String, ingredient: String, price: String) {
         val url = "${BuildConfig.SERVER_URL}discounts"
-//        Log.d(TAG, url)
 
         val jsonBody = """
                 {
@@ -180,13 +224,13 @@ class GroceryStoreActivity : AppCompatActivity() {
                 response.use {
                     if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE:  $response")
 
-                    getDiscount(sampleID) {discountList -> processDiscount(discountList)}
+                    getDiscount(storeID) {discountList -> processDiscount(discountList)}
                 }
             }
         })
     }
 
-    private fun deleteDiscount(discountID: String) {
+    private fun deleteDiscount(storeID: String) {
         val url = "${BuildConfig.SERVER_URL}discounts/$selectedDiscountID"
 
         val request = Request.Builder()
@@ -202,19 +246,16 @@ class GroceryStoreActivity : AppCompatActivity() {
             override fun onResponse(call: Call, response: Response) {
                 response.use {
                     if (!response.isSuccessful) throw IOException("$ERROR_MESSAGE:    $response")
+                    selectedDiscountID = ""
 
-                    getDiscount(sampleID) {discountList -> processDiscount(discountList)}
+                    getDiscount(storeID) {discountList -> processDiscount(discountList)}
                 }
             }
         })
     }
 
     private fun processDiscount(discounts: List<DiscountItem>) {
-        if (discounts.isEmpty()) {
-            // TODO: indicate no discounts posted
-            return
-        }
-
+        // if no discounts posted, list is empty
         runOnUiThread {
             showDiscount(discounts)
         }
@@ -231,15 +272,12 @@ class GroceryStoreActivity : AppCompatActivity() {
             itemView.text = "${discount.ingredient}: $${discount.price}"
 
             itemView.setOnClickListener {
-//                Log.d(TAG, "item $i (ID:${discount.discountID}) is clicked")
                 if (selectedDiscountID == discount.discountID) {
                     selectedDiscountID = ""
                     itemView.setBackgroundColor(Color.TRANSPARENT)
-//                    itemView.setBackgroundColor(Color.parseColor(unselectedColor))
                 } else {
                     if (selectedDiscountID != "") {
                         selectedDiscountView.setBackgroundColor(Color.TRANSPARENT)
-//                        selectedDiscountView.setBackgroundColor(Color.parseColor(unselectedColor))
                     }
 
                     selectedDiscountID = discount.discountID

@@ -116,6 +116,7 @@ class LoginActivity : AppCompatActivity() {
                         val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
                         val editor = sharedPref.edit()
                         editor.putString("userEmail", email)
+                        editor.putString("userName", displayName)
                         editor.apply()
 
                         updateWelcomeMessage("$displayName - $accountType", accountType)
@@ -154,7 +155,7 @@ class LoginActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         } else if (accountType == "admin") {
-            val intent = Intent(this, MainActivityAdmin::class.java)
+            val intent = Intent(this, GroceryStoreActivity::class.java)
             intent.putExtra("USER_NAME", name)
             Log.d(TAG, "Starting")
             startActivity(intent)
