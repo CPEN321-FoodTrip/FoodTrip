@@ -255,11 +255,7 @@ class GroceryStoreActivity : AppCompatActivity() {
     }
 
     private fun processDiscount(discounts: List<DiscountItem>) {
-//        if (discounts.isEmpty()) {
-//            // TODO: indicate no discounts posted
-//            return
-//        }
-
+        // if no discounts posted, list is empty
         runOnUiThread {
             showDiscount(discounts)
         }
