@@ -132,11 +132,13 @@ class PopTripActivity : Activity() {
         val tripID = intent.getStringExtra("tripID")
         Log.d(TAG, "$tripID is passed into here")
         if (tripID != null) {
+
             getTrip(tripID) {route ->
-                processTrip(route)
+                processTrip(route, tripID)
                 // getRecipe(tripID) {recipes -> processRecipes(recipes)}
                 processRecipes(EdamamResponse(emptyList()))
             }
+
         }
     }
 
@@ -167,13 +169,13 @@ class PopTripActivity : Activity() {
         })
     }
 
-    private fun processTrip(route: Route) {
+    private fun processTrip(route: Route, tripID: String) {
         runOnUiThread {
-            showTrip(route)
+            showTrip(route, tripID)
         }
     }
 
-    private fun showTrip(route: Route) {
+    private fun showTrip(route: Route, tripID: String) {
         stopList.removeAllViews()
 
         val startItemView = TextView(this)
@@ -199,35 +201,8 @@ class PopTripActivity : Activity() {
 
         val showRouteButton = findViewById<Button>(R.id.show_past_route_button)
         showRouteButton.setOnClickListener {
-            val coordsList = mutableListOf<LatLng>()
-            val nameList = mutableListOf<String>()
-
-            // add start location
-            coordsList.add(LatLng(route.start_location.latitude.toDouble()
-                , route.start_location.longitude.toDouble()))
-            nameList.add(route.start_location.name)
-
-            // add stops
-            for (i in 0..<stops.count()) {
-                val stop = stops[i]
-
-                coordsList.add(LatLng(stop.location.latitude.toDouble(),
-                    stop.location.longitude.toDouble()))
-                nameList.add(stop.location.name)
-
-                Log.d(TAG, "Stop $i: ${stop.location.latitude}, ${stop.location.longitude}")
-            }
-
-            // add end location
-            coordsList.add(LatLng(route.end_location.latitude.toDouble()
-                , route.end_location.longitude.toDouble()))
-            nameList.add(route.end_location.name)
-
             val intent = Intent(this, MainActivity::class.java)
-            val bundle = Bundle()
-            bundle.putParcelableArrayList("coordinates", ArrayList(coordsList))
-            bundle.putStringArrayList("cities", ArrayList(nameList))
-            intent.putExtras(bundle)
+            intent.putExtra("tripId", tripID)
             startActivity(intent)
         }
     }

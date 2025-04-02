@@ -18,6 +18,7 @@ import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.exceptions.*
 import androidx.fragment.app.FragmentContainerView
+import com.example.FoodTripFrontend.BuildConfig.SERVER_URL
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -33,6 +34,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
+import java.io.IOException
+import java.util.ArrayList
 
 /**
  * Home page of the app in user mode
@@ -47,7 +58,9 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
+    lateinit var globalData : GlobalData
 
+    private val client = OkHttpClient()
     /**
      * Companion object for MainActivity.
      * Stores static constants related to the activity.
@@ -79,6 +92,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        globalData = application as GlobalData
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -175,52 +190,161 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
 
         mMap = googleMap
-
         //Gets a coordinate list passed from Trip Activities which is then displayed with a polyline
         //Only shows the map when a route and coordinates are entered
         //coordsList and nameList are sent as bundles from other activities
-        val coordsList = intent.extras?.getParcelableArrayList<LatLng>("coordinates")
-        val nameList = intent.extras?.getStringArrayList("cities")
+        val tripID = intent.getStringExtra("tripId")
+        Log.d(TAG, "Running Map")
+        if (tripID != null) {
+            globalData.currentTripID = tripID
+            CoroutineScope(Dispatchers.IO).launch {
 
-        if (coordsList != null && nameList != null) {
-            val mapFragment = findViewById<FragmentContainerView>(R.id.map)
+                val request = Request.Builder()
+                    .url("${SERVER_URL}routes/$tripID")
+                    .addHeader("Content-Type", "application/json")
+                    .build()
 
-            if (mapFragment.visibility == android.view.View.GONE) {
-                mapFragment.visibility = android.view.View.VISIBLE
+                try {
+                    val response = client.newCall(request).execute()
+
+                    //if a route is successfully returned, the data for the route is collected
+                    if (response.isSuccessful) {
+                        val responseBody = response.body?.string()
+                        Log.d(TAG, "Response: $responseBody")
+                        withContext(Dispatchers.Main) {
+                            genMap(mMap, responseBody)
+                        }
+                    } else {
+                        Log.e(TAG, "Error: ${response.code}")
+                    }
+
+
+                } catch (e: IOException) {
+                    Log.e(TAG, "Exception: ${e.message}")
+                }
+
             }
+        } else {
+            if (globalData.currentTripID.isEmpty()) {
+                Log.e(TAG, "TripID is null")
+            } else {
+                CoroutineScope(Dispatchers.IO).launch {
+                    val request = Request.Builder()
+                        .url("${SERVER_URL}routes/${globalData.currentTripID}")
+                        .addHeader("Content-Type", "application/json")
+                        .build()
 
-            //coordinates for testing purposes
+                    try {
+                        val response = client.newCall(request).execute()
+
+                        //if a route is successfully returned, the data for the route is collected
+                        if (response.isSuccessful) {
+                            val responseBody = response.body?.string()
+                            Log.d(TAG, "Response: $responseBody")
+                            withContext(Dispatchers.Main) {
+                                genMap(mMap, responseBody)
+                            }
+                        } else {
+                            Log.e(TAG, "Error: ${response.code}")
+                        }
+                    } catch (e: IOException) {
+                        Log.e(TAG, "Exception: ${e.message}")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun genMap(googleMap: GoogleMap, response : String?) {
+        mMap = googleMap
+        val longName = "longitude"
+        val latName = "latitude"
+
+        if (response != null) {
+            try {
+                val jsonObject = JSONObject(response)
+                val coordsList = mutableListOf<LatLng>()
+                val nameList = mutableListOf<String>()
+
+                val startLocation = jsonObject.getJSONObject("start_location")
+                val startName = startLocation.getString("name")
+                val startLat = startLocation.getDouble(latName)
+                val startLong = startLocation.getDouble(longName)
+                Log.d(TAG, "Start Location: $startLat, $startLong")
+
+                coordsList.add(LatLng(startLat, startLong))
+                nameList.add(startName)
+
+                val endLocation = jsonObject.getJSONObject("end_location")
+                val endName = endLocation.getString("name")
+                val endLat = endLocation.getDouble(latName)
+                val endLong = endLocation.getDouble(longName)
+
+                val arrayOfStops: JSONArray = jsonObject.getJSONArray("stops")
+                Log.d(TAG, "${arrayOfStops.length()}")
+                for (i in 0 until arrayOfStops.length()) {
+                    val stop = arrayOfStops.getJSONObject(i)
+                    val location = stop.getJSONObject("location")
+                    val city = location.getString("name")
+                    val lat = location.getDouble(latName)
+                    val long = location.getDouble(longName)
+
+                    coordsList.add(LatLng(lat, long))
+                    nameList.add(city)
+
+                    Log.d(TAG, "Stop $i: $lat, $long")
+                }
+
+                coordsList.add(LatLng(endLat, endLong))
+                nameList.add(endName)
+                Log.d(TAG, "End Location: $endLat, $endLong")
+
+
+                //coordinates for testing purposes
 //            val points = listOf(
 //                LatLng(37.7749, -122.4194), // San Francisco
 //                LatLng(34.0522, -118.2437), // Los Angeles
 //                LatLng(36.1699, -115.1398)  // Las Vegas
 //            )
 
-            //polyline only draws straight lines, ideally in release this should change to
-            //actual routes (ie. roads, highways)
-            val polylineOptions = PolylineOptions()
-                .addAll(coordsList)
-                .width(5f)
-                .color(0xFF0000FF.toInt())
+                val mapFragment = findViewById<FragmentContainerView>(R.id.map)
 
-            mMap.addPolyline(polylineOptions)
+                Log.d(TAG, "Found Map")
 
-            for (i in coordsList.indices) {
-                val marker = mMap.addMarker(MarkerOptions().position(coordsList[i]).title(nameList[i]))
-                marker?.showInfoWindow()
+                if (mapFragment.visibility == android.view.View.GONE) {
+                    mapFragment.visibility = android.view.View.VISIBLE
+                }
+
+                Log.d(TAG, "Map made visible")
+
+                //polyline only draws straight lines, ideally in release this should change to
+                //actual routes (ie. roads, highways)
+                val polylineOptions = PolylineOptions()
+                    .addAll(coordsList)
+                    .width(5f)
+                    .color(0xFF0000FF.toInt())
+
+                mMap.addPolyline(polylineOptions)
+
+                for (i in coordsList.indices) {
+                    val marker = mMap.addMarker(MarkerOptions().position(coordsList[i]).title(nameList[i]))
+                    marker?.showInfoWindow()
+                }
+
+                Log.d(TAG, "Map is ready and displayed")
+
+                val builder = LatLngBounds.Builder()
+                coordsList.forEach { builder.include(it) }
+                val bounds = builder.build()
+                val padding = 100
+                val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding)
+                mMap.moveCamera(cameraUpdate)
+
+            } catch (e : JSONException) {
+                Log.e(TAG, "Error parsing JSON response: ${e.message}")
             }
-
-            Log.d(TAG, "Map is ready and displayed")
-
-            val builder = LatLngBounds.Builder()
-            coordsList.forEach { builder.include(it) }
-            val bounds = builder.build()
-            val padding = 100
-            val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding)
-            mMap.moveCamera(cameraUpdate)
-
         } else {
-            Log.e(TAG, "No coordinates/cities received!")
+            Log.e(TAG, "Response is null")
         }
     }
 
