@@ -13,9 +13,13 @@ import androidx.core.app.NotificationManagerCompat
 import com.example.FoodTripFrontend.BuildConfig.SERVER_URL
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import okhttp3.*
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import org.json.JSONObject
 import java.io.IOException
 
@@ -29,11 +33,12 @@ class NotificationActivity : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        Log.d(TAG, "Message received: ${remoteMessage.notification?.body}")
+        val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "New Message"
+        val message = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: "You have a new notification"
 
-        remoteMessage.notification?.let {
-            showNotification(it.title ?: "New Message", it.body ?: "You have a new notification")
-        }
+        Log.d(TAG, "Message received: $message")
+
+        showNotification(title, message)
     }
 
     private fun showNotification(title: String, message: String) {
@@ -67,7 +72,7 @@ class NotificationActivity : FirebaseMessagingService() {
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle(title)
             .setContentText(message)
-//            .setSmallIcon(R.drawable.ic_notification)
+            .setSmallIcon(R.drawable.ic_notification)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .build()

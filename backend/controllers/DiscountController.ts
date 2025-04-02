@@ -38,7 +38,7 @@ export const addDiscount = async (
     const payload = {
       notification: {
         title: "New Discount Available!",
-        body: `Get ${discount.ingredient} for only $${discount.price}% at ${discount.storeName}!`,
+        body: `Get ${discount.ingredient} for only $${discount.price} at ${discount.storeName}!`,
       },
     };
 

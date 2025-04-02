@@ -133,7 +133,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     //temp function for Notifications
     private fun requestNotificationPermission() {
-        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 
     private fun fetchFCMToken() {
