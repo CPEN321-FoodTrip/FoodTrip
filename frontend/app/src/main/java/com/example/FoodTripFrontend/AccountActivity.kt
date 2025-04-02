@@ -1,6 +1,7 @@
 package com.example.FoodTripFrontend
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
@@ -46,6 +47,13 @@ class AccountActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        // back button to home page
+        val backButton: Button = findViewById(R.id.back_button_account)
+        backButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
         }
 
         notificationsSwitch = findViewById(R.id.notifications_switch)
