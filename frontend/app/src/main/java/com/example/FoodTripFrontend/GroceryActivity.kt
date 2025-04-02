@@ -42,8 +42,6 @@ class GroceryActivity : AppCompatActivity() {
 
     private val ERROR_MESSAGE = "Unexpected code"
 
-    private val sampleTripID = "67eaa53f02fdf04413318b3a"
-    private val sampleUserID = "test_person"
 
     /**
      * JSON format for API response in getDiscount()
@@ -128,7 +126,7 @@ class GroceryActivity : AppCompatActivity() {
                 window.decorView.rootView,
                 "Please first plan your trip",
                 Snackbar.LENGTH_SHORT
-            )
+            ).show()
         }
     }
 
