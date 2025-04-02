@@ -213,6 +213,9 @@ class TripActivity : AppCompatActivity() {
                     Log.d(TAG, "Response: $responseBody")
                     collectRoute(responseBody)
                 } else {
+                    if (response.code == 503) {
+                        showSnackbar(findViewById(android.R.id.content), "Service unavailable, try again later")
+                    }
                     Log.e(TAG, "Error: ${response.code}")
                 }
 
