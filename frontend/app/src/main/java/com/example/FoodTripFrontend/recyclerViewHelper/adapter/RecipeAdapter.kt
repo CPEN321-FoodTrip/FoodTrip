@@ -49,17 +49,21 @@ class RecipeAdapter(private val recipeList: List<RecipeItem>) :
     override fun onBindViewHolder(holder: RecipeViewHolder, position: Int) {
         val recipeItem = recipeList[position]
 
-        holder.recipeName.text = recipeItem.recipeName
+        holder.recipeName.text = "Day ${position+1}: ${recipeItem.recipeName}"
 
         val ingredients = recipeItem.ingredients
         for (i in 0..<ingredients.size) {
             val ingredient = ingredients[i]
 
             val ingredTextView = TextView(holder.itemView.context)
-            val quantity = ingredient.quantity
-            val measure = if (ingredient.measure == "<unit>") "" else ingredient.measure
-            val food = ingredient.food
-            ingredTextView.text = "Day $i: ${quantity} ${measure} ${food}"
+            var quantity = ingredient.quantity.toString() + " "
+            var measure = ingredient.measure + " "
+            var food = ingredient.food
+
+            if (quantity == "0 ") quantity = ""
+            if (measure == "<unit> " || measure == "null ") measure = ""
+
+            ingredTextView.text = "$quantity$measure$food"
 
             ingredTextView.setOnClickListener() {
                 getDiscount(ingredient.food) { discounts ->

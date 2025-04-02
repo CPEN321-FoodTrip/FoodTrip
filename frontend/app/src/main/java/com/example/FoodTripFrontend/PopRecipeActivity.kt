@@ -3,7 +3,11 @@ package com.example.FoodTripFrontend
 import android.app.Activity
 import android.os.Bundle
 import android.util.Log
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -11,12 +15,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.snackbar.Snackbar
 import retrofit2.http.Tag
 
 /**
  * Activity showing details of the selected recipe from PopTripActivity
  */
-class PopRecipeActivity : Activity() {
+class PopRecipeActivity : AppCompatActivity() {
 
     lateinit var webView: WebView
     lateinit var recipeList: LinearLayout
@@ -60,24 +65,14 @@ class PopRecipeActivity : Activity() {
 
         if (url.isNotEmpty()) {
             if (from == "grocery") {
-                webView = WebView(this)
-                webView.tag = "recipe web"
-                webView.settings.javaScriptEnabled = true
-                webView.settings.domStorageEnabled = true
-                findViewById<ConstraintLayout>(R.id.main).addView(webView)
-                webView.loadUrl(url)
+                createWebView(url)
             } else {
                 val urlTextView = TextView(this)
                 urlTextView.textSize = 25f
                 urlTextView.text = url
                 urlTextView.tag = "url"
                 urlTextView.setOnClickListener {
-                    webView = WebView(this)
-                    webView.tag = "recipe web"
-                    webView.settings.javaScriptEnabled = true
-                    webView.settings.domStorageEnabled = true
-                    findViewById<ConstraintLayout>(R.id.main).addView(webView)
-                    webView.loadUrl(url)
+                    createWebView(url)
                 }
                 recipeList.addView(urlTextView)
             }
@@ -92,6 +87,42 @@ class PopRecipeActivity : Activity() {
                 recipeList.addView(newTextView);
             }
         }
+    }
+
+    private fun createWebView(url: String) {
+        webView = WebView(this)
+        webView.tag = "recipe web"
+        webView.settings.javaScriptEnabled = true
+        webView.settings.domStorageEnabled = true
+
+        webView.webViewClient = object : WebViewClient() {
+            // Handle network error
+            override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
+                super.onReceivedError(view, request, error)
+                Log.d("PopRecipe", "Network Error: ${error?.description}")
+                Snackbar.make(
+                    window.decorView.rootView,
+                    "Network Error: ${error?.description}",
+                    Snackbar.LENGTH_SHORT
+                ).show()
+                onBackPressed()
+            }
+
+            // Handle HTTP errors
+            override fun onReceivedHttpError(view: WebView?, request: WebResourceRequest?, errorResponse: WebResourceResponse?) {
+                super.onReceivedHttpError(view, request, errorResponse)
+                Log.d("PopRecipe", "HTTP Error: ${errorResponse?.statusCode}")
+                Snackbar.make(
+                    window.decorView.rootView,
+                    "HTTP Error: ${errorResponse?.statusCode}",
+                    Snackbar.LENGTH_SHORT
+                ).show()
+//                onBackPressed()
+            }
+        }
+
+        findViewById<ConstraintLayout>(R.id.main).addView(webView)
+        webView.loadUrl(url)
     }
 
     @Deprecated("Deprecated in Java")
