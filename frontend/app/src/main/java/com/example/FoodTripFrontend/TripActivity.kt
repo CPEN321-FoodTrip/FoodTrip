@@ -229,6 +229,7 @@ class TripActivity : AppCompatActivity() {
                 val jsonObject = JSONObject(response)
                 val tripID = jsonObject.getString("tripID")
 
+                val intent = Intent(this, MainActivity::class.java)
                 intent.putExtra("tripId", tripID)
                 Log.d(TAG, "Trip ID : $tripID")
                 startActivity(intent)
