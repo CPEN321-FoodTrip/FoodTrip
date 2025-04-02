@@ -120,7 +120,6 @@ class PopTripActivity : Activity() {
         client = OkHttpClient()
         stopList = findViewById<LinearLayout>(R.id.trip_list_layout)
 
-        // TODO: change processRecipes -> getRecipes
         val tripID = intent.getStringExtra("tripID")
         Log.d(TAG, "$tripID is passed into here")
         if (tripID != null) {
@@ -128,7 +127,6 @@ class PopTripActivity : Activity() {
             getTrip(tripID) {route ->
                 processTrip(route, tripID)
                 getRecipes(tripID) {recipes -> processRecipes(recipes)}
-                // processRecipes(EdamamResponse(emptyList()))
             }
 
         }
@@ -237,7 +235,6 @@ class PopTripActivity : Activity() {
         val stopsCount = stopList.getChildCount() - 2
         val recipesCount = recipes.count()
 
-        // TODO: change the itemView.text
         for (i in 0..<recipesCount) {
             val recipe = recipes[i]
 
@@ -250,7 +247,6 @@ class PopTripActivity : Activity() {
             itemView.text = "recipe ${i+1}: ${recipe.recipeName}"
             itemView.tag = "recipe ${i+1}"
 
-            // TODO: implement parameters to PopRecipeActivity
             itemView.setOnClickListener {
                 Log.d(TAG, "${itemView.text} is clicked")
 
