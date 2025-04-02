@@ -25,6 +25,7 @@ class PopRecipeActivity : AppCompatActivity() {
 
     lateinit var webView: WebView
     lateinit var recipeList: LinearLayout
+    var isClosing = false
 
     lateinit var name: String
     lateinit var url: String
@@ -90,6 +91,8 @@ class PopRecipeActivity : AppCompatActivity() {
     }
 
     private fun createWebView(url: String) {
+        Log.d("PopRecipe", "url: $url")
+
         webView = WebView(this)
         webView.tag = "recipe web"
         webView.settings.javaScriptEnabled = true
@@ -99,25 +102,21 @@ class PopRecipeActivity : AppCompatActivity() {
             // Handle network error
             override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
                 super.onReceivedError(view, request, error)
-                Log.d("PopRecipe", "Network Error: ${error?.description}")
-                Snackbar.make(
-                    window.decorView.rootView,
-                    "Network Error: ${error?.description}",
-                    Snackbar.LENGTH_SHORT
-                ).show()
-                onBackPressed()
-            }
-
-            // Handle HTTP errors
-            override fun onReceivedHttpError(view: WebView?, request: WebResourceRequest?, errorResponse: WebResourceResponse?) {
-                super.onReceivedHttpError(view, request, errorResponse)
-                Log.d("PopRecipe", "HTTP Error: ${errorResponse?.statusCode}")
-                Snackbar.make(
-                    window.decorView.rootView,
-                    "HTTP Error: ${errorResponse?.statusCode}",
-                    Snackbar.LENGTH_SHORT
-                ).show()
-//                onBackPressed()
+                when (error?.errorCode) {
+                    -2 -> {
+                        Snackbar.make(view!!, "No Internet Connection", Snackbar.LENGTH_LONG).show()
+                        onBackPressed()
+                    }
+                    -6 -> {
+                        Snackbar.make(view!!, "Failed to Connect", Snackbar.LENGTH_LONG).show()
+                        onBackPressed()
+                    }
+                    -8 -> {
+                        Snackbar.make(view!!, "Connection Timed Out", Snackbar.LENGTH_LONG).show()
+                        onBackPressed()
+                    }
+                }
+                Log.d("PopRecipe", "Network Error: ${error?.description} (${error?.errorCode})")
             }
         }
 
@@ -127,6 +126,9 @@ class PopRecipeActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+        if (isClosing) return
+        isClosing = true
+
         if (from == "grocery") {
             finish()
         }

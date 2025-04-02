@@ -84,7 +84,11 @@ class RecipeAdapter(private val recipeList: List<RecipeItem>) :
 
         holder.linkToRecipeButton.setOnClickListener() {
             val intent = Intent(holder.itemView.context, PopRecipeActivity::class.java)
-            intent.putExtra("url", recipeItem.url)
+            var _url = recipeItem.url
+            if (_url?.startsWith("http://") == true) {
+                _url = _url.replaceFirst("http://", "https://")
+            }
+            intent.putExtra("url", _url)
             intent.putExtra("from", "grocery")
             holder.itemView.context.startActivity(intent)
         }
