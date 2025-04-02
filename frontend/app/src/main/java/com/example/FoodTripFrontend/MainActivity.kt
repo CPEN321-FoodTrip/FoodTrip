@@ -333,12 +333,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
                 Log.d(TAG, "Map is ready and displayed")
 
-                val builder = LatLngBounds.Builder()
-                coordsList.forEach { builder.include(it) }
-                val bounds = builder.build()
-                val padding = 100
-                val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding)
-                mMap.moveCamera(cameraUpdate)
+                mapFragment.post {
+                    val builder = LatLngBounds.Builder()
+                    coordsList.forEach { builder.include(it) }
+                    val bounds = builder.build()
+                    val padding = 100
+                    val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding)
+                    mMap.moveCamera(cameraUpdate)
+                }
 
             } catch (e : JSONException) {
                 Log.e(TAG, "Error parsing JSON response: ${e.message}")

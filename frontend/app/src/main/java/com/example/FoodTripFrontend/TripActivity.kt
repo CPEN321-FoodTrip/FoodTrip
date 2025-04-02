@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.FoodTripFrontend.BuildConfig.SERVER_URL
+import com.example.FoodTripFrontend.GroceryActivity.Companion
+import com.example.FoodTripFrontend.recyclerViewHelper.itemClass.RecipeItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -29,6 +31,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import org.json.JSONException
 import java.util.ArrayList
 import java.util.LinkedList
@@ -47,7 +51,9 @@ class TripActivity : AppCompatActivity() {
 
     private var snackbarQueue: Queue<String> = LinkedList()
     private var isSnackbarShowing = false
-    private var currentTripID = ""
+    lateinit var globalData : GlobalData
+    private val ERROR_MESSAGE = "Unexpected code"
+
 
 
     /**
@@ -67,6 +73,9 @@ class TripActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        globalData = application as GlobalData
+
 
         findViewById<Button>(R.id.CreateTrip).setOnClickListener() {
             collectParameters()
@@ -99,48 +108,41 @@ class TripActivity : AppCompatActivity() {
                 Log.d(TAG, "in if")
                 isValid = false
                 showSnackbar(findViewById(android.R.id.content), "Invalid Start City")
-//                Snackbar.make(findViewById(android.R.id.content), "Invalid Start City", Snackbar.LENGTH_SHORT).show()
             }
 
             // Check if end city is valid
             if (userEndInput.isNotEmpty() && !checkExistence(userEndInput)) {
                 isValid = false
                 showSnackbar(findViewById(android.R.id.content), "Invalid End City")
-//                Snackbar.make(findViewById(android.R.id.content), "Invalid End City", Snackbar.LENGTH_SHORT).show()
             }
 
             // Check if start and end city are the same
             if (userStartInput == userEndInput) {
                 isValid = false
                 showSnackbar(findViewById(android.R.id.content), "Route Cannot Have Same Start/End")
-//                Snackbar.make(findViewById(android.R.id.content), "Route Cannot Have Same Start/End", Snackbar.LENGTH_SHORT).show()
             }
 
             //Check if start or end city is missing
             if (userStartInput.isEmpty()) {
                 isValid = false
                 showSnackbar(findViewById(android.R.id.content), "Missing Start City")
-//                Snackbar.make(findViewById(android.R.id.content), "Missing Start City", Snackbar.LENGTH_SHORT).show()
             } else if (userEndInput.isEmpty()) {
                 Log.d(TAG,"In missing end")
                 isValid = false
                 showSnackbar(findViewById(android.R.id.content), "Missing End City")
-//                Snackbar.make(findViewById(android.R.id.content), "Missing End City", Snackbar.LENGTH_SHORT).show()
             }
 
             if (userNumStops == null) {
                 Log.d(TAG,"In numStopsEmpty")
                 isValid = false
                 showSnackbar(findViewById(android.R.id.content), "Missing Number of Stops")
-//                Snackbar.make(findViewById(android.R.id.content), "Missing Number of Stops", Snackbar.LENGTH_SHORT).show()
             }
 
-            // Check if the number of stops is valid (non null and at least 1 stop)
-            if (userNumStops != null && userNumStops < 1) {
+            // Check if the number of stops is valid (non null and at least 1 stop but less than 10)
+            if ((userNumStops != null && userNumStops < 1) || (userNumStops != null && userNumStops > 10)) {
                 Log.d(TAG,"In numStops invalid")
                 isValid = false
                 showSnackbar(findViewById(android.R.id.content), "Invalid Number of Stops")
-//                Snackbar.make(findViewById(android.R.id.content), "Invalid Number of Stops", Snackbar.LENGTH_SHORT).show()
             }
 
 
@@ -225,20 +227,72 @@ class TripActivity : AppCompatActivity() {
     //Takes the response from the back end and sends the tripID to mainActivity to be processed
     private fun collectRoute(response : String?) {
         if (response != null) {
-            try {
-                val jsonObject = JSONObject(response)
-                val tripID = jsonObject.getString("tripID")
+            CoroutineScope(Dispatchers.Main).launch {
+                try {
+                    val jsonObject = JSONObject(response)
+                    val tripID = jsonObject.getString("tripID")
 
-                val intent = Intent(this, MainActivity::class.java)
-                intent.putExtra("tripId", tripID)
-                Log.d(TAG, "Trip ID : $tripID")
-                startActivity(intent)
+                    val recipeSuccess = createRecipe(tripID, globalData.userID)
 
-            } catch (e : JSONException) {
-                Log.e(TAG, "Error parsing JSON response: ${e.message}")
+                    if (recipeSuccess) {
+                        val intent = Intent(this@TripActivity, MainActivity::class.java)
+                        intent.putExtra("tripId", tripID)
+                        Log.d(TAG, "Trip ID : $tripID")
+                        startActivity(intent)
+                    } else {
+                        Log.d(TAG, "Recipe generation failed, staying on the input screen.")
+                    }
+
+                } catch (e: JSONException) {
+                    Log.e(TAG, "Error parsing JSON response: ${e.message}")
+                }
+
             }
         } else {
             Log.e(TAG, "Response is null")
+        }
+    }
+
+    private suspend fun createRecipe(tripID: String, userID: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            val url = "${SERVER_URL}recipes"
+            val jsonBody = """
+            {
+                "tripID": "$tripID",
+                "userID": "$userID"
+            }
+        """.trimIndent()
+
+            val body = jsonBody.toRequestBody("application/json; charset=utf-8".toMediaType())
+
+            val request = Request.Builder()
+                .url(url)
+                .post(body)
+                .build()
+
+            try {
+                val response = client.newCall(request).execute()
+                response.use {
+                    if (response.code == 404) {
+                        runOnUiThread {
+                            showSnackbar(findViewById(android.R.id.content), "Recipes could not be found. Please resubmit.")
+                        }
+                        return@withContext false
+                    }
+                    if (!response.isSuccessful) {
+                        runOnUiThread {
+                            showSnackbar(findViewById(android.R.id.content), "An error occurred: ${response.message}")
+                        }
+                        return@withContext false
+                    }
+                }
+                return@withContext true
+            } catch (e: IOException) {
+                runOnUiThread {
+                    showSnackbar(findViewById(android.R.id.content), "Network error. Please try again.")
+                }
+                return@withContext false
+            }
         }
     }
 
