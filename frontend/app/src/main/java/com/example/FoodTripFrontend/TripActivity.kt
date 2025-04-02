@@ -301,6 +301,7 @@ class TripActivity : AppCompatActivity() {
         }
     }
 
+
     private suspend fun deleteTrip(tripID: String) {
         withContext(Dispatchers.IO) {
             val url = "${SERVER_URL}routes/$tripID"

@@ -1,7 +1,10 @@
 package com.example.FoodTripFrontend
 
 import android.app.Activity
+import android.graphics.Typeface
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -59,9 +62,21 @@ class PopRecipeActivity : AppCompatActivity() {
         if (name.isNotEmpty()) {
             val nameTextView = TextView(this)
             nameTextView.textSize = 25f
+            nameTextView.typeface = Typeface.DEFAULT_BOLD
             nameTextView.text = name
             recipeList.addView(nameTextView);
             Log.d("temp", "name is printed")
+        }
+
+        if (!ingredients.isNullOrEmpty()) {
+            for (i in 0..<ingredients!!.count()) {
+                val newTextView = TextView(this)
+                newTextView.setPadding(10, 0, 0, 10)
+                newTextView.textSize = 20f
+                newTextView.text = ingredients!![i]
+                newTextView.tag = "ingred ${i+1}"
+                recipeList.addView(newTextView);
+            }
         }
 
         if (url.isNotEmpty()) {
@@ -69,23 +84,14 @@ class PopRecipeActivity : AppCompatActivity() {
                 createWebView(url)
             } else {
                 val urlTextView = TextView(this)
-                urlTextView.textSize = 25f
+                urlTextView.setPadding(5, 5, 5, 10)
+                urlTextView.textSize = 12f
                 urlTextView.text = url
                 urlTextView.tag = "url"
                 urlTextView.setOnClickListener {
                     createWebView(url)
                 }
                 recipeList.addView(urlTextView)
-            }
-        }
-
-
-        if (!ingredients.isNullOrEmpty()) {
-            for (i in 0..<ingredients!!.count()) {
-                val newTextView = TextView(this)
-                newTextView.textSize = 25f
-                newTextView.text = ingredients!![i]
-                recipeList.addView(newTextView);
             }
         }
     }
@@ -102,18 +108,22 @@ class PopRecipeActivity : AppCompatActivity() {
             // Handle network error
             override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
                 super.onReceivedError(view, request, error)
+                val rootView = window.decorView.rootView
                 when (error?.errorCode) {
                     -2 -> {
-                        Snackbar.make(view!!, "No Internet Connection", Snackbar.LENGTH_LONG).show()
-                        onBackPressed()
+                        Snackbar.make(rootView, "Connection error! Some contents may not load", Snackbar.LENGTH_LONG).show()
                     }
                     -6 -> {
-                        Snackbar.make(view!!, "Failed to Connect", Snackbar.LENGTH_LONG).show()
-                        onBackPressed()
+                        Snackbar.make(rootView, "Failed to Connect", Snackbar.LENGTH_LONG).show()
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            onBackPressed()
+                        }, 2000)
                     }
                     -8 -> {
-                        Snackbar.make(view!!, "Connection Timed Out", Snackbar.LENGTH_LONG).show()
-                        onBackPressed()
+                        Snackbar.make(rootView, "Connection Timed Out", Snackbar.LENGTH_LONG).show()
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            onBackPressed()
+                        }, 2000)
                     }
                 }
                 Log.d("PopRecipe", "Network Error: ${error?.description} (${error?.errorCode})")
@@ -126,10 +136,9 @@ class PopRecipeActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        if (isClosing) return
-        isClosing = true
-
         if (from == "grocery") {
+            if (isClosing) return
+            isClosing = true
             finish()
         }
         if (::webView.isInitialized && webView.parent != null) {
