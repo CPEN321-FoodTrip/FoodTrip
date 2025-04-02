@@ -82,21 +82,6 @@ class GroceryActivity : AppCompatActivity() {
     )
 
     /**
-     * class of sub-element in class EdamamResponse
-     *
-     * @property recipeName: name of the recipe
-     * @property recipeID: unique identifier of the recipe
-     * @property url: link to the recipe
-     * @property ingredients: list of ingredients needed for the recipe
-     */
-//    data class RecipeItem(
-//        val recipeName: String,
-//        val recipeID: String,
-//        val url: String,
-//        val ingredients: List<Ingredient>,
-//    )
-
-    /**
      * JSON format for API response in getRecipes()
      *
      * @property hits: list of recipes
@@ -106,6 +91,7 @@ class GroceryActivity : AppCompatActivity() {
     )
 
     lateinit var client: OkHttpClient
+    lateinit var globalData : GlobalData
 
     lateinit var recipeList: LinearLayout
     lateinit var recyclerView: RecyclerView
@@ -121,6 +107,7 @@ class GroceryActivity : AppCompatActivity() {
         }
 
         client = OkHttpClient()
+        globalData = application as GlobalData
 
         val backBtn = findViewById<Button>(R.id.back_button);
         recipeList = findViewById<LinearLayout>(R.id.recipe_list_layout)
@@ -132,9 +119,16 @@ class GroceryActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // TODO: get tripID from GlobalData
-        getRecipe(sampleTripID, sampleUserID) { recipes ->
-            processRecipe(recipes)
+        if (globalData.currentTripID != "") {
+            getRecipe(globalData.currentTripID, globalData.userID) { recipes ->
+                processRecipe(recipes)
+            }
+        } else {
+            Snackbar.make(
+                window.decorView.rootView,
+                "Please first plan your trip",
+                Snackbar.LENGTH_SHORT
+            )
         }
     }
 
@@ -164,7 +158,7 @@ class GroceryActivity : AppCompatActivity() {
 
                     val json = response.body!!.string()
                     val listType = object : TypeToken<List<RecipeItem>>() {}.type
-                    var recipes:List<RecipeItem> = Gson().fromJson(json, listType)
+                    val recipes:List<RecipeItem> = Gson().fromJson(json, listType)
                     callback(recipes)
                 }
             }
@@ -173,13 +167,8 @@ class GroceryActivity : AppCompatActivity() {
 
     private fun processRecipe(recipes: List<RecipeItem>) {
         if (recipes.isEmpty()) {
-//            runOnUiThread {
-//                Snackbar.make(findViewById(android.R.id.content),
-//                    "No recipe for this trip",
-//                    Snackbar.LENGTH_SHORT).show()
-//            }
-            // TODO: use GlobalData
-            createRecipe(sampleTripID, sampleUserID) { _recipes ->
+            Log.d(TAG, "Recipes has not created. Creating...")
+            createRecipe(globalData.currentTripID, globalData.userID) { _recipes ->
                 showRecipe(_recipes)
             }
         } else {
