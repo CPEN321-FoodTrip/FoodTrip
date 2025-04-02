@@ -91,12 +91,11 @@ class PastTripActivity : AppCompatActivity() {
         }
 
         //use "test_person" for developing and debugging
-        //val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
-        //val userEmail = sharedPref.getString("userEmail", "No email found")
+        val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
+        val userEmail = sharedPref.getString("userEmail", "No email found")
 
-        val userEmail = "test_person"
+//        val userEmail = "test_person"
 
-//        getTrip(sampleID) {trips -> processTrip(trips)}
         if (userEmail != null) {
             getTrip(userEmail) {trips -> processTrip(trips)}
         }
@@ -104,7 +103,6 @@ class PastTripActivity : AppCompatActivity() {
 
     private fun getTrip(userID : String, callback: (List<TripItem>) -> Unit) {
         val url = "${BuildConfig.SERVER_URL}users/$userID/routes"
-//        Log.d(TAG, url)
 
         val request = Request.Builder()
             .url(url)
