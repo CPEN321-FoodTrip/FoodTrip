@@ -47,6 +47,8 @@ class TripActivity : AppCompatActivity() {
 
     private var snackbarQueue: Queue<String> = LinkedList()
     private var isSnackbarShowing = false
+    private var currentTripID = ""
+
 
     /**
      * Companion object for TripActivity.
@@ -220,56 +222,15 @@ class TripActivity : AppCompatActivity() {
         }
     }
 
-    //Takes the response from the back end and creates a list of the route coordinates and
-    //corresponding city names. Puts them into an arraylist and sends them to the main activity
-    //to be displayed on the map in MainActivity. Then returns back to main activity.
+    //Takes the response from the back end and sends the tripID to mainActivity to be processed
     private fun collectRoute(response : String?) {
-        val longName = "longitude"
-        val latName = "latitude"
-
         if (response != null) {
             try {
                 val jsonObject = JSONObject(response)
-                val coordsList = mutableListOf<LatLng>()
-                val nameList = mutableListOf<String>()
+                val tripID = jsonObject.getString("tripID")
 
-                val startLocation = jsonObject.getJSONObject("start_location")
-                val startName = startLocation.getString("name")
-                val startLat = startLocation.getDouble(latName)
-                val startLong = startLocation.getDouble(longName)
-                Log.d(TAG, "Start Location: $startLat, $startLong")
-
-                coordsList.add(LatLng(startLat, startLong))
-                nameList.add(startName)
-
-                val endLocation = jsonObject.getJSONObject("end_location")
-                val endName = endLocation.getString("name")
-                val endLat = endLocation.getDouble(latName)
-                val endLong = endLocation.getDouble(longName)
-
-                val arrayOfStops: JSONArray = jsonObject.getJSONArray("stops")
-
-                for (i in 0 until arrayOfStops.length()) {
-                    val stop = arrayOfStops.getJSONObject(i)
-                    val location = stop.getJSONObject("location")
-                    val city = location.getString("name")
-                    val lat = location.getDouble(latName)
-                    val long = location.getDouble(longName)
-
-                    coordsList.add(LatLng(lat, long))
-                    nameList.add(city)
-
-                    Log.d(TAG, "Stop $i: $lat, $long")
-                }
-
-                coordsList.add(LatLng(endLat, endLong))
-                nameList.add(endName)
-
-                val intent = Intent(this@TripActivity, MainActivity::class.java)
-                val bundle = Bundle()
-                bundle.putParcelableArrayList("coordinates", ArrayList(coordsList))
-                bundle.putStringArrayList("cities", ArrayList(nameList))
-                intent.putExtras(bundle)
+                intent.putExtra("tripId", tripID)
+                Log.d(TAG, "Trip ID : $tripID")
                 startActivity(intent)
 
             } catch (e : JSONException) {
