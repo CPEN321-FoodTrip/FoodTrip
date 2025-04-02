@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.FoodTripFrontend.GroceryStoreActivity.DiscountItem
+import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import okhttp3.Call
@@ -129,7 +130,11 @@ class PastTripActivity : AppCompatActivity() {
 
     private fun processTrip(trips: List<TripItem>) {
         if (trips.isEmpty()) {
-            // TODO: indicate no discounts posted
+            Snackbar.make(
+                findViewById(android.R.id.content),
+                "You haven't done any trip yet",
+                Snackbar.LENGTH_SHORT
+            )
             return
         }
 
