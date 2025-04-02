@@ -275,6 +275,7 @@ class TripActivity : AppCompatActivity() {
                 response.use {
                     if (response.code == 404) {
                         deleteTrip(tripID)
+
                         runOnUiThread {
                             showSnackbar(findViewById(android.R.id.content), "Recipes could not be found. Please resubmit.")
                         }
@@ -296,6 +297,7 @@ class TripActivity : AppCompatActivity() {
             }
         }
     }
+
 
     private suspend fun deleteTrip(tripID: String) {
         withContext(Dispatchers.IO) {
