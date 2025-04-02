@@ -49,7 +49,7 @@ class RecipeAdapter(private val recipeList: List<RecipeItem>) :
     override fun onBindViewHolder(holder: RecipeViewHolder, position: Int) {
         val recipeItem = recipeList[position]
 
-        holder.recipeName.text = "Day ${position+1}: ${recipeItem.recipeName}"
+        holder.recipeName.text = "Stop ${position+1}: ${recipeItem.recipeName}"
 
         val ingredients = recipeItem.ingredients
         for (i in 0..<ingredients.size) {
@@ -84,7 +84,11 @@ class RecipeAdapter(private val recipeList: List<RecipeItem>) :
 
         holder.linkToRecipeButton.setOnClickListener() {
             val intent = Intent(holder.itemView.context, PopRecipeActivity::class.java)
-            intent.putExtra("url", recipeItem.url)
+            var _url = recipeItem.url
+            if (_url?.startsWith("http://") == true) {
+                _url = _url.replaceFirst("http://", "https://")
+            }
+            intent.putExtra("url", _url)
             intent.putExtra("from", "grocery")
             holder.itemView.context.startActivity(intent)
         }

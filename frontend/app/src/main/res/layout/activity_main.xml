@@ -68,7 +68,7 @@
                 android:id="@+id/ManageAccount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Manage Account"
+                android:text="Set Preferences"
                 android:layout_weight="1"
                 android:backgroundTint="#90b9c3"
                 android:textColor="@android:color/white"

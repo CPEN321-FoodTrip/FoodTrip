@@ -246,6 +246,7 @@ class TripActivity : AppCompatActivity() {
                 } catch (e: JSONException) {
                     Log.e(TAG, "Error parsing JSON response: ${e.message}")
                 }
+
             }
         } else {
             Log.e(TAG, "Response is null")
