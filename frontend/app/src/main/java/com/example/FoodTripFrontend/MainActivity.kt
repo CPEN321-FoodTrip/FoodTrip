@@ -58,8 +58,9 @@ import java.util.ArrayList
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
+    lateinit var globalData : GlobalData
+
     private val client = OkHttpClient()
-    private var currentTripID = ""
     /**
      * Companion object for MainActivity.
      * Stores static constants related to the activity.
@@ -91,6 +92,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        globalData = application as GlobalData
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -193,8 +196,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         val tripID = intent.getStringExtra("tripId")
         Log.d(TAG, "Running Map")
         if (tripID != null) {
-            currentTripID = tripID
-            Log.d(TAG, currentTripID)
+            globalData.currentTripID = tripID
             CoroutineScope(Dispatchers.IO).launch {
 
                 val request = Request.Builder()
@@ -223,7 +225,33 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
             }
         } else {
-            Log.e(TAG, "TripID is null")
+            if (globalData.currentTripID.isEmpty()) {
+                Log.e(TAG, "TripID is null")
+            } else {
+                CoroutineScope(Dispatchers.IO).launch {
+                    val request = Request.Builder()
+                        .url("${SERVER_URL}routes/${globalData.currentTripID}")
+                        .addHeader("Content-Type", "application/json")
+                        .build()
+
+                    try {
+                        val response = client.newCall(request).execute()
+
+                        //if a route is successfully returned, the data for the route is collected
+                        if (response.isSuccessful) {
+                            val responseBody = response.body?.string()
+                            Log.d(TAG, "Response: $responseBody")
+                            withContext(Dispatchers.Main) {
+                                genMap(mMap, responseBody)
+                            }
+                        } else {
+                            Log.e(TAG, "Error: ${response.code}")
+                        }
+                    } catch (e: IOException) {
+                        Log.e(TAG, "Exception: ${e.message}")
+                    }
+                }
+            }
         }
     }
 
