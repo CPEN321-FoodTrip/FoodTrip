@@ -274,6 +274,7 @@ class TripActivity : AppCompatActivity() {
                 val response = client.newCall(request).execute()
                 response.use {
                     if (response.code == 404) {
+                        deleteTrip(tripID)
                         runOnUiThread {
                             showSnackbar(findViewById(android.R.id.content), "Recipes could not be found. Please resubmit.")
                         }
@@ -292,6 +293,28 @@ class TripActivity : AppCompatActivity() {
                     showSnackbar(findViewById(android.R.id.content), "Network error. Please try again.")
                 }
                 return@withContext false
+            }
+        }
+    }
+
+    private suspend fun deleteTrip(tripID: String) {
+        withContext(Dispatchers.IO) {
+            val url = "${SERVER_URL}routes/$tripID"
+
+            val request = Request.Builder()
+                .url(url)
+                .delete()
+                .build()
+
+            try {
+                val response = client.newCall(request).execute()
+                if (!response.isSuccessful) {
+                    Log.e(TAG, "Failed to delete trip: ${response.code}")
+                } else {
+                    Log.d(TAG, "Trip deleted successfully")
+                }
+            } catch (e: IOException) {
+                Log.e(TAG, "Exception while deleting trip: ${e.message}")
             }
         }
     }
