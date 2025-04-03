@@ -15,6 +15,7 @@
 | April 3, 2025 | 3.1 | Update frontend non-functional test location to reflect new file |
 | April 3, 2025 | 3.2 | Update frontend usability test log for new test |
 | April 3, 2025 | 4.2 | Update frontend functional test logs with most recent run |
+| April 3, 2025 | 5.* | Update codacy screenshots and commit hash to account for code updates |
 
 ---
 
@@ -427,7 +428,7 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 
 ### 5.1. Commit Hash Where Codacy Ran
 
-`c4af1f3921930b82a3fe69d18c0ba64f4b2c03f4`
+`abfa2144599635f44dcd59fd106209fd80abb743`
 
 ### 5.2. Unfixed Issues per Codacy Category
 
