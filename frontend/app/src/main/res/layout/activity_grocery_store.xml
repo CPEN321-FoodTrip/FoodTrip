@@ -7,63 +7,91 @@
     android:layout_height="match_parent"
     tools:context=".GroceryStoreActivity">
 
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#90b9c3">
+
+
+        <LinearLayout
+            android:id="@+id/topLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="#4db2c4"
+            android:padding="0dp"
+            android:weightSum="3"
+            android:layout_gravity="center"
+            android:layout_alignParentTop="true">
+
+            <Button
+                android:id="@+id/sign_out_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:text="Sign Out"
+                android:background="@android:color/transparent"
+                android:backgroundTint="#4db2c4"
+                android:layout_weight="0.4"
+                android:textColor="@android:color/white"
+                android:layout_margin="0dp" />
+
+            <TextView
+                android:id="@+id/grocery_store_title_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="80dp"
+                android:text="@string/_grocery_store_title_text"
+                android:background="@android:color/transparent"
+                android:backgroundTint="#4db2c4"
+                android:textStyle="bold"
+                android:layout_weight="2.2"
+                android:gravity="center"
+                android:textColor="@android:color/white"
+                android:layout_margin="0dp" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:backgroundTint="#4db2c4"
+                android:layout_weight="0.4"
+                android:textColor="@android:color/white"
+                android:clickable="false"
+                android:layout_margin="0dp"
+                />
+        </LinearLayout>
+
     <ScrollView
         android:id="@+id/discount_scroll_view_store"
-        android:layout_width="350dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_marginHorizontal="20dp"
-        android:layout_marginVertical="20dp"
-        app:layout_constraintBottom_toTopOf="@+id/delete_button_grocery_store"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/grocery_store_title_text_view">
+        android:layout_marginVertical="20dp">
 
         <LinearLayout
             android:id="@+id/discount_list_layout_store"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" />
+            android:orientation="vertical"
+            android:layout_marginTop="40dp"/>
     </ScrollView>
-
-    <Button
-        android:id="@+id/sign_out_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="17dp"
-        android:layout_marginEnd="292dp"
-        android:text="Sign Out"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.023" />
-
-    <TextView
-        android:id="@+id/grocery_store_title_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
-        android:text="@string/_grocery_store_title_text"
-        android:textSize="40sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/discount_input_layout"
         android:layout_width="wrap_content"
-        android:layout_height="60dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        android:weightSum="4"
+        android:layout_alignParentBottom="true">
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/ingredient_input_layout"
-            android:layout_width="200dp"
+            android:layout_width="130dp"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:paddingHorizontal="10dp">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -77,6 +105,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/price_input_layout"
             android:layout_width="80dp"
+            android:layout_weight="1"
             android:layout_height="match_parent">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -94,19 +123,22 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
             android:layout_weight="1"
+            android:backgroundTint="#4db2c4"
+            android:textColor="@android:color/white"
             android:text="@string/post_button_text" />
+
+        <Button
+            android:id="@+id/delete_button_grocery_store"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_weight="1"
+            android:backgroundTint="#4db2c4"
+            android:textColor="@android:color/white"
+            android:text="@string/delete_button_text" />
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/delete_button_grocery_store"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_weight="1"
-        android:text="@string/delete_button_text"
-        app:layout_constraintBottom_toTopOf="@+id/discount_input_layout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
+    </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
