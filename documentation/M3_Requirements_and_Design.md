@@ -34,6 +34,7 @@ The reason for changing our diagram is based on comments from our M3. We also re
     - Section 4.2 with new sequence diagrams for manage discounts and set preferences to match implementation.
     - Section 3.5: Use 2 seconds as the required response time to match test.
     - Section 3.1: Invert arrow between "View Past Trips" and "View Recipes" to reflect implementation change.
+    - Section 4.7: Update description to match test implementation.
 
 
 ## 2. Project Description
@@ -46,7 +47,7 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
 
 
 ### **3.2. Actors Description**
-1. **Grocery Store**: An actor who can manage discounts available to customers .
+1. **Grocery Store**: An actor who can manage discounts available to customers.
 2. **App User**: An actor who interacts with the app to set their food preferences, manage virtual food trips, view their past trips, view their recipes, and manage their groceries.
 
 
@@ -430,7 +431,7 @@ Not necessary to explain our requirements.
 
 ### **4.7. Non-Functional Requirements Design**
 1. [Efficient performance](#nfr1)
-    - **Validation**: Extensive testing of each endpoint, including to 10 sequential requests for recipes, discounts, and subscriptions, with timing beginning when when requests are made and ending after teardown. In the case of route creation, these tests are a good indicator of general latency, and in other cases is a good indicator of overall latency experienced during creation, viewing, and deletion
+    - **Validation**: Performance is measured through targeted endpoint testing. Routes, recipes, and allergies are tested individually, while discounts and notifications undergo batch testing with up to 10 sequential requests. Response times are tracked from initiation to teardown, providing insights into both general system latency and user-experienced delays for creation, retrieval, and deletion actions.
 2. [Usability](#nfr1)
     - **Validation**: Front end tests developed with espresso will ensure that all relevant use cases can be navigated to and finished within 3 clicks, if all parameter population is counted as a singular click. This is tested by navigating to all resources and tracking each click used with a custom click action.
 
