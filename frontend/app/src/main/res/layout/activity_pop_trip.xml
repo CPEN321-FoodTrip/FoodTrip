@@ -12,17 +12,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#a2dbca">
+
         <ScrollView
             android:id="@+id/trip_scroll_view"
-            android:layout_width="376dp"
-            android:layout_height="838dp"
+            android:layout_width="378dp"
+            android:layout_height="814dp"
             android:layout_above="@+id/bottomLayout"
             android:layout_marginStart="20dp"
             android:layout_marginLeft="20dp"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="20dp"
             android:layout_marginRight="20dp"
-            android:layout_marginBottom="-15dp">
+            android:layout_marginBottom="9dp">
 
             <LinearLayout
                 android:id="@+id/trip_list_layout"
