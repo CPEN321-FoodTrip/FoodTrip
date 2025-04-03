@@ -50,7 +50,7 @@ class AccountActivity : AppCompatActivity() {
         }
 
         // back button to home page
-        val backButton: Button = findViewById(R.id.back_button_account)
+        val backButton = findViewById<Button>(R.id.back_button)
         backButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)

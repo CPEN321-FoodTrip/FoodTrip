@@ -7,9 +7,14 @@ import android.util.Log
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.example.FoodTripFrontend.BuildConfig.SERVER_URL
+import com.example.FoodTripFrontend.TripActivity.Companion
 import com.example.FoodTripFrontend.recyclerViewHelper.itemClass.RecipeItem
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
@@ -194,6 +199,34 @@ class PopTripActivity : Activity() {
             val intent = Intent(this, MainActivity::class.java)
             intent.putExtra("tripId", tripID)
             startActivity(intent)
+        }
+
+        val deleteTripButton = findViewById<Button>(R.id.delete_trip_button)
+        deleteTripButton.setOnClickListener {
+            deleteTrip(tripID)
+            val intent = Intent(this, PastTripActivity::class.java)
+            startActivity(intent)
+        }
+
+    }
+
+    private fun deleteTrip(tripID: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val request = Request.Builder()
+                .url("${SERVER_URL}routes/${tripID}")
+                .delete()
+                .build()
+            try {
+                val response = client.newCall(request).execute()
+                if (!response.isSuccessful) {
+                    Log.e(TAG, "Failed to delete trip: ${response.code}")
+                } else {
+                    Log.d(TAG, "Trip deleted successfully")
+                }
+            } catch (e: java.io.IOException) {
+                Log.e(TAG, "Exception while deleting trip: ${e.message}")
+            }
         }
     }
 

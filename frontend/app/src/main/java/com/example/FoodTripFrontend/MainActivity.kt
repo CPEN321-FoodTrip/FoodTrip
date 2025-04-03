@@ -21,6 +21,7 @@ import androidx.fragment.app.FragmentContainerView
 import com.example.FoodTripFrontend.BuildConfig.SERVER_URL
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapFragment
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
@@ -299,14 +300,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 nameList.add(endName)
                 Log.d(TAG, "End Location: $endLat, $endLong")
 
-
-                //coordinates for testing purposes
-//            val points = listOf(
-//                LatLng(37.7749, -122.4194), // San Francisco
-//                LatLng(34.0522, -118.2437), // Los Angeles
-//                LatLng(36.1699, -115.1398)  // Las Vegas
-//            )
-
                 val mapFragment = findViewById<FragmentContainerView>(R.id.map)
 
                 Log.d(TAG, "Found Map")
@@ -317,36 +310,40 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
                 Log.d(TAG, "Map made visible")
 
-                //polyline only draws straight lines, ideally in release this should change to
-                //actual routes (ie. roads, highways)
-                val polylineOptions = PolylineOptions()
-                    .addAll(coordsList)
-                    .width(5f)
-                    .color(0xFF0000FF.toInt())
-
-                mMap.addPolyline(polylineOptions)
-
-                for (i in coordsList.indices) {
-                    val marker = mMap.addMarker(MarkerOptions().position(coordsList[i]).title(nameList[i]))
-                    marker?.showInfoWindow()
-                }
-
-                Log.d(TAG, "Map is ready and displayed")
-
-                mapFragment.post {
-                    val builder = LatLngBounds.Builder()
-                    coordsList.forEach { builder.include(it) }
-                    val bounds = builder.build()
-                    val padding = 100
-                    val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding)
-                    mMap.moveCamera(cameraUpdate)
-                }
+                createMapDisplay(mMap, coordsList, nameList, mapFragment)
 
             } catch (e : JSONException) {
                 Log.e(TAG, "Error parsing JSON response: ${e.message}")
             }
         } else {
             Log.e(TAG, "Response is null")
+        }
+    }
+
+    private fun createMapDisplay(googleMap: GoogleMap, coordsList: MutableList<LatLng>, nameList: MutableList<String>, mapFragment: FragmentContainerView) {
+        //polyline only draws straight lines, ideally in release this should change to
+        //actual routes (ie. roads, highways)
+        val polylineOptions = PolylineOptions()
+            .addAll(coordsList)
+            .width(5f)
+            .color(0xFF0000FF.toInt())
+
+        mMap.addPolyline(polylineOptions)
+
+        for (i in coordsList.indices) {
+            val marker = mMap.addMarker(MarkerOptions().position(coordsList[i]).title(nameList[i]))
+            marker?.showInfoWindow()
+        }
+
+        Log.d(TAG, "Map is ready and displayed")
+
+        mapFragment.post {
+            val builder = LatLngBounds.Builder()
+            coordsList.forEach { builder.include(it) }
+            val bounds = builder.build()
+            val padding = 100
+            val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding)
+            mMap.moveCamera(cameraUpdate)
         }
     }
 
