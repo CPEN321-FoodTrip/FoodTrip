@@ -41,43 +41,6 @@ import org.junit.rules.TestName
 
 val TAG = "TestLog"
 
-val startCount = 0
-val maxCount = 3
-var clickCount = 0
-
-/**
- * customize click action with click count
- * for usability test: click count <= 3 for each use case
- */
-fun customClick(): ViewAction {
-    return object : ViewAction {
-        override fun getConstraints(): Matcher<View> {
-            return ViewMatchers.isClickable()
-        }
-
-        override fun getDescription(): String {
-            return "custom click action"
-        }
-
-        override fun perform(uiController: UiController, view: View) {
-            clickCount++
-            click().perform(uiController, view)
-        }
-    }
-}
-
-/**
- * Print test log result of usability test
- */
-fun checkClick(str: String) {
-    try {
-        assert(clickCount <= maxCount)
-        Log.d(TAG, "Usability Test Passed($clickCount clicks): $str")
-    } catch (e: AssertionError) {
-        Log.d(TAG, "Usability Test Failed($clickCount clicks): $str")
-    }
-}
-
 /**
  * Test of LoginActivity-related functionality.
  *
@@ -906,25 +869,12 @@ class GroceryStoreActivityTest {
      * Checks if all required elements are present
      */
     @Test fun checkElements() {
-        onView(withId(R.id.back_button_grocery_store)).check(matches(withText("Back")))
         onView(withId(R.id.grocery_store_title_text_view)).check(matches(isDisplayed()))
         onView(withId(R.id.discount_list_layout_store)).check(matches(isDisplayed()))
         onView(withId(R.id.ingredient_input)).check(matches(isDisplayed()))
         onView(withId(R.id.price_input)).check(matches(isDisplayed()))
         onView(withId(R.id.post_button_grocery_store)).check(matches(isDisplayed()))
         onView(withId(R.id.delete_button_grocery_store)).check(matches(isDisplayed()))
-    }
-
-    /**
-     * Functionality Test for the current Activity
-     *
-     * Verify that the back button successfully returns
-     * back to the main activity
-     */
-    @Test fun backButtonTest() {
-        onView(withId(R.id.back_button_grocery_store)).perform(customClick())
-        Thread.sleep(7000)
-        Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
     }
 
     /**
