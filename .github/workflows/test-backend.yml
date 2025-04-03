@@ -38,6 +38,7 @@ jobs:
         working-directory: backend
         run: npm run test -- --testPathPattern="(/non_functional_requirements/)"
         env:
+          FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
           GATEWAY_BASE_URL: ${{ secrets.GATEWAY_BASE_URL }}
 
       - name: Upload coverage report
