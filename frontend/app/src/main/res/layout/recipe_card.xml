@@ -15,7 +15,8 @@
         android:layout_marginBottom="15dp"
         android:maxLines="1"
         android:text="Some Recipe"
-        android:textColor="@color/black"
+        android:textColor="@color/white"
+        android:textStyle="bold"
         android:textSize="20dp"
         android:ellipsize="end"/>
 
@@ -42,6 +43,9 @@
                 android:id="@+id/linkToRecipeButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:backgroundTint="#4db2c4"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="20dp"
                 android:text="@string/link_to_recipe_text" />
         </LinearLayout>
     </ScrollView>
