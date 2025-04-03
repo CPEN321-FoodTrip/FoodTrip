@@ -330,7 +330,7 @@ describe("Performance test", () => {
           },
           body: JSON.stringify({
             userID: i.toString(),
-            fcmToken: "Vancouver",
+            fcmToken: "fake_token",
           }),
         }
       );
