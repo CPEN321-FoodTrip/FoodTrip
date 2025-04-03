@@ -36,6 +36,7 @@ The reason for changing our diagram is based on comments from our M3. We also re
     - Section 3.1: Invert arrow between "View Past Trips" and "View Recipes" to reflect implementation change.
     - Section 4.7: Update description to match test implementation.
     - Section 4.8: Update main complexity to match implementation and add images.
+    - Section 3.3: Update description to use case 4 and 6
 
 
 ## 2. Project Description
@@ -70,11 +71,11 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
             - **Primary actor(s)**: Grocery store owners (admin)
             - **Preconditions**: None
             - **Postconditions**: Ingredient corresponding to the actors store is now displayed as discounted for all users
-            - **Main success scenario**:
-                1. "Manage Discounts" is selected from the main menu
-                2. System displays entries for storeID, storeName, ingredient, and price of the discount to be added
-                3. Owners input all fields and submits the discount
-                4. The discount is added, and all users are notified in real time
+            - **Main success scenario**: <br/>
+                &nbsp;1\. "Manage Discounts" is selected from the main menu<br/>
+                &nbsp;2\. System displays entries for storeID, storeName, ingredient, and price of the discount to be added<br/>
+                &nbsp;3\. Owners input all fields and submits the discount<br/>
+                &nbsp;4\. The discount is added, and all users are notified in real time
             - **Failure scenario(s)**:
                 - 3a. Owner attempts to post a discount with a missing parameter
                     - 3a1. The app shows an pop-up message prompting the owner to fill all input fields
@@ -89,9 +90,9 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
             - **Primary actor(s)**: Grocery store owners (admin)
             - **Preconditions**: Item exists in stores discount list
             - **Postconditions**: Ingredient corresponding to the actors store is now deleted for all users
-            - **Main success scenario**:
-                1. User selects a posted discount on the list and presses the delete button
-                2. The app refreshes and the selected discount is removed from the list
+            - **Main success scenario**:<br/>
+                &nbsp;1\. User selects a posted discount on the list and presses the delete button<br/>
+                &nbsp;2\. The app refreshes and the selected discount is removed from the list
             - **Failure scenario(s)**:
                 - 1a. User attempts to perform a delete without selecting any discount
                     - 1a1. The app shows an pop-up message prompting the user to select a discount to be deleted
@@ -111,12 +112,12 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
             - **Primary actor(s)**: App user
             - **Preconditions**: None
             - **Postconditions**: Users allergy settings are stored on backend
-            - **Main success scenario**:
-                1. "Set Preferences" is selected from the main menu
-                2. System displays the option to set allergies or to toggle notifications
-                3. User selects "Set Allergies"
-                4. User is given the option to select from multiple common allergies or submit their own
-                5. User presses confirmation button and is returned to set preferences page
+            - **Main success scenario**:<br/>
+                &nbsp;1\. "Set Preferences" is selected from the main menu<br/>
+                &nbsp;2\. System displays the option to set allergies or to toggle notifications<br/>
+                &nbsp;3\. User selects "Set Allergies"<br/>
+                &nbsp;4\. User is given the option to select from multiple common allergies or submit their own<br/>
+                &nbsp;5\. User presses confirmation button and is returned to set preferences page
             - **Failure scenario(s)**:
                 - 5a. Unable to save allergy
                     - 5a1. The app shows an pop-up message telling the user their allergy settins could not be saved
@@ -125,10 +126,10 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
             - **Primary actor(s)**: App User
             - **Preconditions**: Notifications are disallowed for the user
             - **Postconditions**: Notifications are allowed for the user
-            - **Main success scenario**:
-                1. "Set Preferences" is selected from the main menu
-                2. System displays the option to set allergies or to toggle notifications
-                3. User toggles notifications to allow
+            - **Main success scenario**:<br/>
+                &nbsp;1\. "Set Preferences" is selected from the main menu<br/>
+                &nbsp;2\. System displays the option to set allergies or to toggle notifications<br/>
+                &nbsp;3\. User toggles notifications to allow
             - **Failure scenario(s)**:
                 - 3a. Unable to set notification settings
                     - 3a1. The app shows an pop-up message telling the user notification settings failed to update and prompts them to try again
@@ -138,9 +139,9 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
             - **Preconditions**: Notifications are allowed for the user
             - **Postconditions**: Notifications are disallowed for the user
             - **Main success scenario**:
-                1. "Set Preferences" is selected from the main menu
-                2. System displays the option to set allergies or to toggle notifications
-                3. User toggles notifications to not allowed
+                <br/>&nbsp;1. "Set Preferences" is selected from the main menu
+                <br/>&nbsp;2. System displays the option to set allergies or to toggle notifications
+                <br/>&nbsp;3. User toggles notifications to not allowed
             - **Failure scenario(s)**:
                 - 3a. Unable to set notification settings
                     - 3a1. The app shows an pop-up message telling the user notification settings failed to update and prompts them to try again
@@ -159,10 +160,10 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
             - **Preconditions**: None
             - **Postconditions**: Created trip is now stored in trip database under the user
             - **Main success scenario**:
-                1. User enters starting and ending cities.
-                2. User sets the number of stops
-                3. The app opens the Main Screen
-                4. The trip is displayed on a map
+                <br/>&nbsp;1. User enters starting and ending cities.
+                <br/>&nbsp;2. User sets the number of stops
+                <br/>&nbsp;3. The app opens the Main Screen
+                <br/>&nbsp;4. The trip is displayed on a map
             - **Failure scenario(s)**:
                 - 1a. The user enters an invalid start/end city and attempts to create a trip
                     - 1a1. The app displays a pop-up message saying that the associated field is invalid
@@ -185,17 +186,18 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
             - **Preconditions**: User has created at least 1 trip already
             - **Postconditions**: None
             - **Main success scenario**:
-                1. User open the Past Trip View
-                2. The app shows a list of past trip have been created
-                3. User presses one of the trips in the list
-                4. The window shows the starting location, intermediate stops, destination, recipes for each stop, and a "Show Route" button.
-                5. The user presses the "Show Route" button
-                6. The user clicks on the first recipe
+                <br/>&nbsp;1. User open the Past Trip View
+                <br/>&nbsp;2. The app shows a list of past trip have been created
+                <br/>&nbsp;3. User presses one of the trips in the list
+                <br/>&nbsp;4. The window shows the starting location, intermediate stops, destination, recipes for each stop, and a "Show Route" button.
+                <br/>&nbsp;5. The user presses the "Show Route" button
+                <br/>&nbsp;6. The user is directed to the main page and a map of the route is displayed
             - **Extension(s):**
-                - 5a. The user is directed to the main page and a map of the route is displayed
-                - 6a. The window shows the details of the recipe and a recipe url
-                    - 6a1. The user clicks the recipe url.
-                    - 6a2. A webView shows up.
+            - The user clicks on the first recipe
+                - 5a. The user clicks on the first recipe
+                - 5b. The window shows the details of the recipe and a recipe url
+                    - 5b1. The user clicks the recipe url.
+                    - 5b2. A webView shows up.
             - **Failure scenario(s)**:
                 - 2a. User has no past trip record
                     - 2a1. The app shows no items in the list
@@ -213,12 +215,12 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
             - **Preconditions**: User has a currently selected trip
             - **Postconditions**: None
             - **Main success scenario**:
-                1. User opens the Recipes view
-                2. The app displays a list of stops (cities) associated with the currently selected trip
-                3. User clicks a stop to get a recipe
-                4. The app displays the details of the recipe an a recipe url
-                5. User clicked on the url
-                6. The app displays a webview of the recipe
+                <br/>&nbsp;1. User opens the Recipes view
+                <br/>&nbsp;2. The app displays a list of stops (cities) associated with the currently selected trip
+                <br/>&nbsp;3. User clicks a stop to get a recipe
+                <br/>&nbsp;4. The app displays the details of the recipe an a recipe url
+                <br/>&nbsp;5. User clicked on the url
+                <br/>&nbsp;6. The app displays a webview of the recipe
             - **Failure scenario(s)**:
                 - 1a. No trips have been taken
                     - 1a1. The app displays an pop-up message: "Must have virtual trip to view recipes"
@@ -240,10 +242,12 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
             - **Preconditions**: User has a currently selected trip
             - **Postconditions**: None
             - **Main success scenario**:
-                1. The app finds required ingredients from all recipes corresponding to a virtual trip.
-                2. The grocery list is created and shown to the user.
-                3. The user press on any ingredient on the list
-                4. Available discounts are displayed to the user
+                <br/>&nbsp;1. User opens the Recipes view
+                <br/>&nbsp;2. The app shows a list of recipes corresponding to the virtual trip.
+                <br/>&nbsp;3. User clicks on a recipe.
+                <br/>&nbsp;4. The grocery list is created and shown to the user.
+                <br/>&nbsp;5. The user press on any ingredient on the list
+                <br/>&nbsp;6. Available discounts are displayed to the user
             - **Failure scenario(s)**:
                 - 4a. No discount to selected ingredient
                     - 4a1. The app displays a pop-up message: "No available discount"

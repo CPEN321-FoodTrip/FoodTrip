@@ -47,6 +47,7 @@ var clickCount = 0
  * for usability test: click count <= 3 for each use case
  */
 fun customClick(): ViewAction {
+
     return object : ViewAction {
         override fun getConstraints(): Matcher<View> {
             return ViewMatchers.isClickable()
@@ -133,6 +134,7 @@ class MainActivityTest {
      */
     @Test fun checkPastTrips() {
         onView(withId(R.id.PastTrips)).perform(customClick())
+
     }
 
     /**
@@ -182,6 +184,7 @@ class TripActivityTest {
 
     @get:Rule
     val activityRule = ActivityScenarioRule(MainActivity::class.java)
+
 
     @get:Rule
     var testName = TestName()
@@ -233,9 +236,9 @@ class TripActivityTest {
         Thread.sleep(5000)
 
         Intents.intended(hasComponent(MainActivity::class.java.name))
-
     }
 }
+
 
 
 
@@ -277,6 +280,7 @@ class PastTripActivityTestPersonTest {
         Intents.release()
         checkClick("${this::class.simpleName}:${testName.methodName}")
     }
+
 
 
     /**
@@ -355,6 +359,7 @@ class GroceryStoreActivityTest {
         sharedPreferences.edit().putString("userEmail", "test_person2").apply()
 
         ActivityScenario.launch(GroceryStoreActivity::class.java)
+
     }
 
     /**
@@ -368,6 +373,7 @@ class GroceryStoreActivityTest {
         checkClick("${this::class.simpleName}:${testName.methodName}")
 
     }
+
 
 
 
@@ -391,7 +397,9 @@ class GroceryStoreActivityTest {
         onView(withId(R.id.price_input)).perform(typeText(samplePrice1), closeSoftKeyboard())
         onView(withId(R.id.price_input)).check(matches(withText(samplePrice1)))
 
+
         onView(withId(R.id.post_button_grocery_store)).perform(customClick())
+
         Thread.sleep(3000)
 
         onView(withText(sample1))
@@ -399,6 +407,7 @@ class GroceryStoreActivityTest {
             .perform(customClick())
 
         onView(withId(R.id.delete_button_grocery_store)).perform(customClick())
+
         Thread.sleep(3000)
 
         onView(withText(sample1))

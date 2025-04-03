@@ -594,7 +594,9 @@ class PastTripActivityTestPersonTestFunctional {
      * back to the main activity
      */
     @Test fun backButton() {
+
         onView(withId(R.id.back_button_past)).perform(click())
+
 
         Thread.sleep(1000)
         Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
@@ -627,7 +629,6 @@ class PastTripActivityTestPersonTestFunctional {
         onView(withTagValue(`is`("recipe web"))).check(matches(isDisplayed()))
     }
 }
-
 
 
 /**
@@ -724,6 +725,7 @@ class GroceryStoreActivityTestFunctional {
         onView(withId(R.id.price_input)).check(matches(withText(samplePrice1)))
 
         onView(withId(R.id.post_button_grocery_store)).perform(click())
+
         Thread.sleep(3000)
 
         onView(withText(sample1))
@@ -767,6 +769,7 @@ class GroceryStoreActivityTestFunctional {
         onView(withId(R.id.delete_button_grocery_store)).perform(click())
 
         Thread.sleep(1000)
+
         onView(withText(discountErrorText))
             .check(matches(isDisplayed()))
 
@@ -781,13 +784,13 @@ class GroceryStoreActivityTestFunctional {
         onView(withId(R.id.delete_button_grocery_store)).perform(click())
 
         Thread.sleep(3000)
-
         onView(withText(discountErrorText))
             .check(matches(isDisplayed()))
 
 
         onView(withText(sample1))
             .perform(click())
+
         onView(withId(R.id.delete_button_grocery_store)).perform(click())
         Thread.sleep(3000)
         onView(withText(sample1))
@@ -835,6 +838,7 @@ class GroceryStoreActivityTestFunctional {
         onView(withText(sample1))
             .check(matches(isDisplayed()))
             .perform(click())
+
         onView(withId(R.id.delete_button_grocery_store)).perform(click())
         Thread.sleep(3000)
         onView(withText(sample1))
@@ -845,6 +849,7 @@ class GroceryStoreActivityTestFunctional {
         onView(withText(sample2))
             .check(matches(isDisplayed()))
             .perform(click())
+
         onView(withId(R.id.delete_button_grocery_store)).perform(click())
         Thread.sleep(3000)
         onView(withText(sample2))
