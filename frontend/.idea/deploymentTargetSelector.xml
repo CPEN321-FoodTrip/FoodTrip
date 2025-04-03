@@ -8,19 +8,19 @@
       <SelectionState runConfigName="All Tests">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="MainActivityAdminTestFunctional">
+      <SelectionState runConfigName="changeSelectedTest()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="TripActivityTestFunctional">
+      <SelectionState runConfigName="MainActivityTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="PastTripActivityEmptyTestFunctional">
+      <SelectionState runConfigName="planRegularTripShort()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="PastTripActivityTestPersonTestFunctional">
+      <SelectionState runConfigName="PastTripActivityTestPersonTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="GroceryActivityTestFunctional">
+      <SelectionState runConfigName="postAndDeleteDiscountTest()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
