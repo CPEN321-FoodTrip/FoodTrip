@@ -30,6 +30,7 @@ The reason for changing our diagram is based on comments from our M3. We also re
 
 **M6:**
 - March 30, 2025: Update section 3.5 to use 3 seconds as the required response times to match test implementation.
+- April 2, 2025: 
 
 
 ## 2. Project Description
