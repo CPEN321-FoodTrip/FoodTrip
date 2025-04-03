@@ -87,6 +87,7 @@ class PopRecipeActivity : AppCompatActivity() {
                 urlButtonView.setBackgroundColor(Color.parseColor("#4db2c4"))
                 urlButtonView.setTextColor(Color.WHITE)
                 urlButtonView.setOnClickListener {
+                    Log.d("PopRecipe", "Clicked")
                     createWebView(url)
                 }
                 recipeList.addView(urlButtonView)

@@ -321,8 +321,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun createMapDisplay(googleMap: GoogleMap, coordsList: MutableList<LatLng>, nameList: MutableList<String>, mapFragment: FragmentContainerView) {
-        //polyline only draws straight lines, ideally in release this should change to
-        //actual routes (ie. roads, highways)
+        //polyline draws the route using straight lines
         val polylineOptions = PolylineOptions()
             .addAll(coordsList)
             .width(5f)

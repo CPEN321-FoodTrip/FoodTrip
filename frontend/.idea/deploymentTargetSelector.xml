@@ -8,16 +8,19 @@
       <SelectionState runConfigName="All Tests">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="wrongStart()">
+      <SelectionState runConfigName="MainActivityAdminTestFunctional">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="displayRecipe()">
+      <SelectionState runConfigName="TripActivityTestFunctional">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="deleteTest()">
+      <SelectionState runConfigName="PastTripActivityEmptyTestFunctional">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="planRegularTripShort()">
+      <SelectionState runConfigName="PastTripActivityTestPersonTestFunctional">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="GroceryActivityTestFunctional">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

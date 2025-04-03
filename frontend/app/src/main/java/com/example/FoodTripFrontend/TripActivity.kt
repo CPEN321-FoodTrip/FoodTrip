@@ -105,7 +105,7 @@ class TripActivity : AppCompatActivity() {
         var isValid = true
 
         //Checks if each input is given a valid response, will only make a call to create a route
-        //if all fields are valid, otherwise it leave a Toast message telling
+        //if all fields are valid, otherwise it will leave a Toast message telling
         //the user which fields are invalid and allows them to resubmit
         GlobalScope.launch(Dispatchers.Main) {
 
@@ -156,10 +156,8 @@ class TripActivity : AppCompatActivity() {
 
             // If all fields are valid, proceed to the next activity
             if (isValid) {
-                //Use "test_person" for developing and debugging
                 val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
                 val userEmail = sharedPref.getString("userEmail", "No email found")
-//                val userEmail = "test_person"
 
                 Log.d(TAG, "User Email: $userEmail")
 
@@ -172,7 +170,6 @@ class TripActivity : AppCompatActivity() {
                 getRoute(json)
             }
         }
-
     }
 
 
@@ -263,51 +260,6 @@ class TripActivity : AppCompatActivity() {
             Log.e(TAG, "Response is null")
         }
     }
-
-//    private suspend fun createRecipe(tripID: String, userID: String): Boolean {
-//        return withContext(Dispatchers.IO) {
-//            val url = "${SERVER_URL}recipes"
-//            val jsonBody = """
-//            {
-//                "tripID": "$tripID",
-//                "userID": "$userID"
-//            }
-//        """.trimIndent()
-//
-//            val body = jsonBody.toRequestBody("application/json; charset=utf-8".toMediaType())
-//
-//            val request = Request.Builder()
-//                .url(url)
-//                .post(body)
-//                .build()
-//
-//            try {
-//                val response = client.newCall(request).execute()
-//                response.use {
-//                    if (response.code == 404) {
-//                        deleteTrip(tripID)
-//
-//                        runOnUiThread {
-//                            showSnackbar(findViewById(android.R.id.content), "Recipes could not be found. Please resubmit.")
-//                        }
-//                        return@withContext false
-//                    }
-//                    if (!response.isSuccessful) {
-//                        runOnUiThread {
-//                            showSnackbar(findViewById(android.R.id.content), "An error occurred: ${response.message}")
-//                        }
-//                        return@withContext false
-//                    }
-//                }
-//                return@withContext true
-//            } catch (e: IOException) {
-//                runOnUiThread {
-//                    showSnackbar(findViewById(android.R.id.content), "Network error. Please try again.")
-//                }
-//                return@withContext false
-//            }
-//        }
-//    }
 
     private suspend fun createRecipe(tripID: String, userID: String): Boolean = withContext(Dispatchers.IO) {
         val url = "${SERVER_URL}recipes"
