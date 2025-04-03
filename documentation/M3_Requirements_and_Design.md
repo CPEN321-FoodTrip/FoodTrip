@@ -29,8 +29,10 @@ The reason for changing our diagram is based on comments from our M3. We also re
     - Section 2: Updated project description to match the scope of the functional requirements.
 
 **M6:**
-- March 30, 2025: Update section 3.5 to use 3 seconds as the required response times to match test implementation.
-- April 2, 2025: Update section 4.2 with new sequence diagrams for manage discounts and set preferences to match implementation.
+- March 30, 2025: Section 3.5: Use 3 seconds as the required response times to match test implementation.
+- April 2, 2025:
+    - Section 4.2 with new sequence diagrams for manage discounts and set preferences to match implementation.
+    - Section 3.5: Use 2 seconds as the required response time to match test.
 
 
 ## 2. Project Description
@@ -251,8 +253,8 @@ Not necessary to explain our requirements.
 <a name="nfr1"></a>
 
 1. **Efficient performance**
-    - **Description**: Virtual routes and their corresponding recipes should be generated and displayed in under 3 seconds.
-    - **Justification**: Responding to users within 3 seconds of them perceiving requests being sent ensures minimal frustration when using the app. Ideally, responses should be loaded within 2 seconds, but from testing 3 seconds was a consistently achievable metric.
+    - **Description**: Virtual routes and their corresponding recipes should be generated and displayed in under 2 seconds.
+    - **Justification**: Responding to users within 2 seconds of them perceiving requests being sent ensures minimal frustration when using the app. Ideally, responses should be loaded within 1 seconds, but from testing 2 seconds was a consistently achievable metric.
         - https://developer.android.com/topic/performance/vitals/launch-time#av (Android developer resource, delays longer than 2 seconds are considered excessive)
         - https://web.dev/articles/rail (tasks with 1000+ ms latency tend to lose user attention, blog created by Paul Kinlan, 15 years of mobile app development Google employee)
         - https://dl.acm.org/doi/abs/10.1145/2750858.2805847 (During most tasks, significant frustration is experienced if delays are longer than 1000ms)
