@@ -1,12 +1,12 @@
 name: Test Backend
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_run:
+    # wait for deploy to complete before running tests 
+    # (since non-functional requirement tests may conflict with deploy)
+    workflows: ["Deploy to EC2"]
+    types:
+      - completed
 
 jobs:
   test:
@@ -27,12 +27,17 @@ jobs:
 
       - name: Run Jest tests with coverage
         working-directory: backend
-        # don't run non-functional requirements tests automatically since may conflict with ec2 deploy
+        # run non-functional requirement tests separately
         run: npm run test:coverage -- --testPathIgnorePatterns="(/non_functional_requirements/)"
         env:
           EDAMAM_APP_ID: ${{ secrets.EDAMAM_APP_ID }}
           EDAMAM_API_KEY: ${{ secrets.EDAMAM_API_KEY }}
           FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
+
+      - name: Run non-functional requirements tests
+        working-directory: backend
+        run: npm run test -- --testPathPattern="(/non_functional_requirements/)"
+        env:
           GATEWAY_BASE_URL: ${{ secrets.GATEWAY_BASE_URL }}
 
       - name: Upload coverage report
