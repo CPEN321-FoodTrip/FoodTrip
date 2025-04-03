@@ -191,7 +191,7 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
                 4. The window shows the starting location, intermediate stops, destination, recipes for each stop, and a "Show Route" button.
                 5. The user presses the "Show Route" button
                 6. The user clicks on the first recipe
-              **Extension(s):**
+            - **Extension(s):**
                 - 5a. The user is directed to the main page and a map of the route is displayed
                 - 6a. The window shows the details of the recipe and a recipe url
                     - 6a1. The user clicks the recipe url.
