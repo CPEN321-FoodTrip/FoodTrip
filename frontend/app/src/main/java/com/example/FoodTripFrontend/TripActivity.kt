@@ -80,6 +80,12 @@ class TripActivity : AppCompatActivity() {
         findViewById<Button>(R.id.CreateTrip).setOnClickListener() {
             collectParameters()
         }
+
+        val backBtn = findViewById<Button>(R.id.back_button)
+        backBtn.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun collectParameters() {
@@ -256,48 +262,91 @@ class TripActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun createRecipe(tripID: String, userID: String): Boolean {
-        return withContext(Dispatchers.IO) {
-            val url = "${SERVER_URL}recipes"
-            val jsonBody = """
-            {
-                "tripID": "$tripID",
-                "userID": "$userID"
-            }
-        """.trimIndent()
+//    private suspend fun createRecipe(tripID: String, userID: String): Boolean {
+//        return withContext(Dispatchers.IO) {
+//            val url = "${SERVER_URL}recipes"
+//            val jsonBody = """
+//            {
+//                "tripID": "$tripID",
+//                "userID": "$userID"
+//            }
+//        """.trimIndent()
+//
+//            val body = jsonBody.toRequestBody("application/json; charset=utf-8".toMediaType())
+//
+//            val request = Request.Builder()
+//                .url(url)
+//                .post(body)
+//                .build()
+//
+//            try {
+//                val response = client.newCall(request).execute()
+//                response.use {
+//                    if (response.code == 404) {
+//                        deleteTrip(tripID)
+//
+//                        runOnUiThread {
+//                            showSnackbar(findViewById(android.R.id.content), "Recipes could not be found. Please resubmit.")
+//                        }
+//                        return@withContext false
+//                    }
+//                    if (!response.isSuccessful) {
+//                        runOnUiThread {
+//                            showSnackbar(findViewById(android.R.id.content), "An error occurred: ${response.message}")
+//                        }
+//                        return@withContext false
+//                    }
+//                }
+//                return@withContext true
+//            } catch (e: IOException) {
+//                runOnUiThread {
+//                    showSnackbar(findViewById(android.R.id.content), "Network error. Please try again.")
+//                }
+//                return@withContext false
+//            }
+//        }
+//    }
 
-            val body = jsonBody.toRequestBody("application/json; charset=utf-8".toMediaType())
+    private suspend fun createRecipe(tripID: String, userID: String): Boolean = withContext(Dispatchers.IO) {
+        val url = "${SERVER_URL}recipes"
+        val jsonBody = """
+        {
+            "tripID": "$tripID",
+            "userID": "$userID"
+        }
+    """.trimIndent()
 
-            val request = Request.Builder()
-                .url(url)
-                .post(body)
-                .build()
+        val body = jsonBody.toRequestBody("application/json; charset=utf-8".toMediaType())
 
-            try {
-                val response = client.newCall(request).execute()
-                response.use {
-                    if (response.code == 404) {
+        val request = Request.Builder()
+            .url(url)
+            .post(body)
+            .build()
+
+        try {
+            client.newCall(request).execute().use { response ->
+                when {
+                    response.code == 404 -> {
                         deleteTrip(tripID)
-
                         runOnUiThread {
                             showSnackbar(findViewById(android.R.id.content), "Recipes could not be found. Please resubmit.")
                         }
-                        return@withContext false
+                        false
                     }
-                    if (!response.isSuccessful) {
+                    !response.isSuccessful -> {
                         runOnUiThread {
                             showSnackbar(findViewById(android.R.id.content), "An error occurred: ${response.message}")
                         }
-                        return@withContext false
+                        false
                     }
+                    else -> true
                 }
-                return@withContext true
-            } catch (e: IOException) {
-                runOnUiThread {
-                    showSnackbar(findViewById(android.R.id.content), "Network error. Please try again.")
-                }
-                return@withContext false
             }
+        } catch (e: IOException) {
+            runOnUiThread {
+                showSnackbar(findViewById(android.R.id.content), "Network error. Please try again.")
+            }
+            false
         }
     }
 

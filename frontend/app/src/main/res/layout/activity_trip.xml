@@ -7,55 +7,135 @@
     android:layout_height="match_parent"
     tools:context=".TripActivity">
 
-    <EditText
-        android:id="@+id/startLocation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="Start Location"
-        android:inputType="text"
-        app:layout_constraintBottom_toTopOf="@+id/endLocation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/endLocation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="144dp"
-        android:ems="10"
-        android:hint="End Location"
-        android:inputType="text"
-        app:layout_constraintBottom_toTopOf="@+id/numstops"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
-        app:layout_constraintStart_toStartOf="parent" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#90b9c3">
 
-    <EditText
-        android:id="@+id/numstops"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="180dp"
-        android:ems="10"
-        android:hint="Number of Stops"
-        android:inputType="number"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
-        app:layout_constraintStart_toStartOf="parent" />
+        <LinearLayout
+            android:id="@+id/topLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="#4db2c4"
+            android:padding="0dp"
+            android:weightSum="3"
+            android:layout_gravity="center"
+            android:layout_alignParentTop="true">
 
-    <Button
-        android:id="@+id/CreateTrip"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Create Trip"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/numstops"
-        app:layout_constraintVertical_bias="0.507" />
+            <Button
+                android:id="@+id/back_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Back"
+                android:layout_marginStart="40dp"
+                android:background="@android:color/transparent"
+                android:backgroundTint="#4db2c4"
+                android:layout_weight="0.10"
+                android:textColor="@android:color/white"
+                android:layout_margin="0dp"
+                />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Start a Trip"
+                android:background="@android:color/transparent"
+                android:backgroundTint="#4db2c4"
+                android:textStyle="bold"
+                android:layout_weight="2.8"
+                android:gravity="center"
+                android:textColor="@android:color/white"
+                android:layout_margin="0dp"
+                />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:backgroundTint="#4db2c4"
+                android:layout_weight="0.10"
+                android:textColor="@android:color/white"
+                android:clickable="false"
+                android:layout_margin="0dp"
+                />
+
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/middleLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:weightSum="4"
+            android:padding="0dp"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center">
+
+            <EditText
+                android:id="@+id/startLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="40dp"
+                android:backgroundTint="#048571"
+                android:textColor="#ffffff"
+                android:textColorHint="#ffffff"
+                android:shadowColor="#ffffff"
+                android:ems="15"
+                android:hint="Start Location"
+                android:inputType="text"
+                android:layout_weight="1"
+                android:layout_gravity="center"/>
+
+            <EditText
+                android:id="@+id/endLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="40dp"
+                android:backgroundTint="#048571"
+                android:textColor="#ffffff"
+                android:textColorHint="#ffffff"
+                android:ems="15"
+                android:hint="End Location"
+                android:inputType="text"
+                android:layout_weight="1"
+                android:layout_gravity="center"/>
+
+            <EditText
+                android:id="@+id/numstops"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="40dp"
+                android:backgroundTint="#048571"
+                android:textColor="#ffffff"
+                android:textColorHint="#ffffff"
+                android:ems="15"
+                android:hint="Number of Stops (1-10)"
+                android:inputType="number"
+                android:layout_weight="1"
+                android:layout_gravity="center"/>
+
+            <Button
+                android:id="@+id/CreateTrip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Create"
+                android:backgroundTint="#4db2c4"
+                android:textColor="@android:color/white"
+                android:layout_margin="0dp"
+                android:layout_weight="1"
+                android:layout_gravity="center"/>
+
+        </LinearLayout>
+
+
+
+    </RelativeLayout>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,23 +7,27 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="#90b9c3"
+        android:elevation="1dp">
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:elevation="0dp"/>
 
         <LinearLayout
             android:id="@+id/topLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="#90b9c3"
+            android:background="#4db2c4"
             android:weightSum="2"
             android:padding="0dp"
             android:layout_gravity="center"
@@ -33,8 +37,9 @@
                 android:id="@+id/ManageTrip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Manage Trip"
-                android:backgroundTint="#90b9c3"
+                android:text="Create Trip"
+                android:background="@android:color/transparent"
+                android:backgroundTint="#4db2c4"
                 android:textColor="@android:color/white"
                 android:layout_margin="0dp"
                 android:layout_weight="1"/>
@@ -44,7 +49,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="View Past Trips"
-                android:backgroundTint="#90b9c3"
+                android:background="@android:color/transparent"
+                android:backgroundTint="#4db2c4"
                 android:textColor="@android:color/white"
                 android:layout_margin="0dp"
                 android:layout_weight="1" />
@@ -58,7 +64,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="#90b9c3"
+            android:background="#4db2c4"
             android:weightSum="3"
             android:padding="0dp"
             android:layout_gravity="center"
@@ -70,7 +76,8 @@
                 android:layout_height="wrap_content"
                 android:text="Set Preferences"
                 android:layout_weight="1"
-                android:backgroundTint="#90b9c3"
+                android:background="@android:color/transparent"
+                android:backgroundTint="#4db2c4"
                 android:textColor="@android:color/white"
                 android:layout_margin="0dp"/>
 
@@ -81,7 +88,8 @@
                 android:layout_height="wrap_content"
                 android:text="Sign Out"
                 android:layout_weight="1"
-                android:backgroundTint="#90b9c3"
+                android:background="@android:color/transparent"
+                android:backgroundTint="#4db2c4"
                 android:textColor="@android:color/white"
                 android:layout_margin="0dp"/>
 
@@ -92,7 +100,8 @@
                 android:layout_height="wrap_content"
                 android:text="View Recipes"
                 android:layout_weight="1"
-                android:backgroundTint="#90b9c3"
+                android:background="@android:color/transparent"
+                android:backgroundTint="#4db2c4"
                 android:textColor="@android:color/white"
                 android:layout_margin="0dp"/>
         </LinearLayout>
