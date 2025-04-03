@@ -9,6 +9,7 @@
 | March 30, 2025 | 5.1 - 5.3 | Updated screenshots of codacy and commit hash where run to reflect changes in implementation |
 | March 30, 2025 | 2.1 | Updated links of backend tests and commit hash where run to reflect changes in implementation |
 | March 30, 2025 | 3.1 | Updated links of non-functional tests to reflect changes in implementation |
+| April 2, 2025 | 3.2 | Update description to mention 2 second response time requirement and update test logs to match implementation |
 
 ---
 
