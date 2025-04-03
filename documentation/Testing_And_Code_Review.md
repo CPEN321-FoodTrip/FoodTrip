@@ -10,6 +10,7 @@
 | March 30, 2025 | 2.1 | Updated links of backend tests and commit hash where run to reflect changes in implementation |
 | March 30, 2025 | 3.1 | Updated links of non-functional tests to reflect changes in implementation |
 | April 2, 2025 | 3.2 | Update description to mention 2 second response time requirement, update description with justification of 2 seconds and source, and update test logs to match new implementation |
+| April 2, 2025 | 5.* | Update codacy screenshots and commit hash to account for code updates |
 
 ---
 
@@ -472,7 +473,7 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 
 ### 5.1. Commit Hash Where Codacy Ran
 
-`6ccb84af25ae10d9d3649238495f22ded40c3c05`
+`c4af1f3921930b82a3fe69d18c0ba64f4b2c03f4`
 
 ### 5.2. Unfixed Issues per Codacy Category
 
