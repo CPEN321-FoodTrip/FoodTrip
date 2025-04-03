@@ -1,22 +1,30 @@
 name: Test Backend
 
 on:
-  workflow_run:
-    # wait for deploy to complete before running tests 
-    # (since non-functional requirement tests may conflict with deploy)
-    workflows: ["Deploy to EC2"]
-    types:
-      - completed
+  push:
+    branches:
+      - main
 
 jobs:
+  wait-for-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for deploy to finish
+        uses: fountainhead/action-wait-for-check@v1.2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: "Deploy to EC2"
+          ref: ${{ github.sha }}
+
   test:
+    # wait for deploy to finish before running tests
+    # (since non-functional requirement tests may conflict with deploy)
+    needs: wait-for-deploy
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }} # use commit where deploy triggered
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
