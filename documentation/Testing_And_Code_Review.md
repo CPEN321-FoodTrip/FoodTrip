@@ -39,7 +39,7 @@
 
 #### 2.1.2. Commit Hash Where Tests Run
 
-`6ccb84af25ae10d9d3649238495f22ded40c3c05`
+`252aa8c8160a75e9a6a253ed465435ff039d71bc`
 
 #### 2.1.3. Explanation on How to Run the Tests
 
@@ -153,56 +153,111 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 
 - **Performance (Response Time)**
 
-  - **Verification:** This test suite evaluates the performance of critical API endpoints in an unmocked environment, simulating real-world user interactions. It measures execution times for creating and deleting routes, recipes, discounts, notifications, and allergy preferences, ensuring each operation completes within 3 seconds. This is important for maintaining a smooth user experience, preventing delays, and ensuring the system can handle expected traffic. By logging execution times and validating responses, the tests help identify performance isssues and ensure the system is quick enough.
+  - **Verification:** This test suite evaluates the performance of critical API endpoints in an unmocked environment, simulating real-world user interactions. It measures execution times for creating and deleting routes, recipes, discounts, notifications, and allergy preferences, ensuring each operation completes within 2 seconds. This is important for maintaining a smooth user experience, preventing delays, and ensuring the system can handle expected traffic. By logging execution times and validating responses, the tests help identify performance isssues and ensure the system is quick enough.
   - **Log Output**
     ```
-        > backend@1.0.0 test
-        > NODE_ENV=test jest __tests__/non_functional_requirements/performance.test.ts
+    > backend@1.0.0 test
+    > NODE_ENV=test jest --testPathPattern=(/non_functional_requirements/)
 
-        console.debug
-            Route Execution time: 2406ms
+    console.debug
+        Route Execution time: 1865ms
 
-            at __tests__/non_functional_requirements/performance.test.ts:74:13
+        at __tests__/non_functional_requirements/performance.test.ts:29:15
 
-        console.debug
-            Discount Execution time: 310ms
+    console.debug
+        Recipe Execution time: 864ms
 
-            at __tests__/non_functional_requirements/performance.test.ts:125:15
+        at __tests__/non_functional_requirements/performance.test.ts:52:15
 
-        console.debug
-            10 discount Execution time: 1953ms
+    console.debug
+        Route Teardown Execution time: 62ms
 
-            at __tests__/non_functional_requirements/performance.test.ts:183:13
+        at __tests__/non_functional_requirements/performance.test.ts:76:15
 
-        console.debug
-            notif Execution time: 188ms
+    console.debug
+        Recipe Teardown Execution time: 85ms
 
-            at __tests__/non_functional_requirements/performance.test.ts:220:15
+        at __tests__/non_functional_requirements/performance.test.ts:96:15
 
-        console.debug
-            10 notification Execution time: 1732ms
+    console.debug
+        Add Discount Execution time: 301ms
 
-            at __tests__/non_functional_requirements/performance.test.ts:263:15
+        at __tests__/non_functional_requirements/performance.test.ts:125:13
 
-        console.debug
-            allergy Execution time: 166ms
+    console.debug
+        Get Discount Execution time: 88ms
 
-            at __tests__/non_functional_requirements/performance.test.ts:307:17
+        at __tests__/non_functional_requirements/performance.test.ts:144:13
 
-        PASS  __tests__/non_functional_requirements/performance.test.ts (11.031 s)
-        Unmocked Performance test
-            ✓ Unmocked single route, 3 stops (2462 ms)
-            ✓ Unmocked single discount (327 ms)
-            ✓ Unmocked 10 discount (1968 ms)
-            ✓ Unmocked single notification (199 ms)
-            ✓ Unmocked 10 notification (1745 ms)
-            ✓ Unmocked single allergy (260 ms)
+    console.debug
+        Delete Discount Execution time: 85ms
 
-        Test Suites: 1 passed, 1 total
-        Tests:       6 passed, 6 total
-        Snapshots:   0 total
-        Time:        11.109 s, estimated 15 s
-        Ran all test suites matching /__tests__\/non_functional_requirements\/performance.test.ts/i
+        at __tests__/non_functional_requirements/performance.test.ts:165:13
+
+    console.debug
+        Add 10 Discounts Average Execution time: 191.5ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:205:13
+
+    console.debug
+        Get All Discounts Execution time: 76ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:228:13
+
+    console.debug
+        Delete 10 Discounts Average Execution time: 52.4ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:260:13
+
+    console.debug
+        Add Notification Execution time: 34ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:287:13
+
+    console.debug
+        Delete Notification Execution time: 31ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:313:13
+
+    console.debug
+        Add 10 Notifications Average Execution time: 45.6ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:348:13
+
+    console.debug
+        Delete 10 Notifications Average Execution time: 41.5ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:383:13
+
+    console.debug
+        Add Allergy Execution time: 85ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:412:13
+
+    console.debug
+        Get Allergy Execution time: 33ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:431:13
+
+    console.debug
+        Delete Allergy Execution time: 68ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:456:13
+
+    PASS __tests__/non_functional_requirements/performance.test.ts (11.024 s)
+    Performance test
+        ✓ Single route, 3 stops (2911 ms)
+        ✓ Single discount (482 ms)
+        ✓ 10 discount (2527 ms)
+        ✓ Single notification (70 ms)
+        ✓ 10 notification (878 ms)
+        ✓ Single allergy (192 ms)
+
+    Test Suites: 1 passed, 1 total
+    Tests:       6 passed, 6 total
+    Snapshots:   0 total
+    Time:        11.064 s
+    Ran all test suites matching /(\/non_functional_requirements\/)/i.
     ```
 
 - **Usability (Clicks to Navigate)**
