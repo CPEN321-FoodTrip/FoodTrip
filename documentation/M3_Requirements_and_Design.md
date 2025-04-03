@@ -241,10 +241,12 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
             - **Preconditions**: User has a currently selected trip
             - **Postconditions**: None
             - **Main success scenario**:
-                <br/>&nbsp;1. The app finds required ingredients from all recipes corresponding to a virtual trip.
-                <br/>&nbsp;2. The grocery list is created and shown to the user.
-                <br/>&nbsp;3. The user press on any ingredient on the list
-                <br/>&nbsp;4. Available discounts are displayed to the user
+                <br/>&nbsp;1. User opens the Recipes view
+                <br/>&nbsp;2. The app shows a list of recipes corresponding to the virtual trip.
+                <br/>&nbsp;3. User clicks on a recipe.
+                <br/>&nbsp;4. The grocery list is created and shown to the user.
+                <br/>&nbsp;5. The user press on any ingredient on the list
+                <br/>&nbsp;6. Available discounts are displayed to the user
             - **Failure scenario(s)**:
                 - 4a. No discount to selected ingredient
                     - 4a1. The app displays a pop-up message: "No available discount"
