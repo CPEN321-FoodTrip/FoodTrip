@@ -63,20 +63,24 @@
                 />
         </LinearLayout>
 
-    <ScrollView
-        android:id="@+id/discount_scroll_view_store"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginVertical="20dp">
-
-        <LinearLayout
-            android:id="@+id/discount_list_layout_store"
+        <ScrollView
+            android:id="@+id/discount_scroll_view_store"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="40dp"/>
-    </ScrollView>
+            android:layout_height="match_parent"
+            android:layout_above="@+id/discount_input_layout"
+            android:layout_below="@+id/topLayout"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginVertical="20dp"
+            android:layout_marginTop="-28dp"
+            android:layout_marginBottom="-58dp">
+
+            <LinearLayout
+                android:id="@+id/discount_list_layout_store"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:orientation="vertical" />
+        </ScrollView>
 
     <LinearLayout
         android:id="@+id/discount_input_layout"

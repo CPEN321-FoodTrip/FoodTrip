@@ -52,16 +52,5 @@ class PopActivity : Activity() {
                 }
             }
         }
-
-        /*val sampleStr = "discount"
-
-        for (num in 1..30) {
-            val newTextView = TextView(this)
-            newTextView.textSize = 25f
-            val str = sampleStr + num
-            newTextView.text = str
-
-            discountList.addView(newTextView);
-        }*/
     }
 }

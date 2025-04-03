@@ -30,11 +30,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="40dp"
-                android:background="@android:color/transparent"
                 android:backgroundTint="#4db2c4"
                 android:layout_weight="0.10"
                 android:textColor="@android:color/white"
-                android:layout_margin="0dp"/>
+                android:layout_margin="0dp" />
+
 
             <TextView
                 android:id="@+id/past_title_text_view"
@@ -62,20 +62,22 @@
                 />
         </LinearLayout>
 
-    <ScrollView
-        android:id="@+id/past_trip_scroll_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginVertical="20dp">
-
-        <LinearLayout
-            android:id="@+id/past_trip_list_layout"
+        <ScrollView
+            android:id="@+id/past_trip_scroll_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:orientation="vertical" />
-    </ScrollView>
+            android:layout_height="match_parent"
+            android:layout_below="@+id/topLayout"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginVertical="20dp"
+            android:layout_marginTop="-28dp">
+
+            <LinearLayout
+                android:id="@+id/past_trip_list_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:orientation="vertical" />
+        </ScrollView>
 
     </RelativeLayout>
 

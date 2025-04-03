@@ -87,15 +87,16 @@ class PastTripActivity : AppCompatActivity() {
         pastTripList = findViewById<LinearLayout>(R.id.past_trip_list_layout)
 
         backBtn.setOnClickListener {
+            Log.d(TAG, "Clicked")
+
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
+            Log.d(TAG, "Intent Started")
+            finish()
         }
 
-        //use "test_person" for developing and debugging
         val sharedPref = getSharedPreferences("UserData", MODE_PRIVATE)
         val userEmail = sharedPref.getString("userEmail", "No email found")
-
-//        val userEmail = "test_person"
 
         if (userEmail != null) {
             getTrip(userEmail) {trips -> processTrip(trips)}

@@ -93,21 +93,14 @@ class PopTripActivity : Activity() {
      * @property url: link to the recipe
      * @property ingredients: list of ingredients needed for the recipe
      */
-//    data class Recipe(
-//        val recipeName: String,
-//        val recipeID: String,
-//        val url: String,
-//        val ingredients: List<String>,
-//    )
+
 
     /**
      * JSON format for API response in getRecipes()
      *
      * @property hits: list of recipes
      */
-//    data class EdamamResponse (
-//        val hits: List<Recipe>
-//    )
+
 
     lateinit var client: OkHttpClient
     lateinit var stopList: LinearLayout
@@ -279,7 +272,6 @@ class PopTripActivity : Activity() {
             val index = 1 + i * 2
             val itemView = TextView(this)
 
-            // val recipe = recipes[i]
             itemView.textSize = 25f
             itemView.setPadding(30, 0, 0, 0)
             itemView.text = "Recipe ${i+1}: ${recipe.recipeName}"
@@ -299,10 +291,6 @@ class PopTripActivity : Activity() {
                     _url = _url.replaceFirst("http://", "https://")
                 }
 
-//                val sample_ingredients = ArrayList<String>()
-//                sample_ingredients.add("ingred 1")
-//                sample_ingredients.add("ingred 2")
-//                sample_ingredients.add("ingred 3")
 
                 val intent = Intent(this, PopRecipeActivity::class.java)
                 intent.putExtra("recipeName", recipe.recipeName)
