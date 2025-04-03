@@ -4,22 +4,23 @@ import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebView
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
+import androidx.core.view.size
 import androidx.recyclerview.widget.RecyclerView
-import androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread
 import com.example.FoodTripFrontend.BuildConfig
 import com.example.FoodTripFrontend.GroceryActivity
 import com.example.FoodTripFrontend.GroceryActivity.DiscountItem
+import com.example.FoodTripFrontend.GroceryActivity.Ingredient
 import com.example.FoodTripFrontend.PopActivity
 import com.example.FoodTripFrontend.PopRecipeActivity
 import com.example.FoodTripFrontend.R
@@ -33,7 +34,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okio.IOException
-import kotlin.reflect.KFunction2
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 class RecipeAdapter(private val recipeList: List<RecipeItem>) :
     RecyclerView.Adapter<RecipeAdapter.RecipeViewHolder>() {
@@ -52,32 +54,48 @@ class RecipeAdapter(private val recipeList: List<RecipeItem>) :
         holder.recipeName.text = "Stop ${position+1}: ${recipeItem.recipeName}"
 
         val ingredients = recipeItem.ingredients
-        for (i in 0..<ingredients.size) {
-            val ingredient = ingredients[i]
+        holder.ingredList.removeViews(0, holder.ingredList.size-1)
 
-            val ingredTextView = TextView(holder.itemView.context)
-            var quantity = ingredient.quantity.toString() + " "
-            var measure = ingredient.measure + " "
-            var food = ingredient.food
+        getAllDiscounts() { allDiscounts ->
+            for (i in 0..<ingredients.size) {
+                val ingredient = ingredients[i]
 
-            if (quantity == "0 ") quantity = ""
-            if (measure == "<unit> " || measure == "null ") measure = ""
+                // create linear layout
+                val linearLayout = LinearLayout(holder.itemView.context)
+                linearLayout.orientation = LinearLayout.HORIZONTAL
+                linearLayout.layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
 
-            ingredTextView.text = "$quantity$measure$food"
+                // create text view
+                val ingredTextView = createIngredTextView(holder, ingredient)
 
-            ingredTextView.setOnClickListener() {
-                getDiscount(ingredient.food) { discounts ->
-                    processDiscount(discounts, holder)
+                // create image view
+                val imageView: ImageView = ImageView(holder.itemView.context)
+                imageView.setImageResource(R.drawable.green_circle)
+                val imageParams : LinearLayout.LayoutParams = LinearLayout.LayoutParams(20, 20)
+                imageView.setLayoutParams(imageParams)
+
+                linearLayout.addView(ingredTextView);
+                linearLayout.addView(imageView);
+
+                if (allDiscounts.contains(ingredient.food.lowercase())) {
+                    imageView.visibility = View.VISIBLE
+                } else {
+                    imageView.visibility = View.GONE
                 }
-            }
 
-            holder.ingredList.addView(ingredTextView, i)
+                holder.ingredList.addView(linearLayout, i)
+            }
         }
 
         holder.recipeName.setOnClickListener() {
             if (holder.recipeDetail.isGone) {
+                holder.recipeName.ellipsize = null
                 holder.recipeDetail.visibility = View.VISIBLE
             } else {
+                holder.recipeName.ellipsize = TextUtils.TruncateAt.END
                 holder.recipeDetail.visibility = View.GONE
             }
         }
@@ -98,6 +116,29 @@ class RecipeAdapter(private val recipeList: List<RecipeItem>) :
 
     override fun getItemCount(): Int {
         return recipeList.size
+    }
+
+    private fun createIngredTextView(holder: RecipeViewHolder, ingredient: Ingredient) : TextView {
+        val ingredTextView = TextView(holder.itemView.context)
+        var quantity = BigDecimal(ingredient.quantity.toDouble())
+            .setScale(3, RoundingMode.HALF_UP)
+            .stripTrailingZeros()
+            .toPlainString() + " "
+        var measure = ingredient.measure + " "
+        var food = ingredient.food
+
+        if (quantity == "0 ") quantity = ""
+        if (measure == "<unit> " || measure == "null ") measure = ""
+
+        ingredTextView.text = "$quantity$measure$food"
+
+        ingredTextView.setOnClickListener() {
+            getDiscount(ingredient.food) { discounts ->
+                processDiscount(discounts, holder)
+            }
+        }
+
+        return ingredTextView
     }
 
     private fun getDiscount(ingredient : String, callback: (List<DiscountItem>) -> Unit) {
@@ -158,6 +199,40 @@ class RecipeAdapter(private val recipeList: List<RecipeItem>) :
         intent.putStringArrayListExtra("names", names)
         intent.putIntegerArrayListExtra("prices", prices)
         context.startActivity(intent)
+    }
+
+    private fun getAllDiscounts(callback: (List<String>) -> Unit) {
+        val url = "${BuildConfig.SERVER_URL}discounts"
+
+        val request = Request.Builder()
+            .url(url)
+            .get()
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.use {
+                    if (response.code == 404) {
+                        val allDiscounts: List<String> = emptyList()
+                        callback(allDiscounts)
+
+                        return
+                    }
+                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                    val json = response.body!!.string()
+                    val listType = object : TypeToken<List<DiscountItem>>() {}.type
+                    val discounts:List<DiscountItem> = Gson().fromJson(json, listType)
+                    val allDiscounts:List<String> = discounts.map { it.ingredient.lowercase() }
+
+                    callback(allDiscounts)
+                }
+            }
+        })
     }
 
     // ViewHolder class
