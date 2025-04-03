@@ -32,7 +32,7 @@ The reason for changing our diagram is based on comments from our M3. We also re
 - March 30, 2025: Section 3.5: Use 3 seconds as the required response times to match test implementation.
 - April 2, 2025:
     - Section 4.2 with new sequence diagrams for manage discounts and set preferences to match implementation.
-    - Section 3.5: Use 2 seconds as the required response time to match test.
+    - Section 3.5: Use 2 seconds as the required response time to match test and provide source justifying.
     - Section 3.1: Invert arrow between "View Past Trips" and "View Recipes" to reflect implementation change.
     - Section 4.7: Update description to match test implementation.
 
@@ -255,11 +255,9 @@ Not necessary to explain our requirements.
 <a name="nfr1"></a>
 
 1. **Efficient performance**
-    - **Description**: Virtual routes and their corresponding recipes should be generated and displayed in under 2 seconds.
-    - **Justification**: Responding to users within 2 seconds of them perceiving requests being sent ensures minimal frustration when using the app. Ideally, responses should be loaded within 1 seconds, but from testing 2 seconds was a consistently achievable metric.
-        - https://developer.android.com/topic/performance/vitals/launch-time#av (Android developer resource, delays longer than 2 seconds are considered excessive)
-        - https://web.dev/articles/rail (tasks with 1000+ ms latency tend to lose user attention, blog created by Paul Kinlan, 15 years of mobile app development Google employee)
-        - https://dl.acm.org/doi/abs/10.1145/2750858.2805847 (During most tasks, significant frustration is experienced if delays are longer than 1000ms)
+    - **Description**: All endpoints and especially those used for generaing virtual routes and their corresponding recipes should provide a response with relevant information in under 2 seconds.
+    - **Justification**: Fast response times are important for maintaining user engagement and preventing frustration. Studies and industry guidelines suggest that delays beyond 2 seconds can lead to noticeable dissatisfaction and reduced interaction.
+        - https://odown.com/blog/what-is-a-good-api-response-time/ (for web applications strive for response times under 2 seconds and for mobile applications, aim for 1-3 seconds)
 2. **Usability**
     - **Description**: Users should be able to navigate and finish any use case within 3 clicks, if assuming all parameter filling counts as 1 click
     - **Justification**: A simple and easy-to-use app can give users a user-friendly experience. An over-complicated interface will make user confused and frustrated. Tasks exceeding 3 clicks are perceived as more difficult, but are acceptable as long as the flow of information is consistent, hence why parameter filling is counted as a single click
