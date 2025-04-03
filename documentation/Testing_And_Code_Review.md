@@ -274,44 +274,12 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 - **Usability (Clicks to Navigate)**
   - **Verification:** This test suite simulates using the frontend app along with Espresso to mimic a user's behavior. The test is done by counting the number of valid click in a use case test. At the end of the test, it checks the number of clicks performed in the test. If the number of clicks is within 3 clicks, it passes, and vice versa.
   - **Log Output**
-    ```
-    Usability Test Passed(0 clicks): GroceryActivityTest:checkElements
-    Usability Test Passed(1 clicks): GroceryActivityTest:discountSuccessTest
-    Usability Test Passed(1 clicks): GroceryActivityTest:backButton
-    Usability Test Passed(1 clicks): GroceryActivityTest:discountEmptyTest
-    Usability Test Passed(0 clicks): GroceryStoreActivityTest:checkElements
-    Usability Test Passed(1 clicks): GroceryStoreActivityTest:backButtonTest
-    Usability Test Passed(1 clicks): GroceryStoreActivityTest:emptyIngredientTest
-    Usability Test Passed(3 clicks): GroceryStoreActivityTest:postAndDeleteDiscountTest
-    Usability Test Passed(1 clicks): GroceryStoreActivityTest:zeroPriceTest
-    Usability Test Passed(1 clicks): GroceryStoreActivityTest:emptyPriceTest
-    Usability Test Failed(7 clicks): GroceryStoreActivityTest:deleteTest
-    Usability Test Failed(7 clicks): GroceryStoreActivityTest:changeSelectedTest
-    Usability Test Passed(0 clicks): LoginActivityTest:checkElements
-    Usability Test Passed(1 clicks): MainActivityAdminTest:setGroceriesButton
-    Usability Test Passed(0 clicks): MainActivityTest:checkElements
-    Usability Test Passed(1 clicks): MainActivityTest:checkAccount
-    Usability Test Passed(1 clicks): MainActivityTest:checkViewRecipe
-    Usability Test Passed(1 clicks): MainActivityTest:checkManageTrip
-    Usability Test Passed(1 clicks): MainActivityTest:checkPastTrips
-    Usability Test Passed(1 clicks): MainActivityTest:signOut
-    Usability Test Passed(0 clicks): PastTripActivityEmptyTest:checkElements
-    Usability Test Passed(0 clicks): PastTripActivityEmptyTest:emptyPastTrip
-    Usability Test Passed(1 clicks): PastTripActivityEmptyTest:backButton
-    Usability Test Passed(0 clicks): PastTripActivityTestPersonTest:checkElements
-    Usability Test Passed(3 clicks): PastTripActivityTestPersonTest:GeneralRecipeViewPastTrip
-    Usability Test Passed(1 clicks): PastTripActivityTestPersonTest:backButton
-    Usability Test Passed(3 clicks): RecipeTests:displayRecipe
-    Usability Test Passed(1 clicks): TripActivityTest:wrongEnd
-    Usability Test Passed(1 clicks): TripActivityTest:planRegularTripShort
-    Usability Test Passed(1 clicks): TripActivityTest:sameStartEnd
-    Usability Test Passed(1 clicks): TripActivityTest:missingInputsEnd
-    Usability Test Passed(1 clicks): TripActivityTest:wrongStart
-    Usability Test Passed(1 clicks): TripActivityTest:missingInputsStart
-    Usability Test Passed(1 clicks): TripActivityTest:missingInputsStops
-    Usability Test Passed(1 clicks): TripActivityTest:wrongStopsAmount
-
-    ```
+    
+    ![Usability Test - Main Activity](images/test_result_nfr2_1.png)
+    ![Usability Test - Trip Activity](images/test_result_nfr2_2.png)
+    ![Usability Test - Past Trip Activity](images/test_result_nfr2_3.png)
+    ![Usability Test - Grocery Store Activity](images/test_result_nfr2_4.png)
+    
 
 ---
 
@@ -366,16 +334,9 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 
 
   - **Test Logs:**
-    ```
-    com.example.FoodTripFrontend.PastTripActivityEmptyTest
-        4.77s passed checkElements
-        3.48s passed emptyPastTrip
-        8.47s passed backButton
-    com.example.FoodTripFrontend.PastTripActivityTestPersonTest
-        6.84s  passed checkElements
-        30.03s failed GeneralRecipeViewPastTrip
-        12.57s passed backButton
-    ```
+    ![View Past Trip Test Log](images/test_result_1.png)
+    ![View Past Trip(Failure) Test Log](images/test_result_1_1.png)
+
 - **Use Case: Manage Trip**
 
     **Main Success Scenario:**
@@ -412,17 +373,7 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 
 
   - **Test Logs:**
-    ```
-    com.example.FoodTripFrontend.TripActivityTest
-        22.12s failed wrongEnd
-        27.81s passed planRegularTripShort
-        17.09s failed sameStartEnd
-        15.52s failed missingInputsEnd
-        15.48s passed wrongStart
-        12.29s failed missingInputsStart
-        13.37s failed missingInputsStops
-        16.49s failed wrongStopsAmount
-    ```
+    ![Manage Trip Test Log](images/test_result_2.png)
 
 - **Use Case: Manage Discounts**
     **Main Success Scenario:**
@@ -465,16 +416,7 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 
 
   - **Test Logs:**
-    ```
-    com.example.FoodTripFrontend.GroceryStoreActivityTest
-    10.67s passed checkElements
-    23.75s failed backButtonTest
-    19.48s passed emptyIngredientTest
-    59.08s passed postAndDeleteDiscountTest
-    21.38s passed zeroPriceTest
-    15.42s passed emptyPriceTest
-    22.86s passed deleteTest
-    26.65s passed changeSelectedTest
+    ![Manage Grocery Test Log](images/test_result_3.png)
 
 ---
 
