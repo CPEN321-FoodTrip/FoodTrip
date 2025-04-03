@@ -33,6 +33,7 @@ The reason for changing our diagram is based on comments from our M3. We also re
 - April 2, 2025:
     - Section 4.2 with new sequence diagrams for manage discounts and set preferences to match implementation.
     - Section 3.5: Use 2 seconds as the required response time to match test.
+    - Section 3.1: Invert arrow between "View Past Trips" and "View Recipes" to reflect implementation change.
 
 
 ## 2. Project Description
