@@ -1,2 +1,3 @@
 frontend/.idea/androidTestResultsUserPreferences.xml
-google_services.json
+google-services.json
+.DS_Store
