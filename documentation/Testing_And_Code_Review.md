@@ -9,6 +9,9 @@
 | March 30, 2025 | 5.1 - 5.3 | Updated screenshots of codacy and commit hash where run to reflect changes in implementation |
 | March 30, 2025 | 2.1 | Updated links of backend tests and commit hash where run to reflect changes in implementation |
 | March 30, 2025 | 3.1 | Updated links of non-functional tests to reflect changes in implementation |
+| April 2, 2025 | 3.2 | Update description to mention 2 second response time requirement, update description with justification of 2 seconds and source, and update test logs to match new implementation |
+| April 2, 2025 | 5.* | Update codacy screenshots and commit hash to account for code updates |
+| April 2, 2025 | 2.1.3 | Add database setup instructions based on feedback from M5 |
 
 ---
 
@@ -39,7 +42,7 @@
 
 #### 2.1.2. Commit Hash Where Tests Run
 
-`6ccb84af25ae10d9d3649238495f22ded40c3c05`
+`252aa8c8160a75e9a6a253ed465435ff039d71bc`
 
 #### 2.1.3. Explanation on How to Run the Tests
 
@@ -78,7 +81,15 @@
     (Optional, only for performance test) GATEWAY_BASE_URL=
     ```
 
-5. **Run the tests with or without coverage:**
+5. **Setup database for testing:**
+
+    - The backend tests use an in-memory MongoDB server for testing. No actual database setup is required. However, ensure that your environment is set up to support it:
+      - The tests use the `mongodb-memory-server` package to spin up a temporary in-memory MongoDB server for each test run.
+      - The in-memory MongoDB server is automatically initialized and torn down before and after the tests. Ensure that MongoDB is not running on your system as the in-memory server will use available resources dynamically.
+      
+    **Note:** If you want to change the default MongoDB database names for testing, you can modify the `testDbs` array in the jest setup file.
+
+6. **Run the tests with or without coverage:**
 
     - To run the tests **with** coverage, use the following command in the terminal:
 
@@ -92,7 +103,7 @@
     npm run test
     ```
 
-6. **[Optional] Run only the mocked or unmocked tests:**
+7. **[Optional] Run only the mocked or unmocked tests:**
 
     - To run the tests **with** mocks, use the following command in the terminal:
 
@@ -106,7 +117,7 @@
     npm run test __tests__/no_mock/
     ```
 
-7. **View the full coverage repo:**
+8. **View the full coverage repo:**
 
     - Within the backend directory navigate to the `coverage/lcov-report` directory.
     - Open `index.html` in the browser.
@@ -153,56 +164,111 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 
 - **Performance (Response Time)**
 
-  - **Verification:** This test suite evaluates the performance of critical API endpoints in an unmocked environment, simulating real-world user interactions. It measures execution times for creating and deleting routes, recipes, discounts, notifications, and allergy preferences, ensuring each operation completes within 3 seconds. This is important for maintaining a smooth user experience, preventing delays, and ensuring the system can handle expected traffic. By logging execution times and validating responses, the tests help identify performance isssues and ensure the system is quick enough.
+  - **Verification:** This test suite evaluates the performance of critical API endpoints in an unmocked environment, simulating real-world user interactions. It measures execution times for creating and deleting routes, recipes, discounts, notifications, and allergy preferences, ensuring each operation completes within 2 seconds. This is important for maintaining a smooth user experience, preventing delays, and ensuring the system can handle expected traffic. By logging execution times and validating responses, the tests help identify performance isssues and ensure the system is quick enough. 2 seconds was selected as the ideal time based on this report (https://odown.com/blog/what-is-a-good-api-response-time/) which states that for web applications you strive for response times under 2 seconds and for mobile applications, aim for 1-3 seconds.
   - **Log Output**
     ```
-        > backend@1.0.0 test
-        > NODE_ENV=test jest __tests__/non_functional_requirements/performance.test.ts
+    > backend@1.0.0 test
+    > NODE_ENV=test jest --testPathPattern=(/non_functional_requirements/)
 
-        console.debug
-            Route Execution time: 2406ms
+    console.debug
+        Route Execution time: 1865ms
 
-            at __tests__/non_functional_requirements/performance.test.ts:74:13
+        at __tests__/non_functional_requirements/performance.test.ts:29:15
 
-        console.debug
-            Discount Execution time: 310ms
+    console.debug
+        Recipe Execution time: 864ms
 
-            at __tests__/non_functional_requirements/performance.test.ts:125:15
+        at __tests__/non_functional_requirements/performance.test.ts:52:15
 
-        console.debug
-            10 discount Execution time: 1953ms
+    console.debug
+        Route Teardown Execution time: 62ms
 
-            at __tests__/non_functional_requirements/performance.test.ts:183:13
+        at __tests__/non_functional_requirements/performance.test.ts:76:15
 
-        console.debug
-            notif Execution time: 188ms
+    console.debug
+        Recipe Teardown Execution time: 85ms
 
-            at __tests__/non_functional_requirements/performance.test.ts:220:15
+        at __tests__/non_functional_requirements/performance.test.ts:96:15
 
-        console.debug
-            10 notification Execution time: 1732ms
+    console.debug
+        Add Discount Execution time: 301ms
 
-            at __tests__/non_functional_requirements/performance.test.ts:263:15
+        at __tests__/non_functional_requirements/performance.test.ts:125:13
 
-        console.debug
-            allergy Execution time: 166ms
+    console.debug
+        Get Discount Execution time: 88ms
 
-            at __tests__/non_functional_requirements/performance.test.ts:307:17
+        at __tests__/non_functional_requirements/performance.test.ts:144:13
 
-        PASS  __tests__/non_functional_requirements/performance.test.ts (11.031 s)
-        Unmocked Performance test
-            ✓ Unmocked single route, 3 stops (2462 ms)
-            ✓ Unmocked single discount (327 ms)
-            ✓ Unmocked 10 discount (1968 ms)
-            ✓ Unmocked single notification (199 ms)
-            ✓ Unmocked 10 notification (1745 ms)
-            ✓ Unmocked single allergy (260 ms)
+    console.debug
+        Delete Discount Execution time: 85ms
 
-        Test Suites: 1 passed, 1 total
-        Tests:       6 passed, 6 total
-        Snapshots:   0 total
-        Time:        11.109 s, estimated 15 s
-        Ran all test suites matching /__tests__\/non_functional_requirements\/performance.test.ts/i
+        at __tests__/non_functional_requirements/performance.test.ts:165:13
+
+    console.debug
+        Add 10 Discounts Average Execution time: 191.5ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:205:13
+
+    console.debug
+        Get All Discounts Execution time: 76ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:228:13
+
+    console.debug
+        Delete 10 Discounts Average Execution time: 52.4ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:260:13
+
+    console.debug
+        Add Notification Execution time: 34ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:287:13
+
+    console.debug
+        Delete Notification Execution time: 31ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:313:13
+
+    console.debug
+        Add 10 Notifications Average Execution time: 45.6ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:348:13
+
+    console.debug
+        Delete 10 Notifications Average Execution time: 41.5ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:383:13
+
+    console.debug
+        Add Allergy Execution time: 85ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:412:13
+
+    console.debug
+        Get Allergy Execution time: 33ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:431:13
+
+    console.debug
+        Delete Allergy Execution time: 68ms
+
+        at __tests__/non_functional_requirements/performance.test.ts:456:13
+
+    PASS __tests__/non_functional_requirements/performance.test.ts (11.024 s)
+    Performance test
+        ✓ Single route, 3 stops (2911 ms)
+        ✓ Single discount (482 ms)
+        ✓ 10 discount (2527 ms)
+        ✓ Single notification (70 ms)
+        ✓ 10 notification (878 ms)
+        ✓ Single allergy (192 ms)
+
+    Test Suites: 1 passed, 1 total
+    Tests:       6 passed, 6 total
+    Snapshots:   0 total
+    Time:        11.064 s
+    Ran all test suites matching /(\/non_functional_requirements\/)/i.
     ```
 
 - **Usability (Clicks to Navigate)**
@@ -416,7 +482,7 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 
 ### 5.1. Commit Hash Where Codacy Ran
 
-`6ccb84af25ae10d9d3649238495f22ded40c3c05`
+`c4af1f3921930b82a3fe69d18c0ba64f4b2c03f4`
 
 ### 5.2. Unfixed Issues per Codacy Category
 

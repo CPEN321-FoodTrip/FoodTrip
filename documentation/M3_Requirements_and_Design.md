@@ -29,7 +29,13 @@ The reason for changing our diagram is based on comments from our M3. We also re
     - Section 2: Updated project description to match the scope of the functional requirements.
 
 **M6:**
-- March 30, 2025: Update section 3.5 to use 3 seconds as the required response times to match test implementation.
+- March 30, 2025: Section 3.5: Use 3 seconds as the required response times to match test implementation.
+- April 2, 2025:
+    - Section 4.2 with new sequence diagrams for manage discounts and set preferences to match implementation.
+    - Section 3.5: Use 2 seconds as the required response time to match test and provide source justifying.
+    - Section 3.1: Invert arrow between "View Past Trips" and "View Recipes" to reflect implementation change.
+    - Section 4.7: Update description to match test implementation.
+    - Section 4.8: Update main complexity to match implementation and add images.
 
 
 ## 2. Project Description
@@ -42,7 +48,7 @@ FoodTrip is an Android app that helps users explore global cuisines by planning 
 
 
 ### **3.2. Actors Description**
-1. **Grocery Store**: An actor who can manage discounts available to customers .
+1. **Grocery Store**: An actor who can manage discounts available to customers.
 2. **App User**: An actor who interacts with the app to set their food preferences, manage virtual food trips, view their past trips, view their recipes, and manage their groceries.
 
 
@@ -250,11 +256,9 @@ Not necessary to explain our requirements.
 <a name="nfr1"></a>
 
 1. **Efficient performance**
-    - **Description**: Virtual routes and their corresponding recipes should be generated and displayed in under 3 seconds.
-    - **Justification**: Responding to users within 3 seconds of them perceiving requests being sent ensures minimal frustration when using the app. Ideally, responses should be loaded within 2 seconds, but from testing 3 seconds was a consistently achievable metric.
-        - https://developer.android.com/topic/performance/vitals/launch-time#av (Android developer resource, delays longer than 2 seconds are considered excessive)
-        - https://web.dev/articles/rail (tasks with 1000+ ms latency tend to lose user attention, blog created by Paul Kinlan, 15 years of mobile app development Google employee)
-        - https://dl.acm.org/doi/abs/10.1145/2750858.2805847 (During most tasks, significant frustration is experienced if delays are longer than 1000ms)
+    - **Description**: All endpoints and especially those used for generaing virtual routes and their corresponding recipes should provide a response with relevant information in under 2 seconds.
+    - **Justification**: Fast response times are important for maintaining user engagement and preventing frustration. Studies and industry guidelines suggest that delays beyond 2 seconds can lead to noticeable dissatisfaction and reduced interaction.
+        - https://odown.com/blog/what-is-a-good-api-response-time/ (for web applications strive for response times under 2 seconds and for mobile applications, aim for 1-3 seconds)
 2. **Usability**
     - **Description**: Users should be able to navigate and finish any use case within 3 clicks, if assuming all parameter filling counts as 1 click
     - **Justification**: A simple and easy-to-use app can give users a user-friendly experience. An over-complicated interface will make user confused and frustrated. Tasks exceeding 3 clicks are perceived as more difficult, but are acceptable as long as the flow of information is consistent, hence why parameter filling is counted as a single click
@@ -426,46 +430,61 @@ Not necessary to explain our requirements.
 
 ### **4.7. Non-Functional Requirements Design**
 1. [Efficient performance](#nfr1)
-    - **Validation**: Extensive testing of each endpoint, including to 10 sequential requests for recipes, discounts, and subscriptions, with timing beginning when when requests are made and ending after teardown. In the case of route creation, these tests are a good indicator of general latency, and in other cases is a good indicator of overall latency experienced during creation, viewing, and deletion
+    - **Validation**: Performance is measured through targeted endpoint testing. Routes, recipes, and allergies are tested individually, while discounts and notifications undergo batch testing with up to 10 sequential requests. Response times are tracked from initiation to teardown, providing insights into both general system latency and user-experienced delays for creation, retrieval, and deletion actions.
 2. [Usability](#nfr1)
     - **Validation**: Front end tests developed with espresso will ensure that all relevant use cases can be navigated to and finished within 3 clicks, if all parameter population is counted as a singular click. This is tested by navigating to all resources and tracking each click used with a custom click action.
 
 ### **4.8. Main Project Complexity Design**
 **Generate Recipes and Route**
-- **Description**: Converts a virtual trip from a pair of city names into a list of recipes. Formally, it takes a pair of strings and an integer, converts the strings into a route(series of coordinates) by via Edamam API, then searches for the names of cities nearby. After cities are found, recipes for each city is found by extracting the name of the city from the route and quering through Edamam API. The user may specify dietary restrictions, which would be relevant as it may arbitrarily restrict the recipes that are associated with the selected virtual path
-- **Why complex?**: Since virtually trips are meant to be somewhat feasible to physically travel, many different paths could be taken depending on the forms of transportation available, meaning that there are many different viable virtual paths. For any given virtual path, the algorithm must be able to determine what recipes are associated with that path, and then find a combination of recipes that satisfies the number of dishes whilst obeying user dietary restrictions
+- **Description**: Converts a virtual trip from a pair of city names and number of stops into a list of recipes. More specifically, it takes a pair of strings and an integer, converts the strings into a route (series of coordinates) by using great circle interpolation and the Haversine formula. The algorithm then searches for large cities near the route using a database of cities with a population greater than 15,000. Recipes for each city are found by extracting the name of the city from the route and querying the Edamam API. The user may specify dietary restrictions, which are applied when selecting recipes along the path.
+- **Why complex?**:
+    - **Math Complexity**: The algorithm must compute an optimal route using great circle interpolation, which involves spherical trigonometry to determine evenly spaced points along the route. The Haversine formula is then used to calculate distances between these points and candidate cities, ensuring that only relevant cities are selected (cities with large enough population). Additionally, geospatial queries are required to efficiently search for cities within a given radius, requiring the use of a spatially indexed database.  
+    <div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
+    <img src="images/great_circle_distance.png" alt="Great Circle Interpolation" style="max-width: 45%; height: auto;">
+    <img src="images/haversine_formula.png" alt="Haversine Formula" style="max-width: 75%; height: 150px;">
+    </div>
+
+    - **Recipe Selection and Allergen Filtering**: Once cities are identified along the route, recipes must be retrieved and filtered based on user dietary restrictions. This process involves handling multiple constraints, such as ensuring that the required number of recipes is available while avoiding allergens. The complexity arises from the fact that removing certain recipes due to allergens may lead to insufficient options, requiring alternate cities or a reevaluation of the path. If suitable recipes are not found or if allergens exclude too many options, the system prompts the user to try another path or adjust their dietary preferences.
 - **Design**:
-    - **Input**: start, The name of the city to begin at
-                destination, The name of the city to end at
-                total_dishes, the number of dishes for the trip
-                userID, a userID to store the trip under, and check for allergies
-    - **Output**: a list of recipes associated with the virtual path between input points, excluding any ingredients that are listed under the user's allegens
-    - **Main computational logic**: ...
-    - **Pseudo-code**: ...
+    - **Input**:
+      - `start`: The name of the city to begin at
+      - `destination`: The name of the city to end at
+      - `num_stops`: The number of stops to take between start and destination city (`num_stops` + 2 = `num_dishes`)
+      - `userID`: A user ID to store the trip under and check for allergies
+    - **Output**: A list of recipes associated with the virtual path between input points, avoiding recipes that include ingredients that are listed under the user's allergens.
+    - **Main computational logic**:
+      - Utilize a database of cities (population > 15,000) indexed by coordinates.
+      - Use the Haversine formula to determine distances and great circle interpolation to find intermediate route points.
+      - Identify the largest nearby cities (population > 50,000) along the route.
+      - Query the Edamam API for recipes associated with each city.
+      - Filter recipes based on user dietary restrictions.
+    - **Pseudo-code**:
         ```
         final_route = null
         recipes = []
-        countries = []
         allergies = []
-        if (have_allergies(userID)){
+
+        if (have_allergies(userID)) {
             allergies = get_allergies(userID)
         }
-        while (attemptedpaths < attempt_limit) // to prevent insane delays from trying every possible path
-            route = find_route(start, destination)
-            cities = find_cities_from_route(route)
 
-            for city in cities
-                potential_recipes = find_recipes_for_city(city)
-                no_allergen_recipes = remove_violating_recipes(potential_recipes, allergies)
-                if no_allergen_recipes.length < total_dishes
-                    continue // try another path
-                selected_recipes = select_recipes(no_allergen_recipes, total_dishes)
-                recipes.add(selected_recipes)
-                final_route = route
+        route = interpolate_route(start, num_stops, destination)
+        cities = find_cities_along_route(route)
 
-            attemptedpaths++
+        for city in cities {
+            potential_recipes = find_recipes_for_city(city)
+            no_allergen_recipes = filter_recipes(potential_recipes, allergies)
+            
+            if (no_allergen_recipes.length > 0) {
+                recipes.add(no_allergen_recipes[0])
+            }
+        }
 
-        return(recipes,final_route)
+        if (recipes.length < num_tops + 2) {
+            return ("Not enough suitable recipes found, please try adjusting your preferences.", null)
+        }
+
+        return (recipes, final_route)
         ```
 
 ## 5. Contributions
