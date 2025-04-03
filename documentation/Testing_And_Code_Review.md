@@ -12,6 +12,10 @@
 | April 2, 2025 | 3.2 | Update description to mention 2 second response time requirement, update description with justification of 2 seconds and source, and update test logs to match new implementation |
 | April 2, 2025 | 5.* | Update codacy screenshots and commit hash to account for code updates |
 | April 2, 2025 | 2.1.3 | Add database setup instructions based on feedback from M5 |
+| April 3, 2025 | 3.1 | Update frontend non-functional test location to reflect new file |
+| April 3, 2025 | 3.2 | Update frontend usability test log for new test |
+| April 3, 2025 | 4.2 | Update frontend functional test logs with most recent run |
+| April 3, 2025 | 5.* | Update codacy screenshots and commit hash to account for code updates |
 
 ---
 
@@ -158,7 +162,7 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 | **Non-Functional Requirement**  | **Location in Git**                              |
 | ------------------------------- | ------------------------------------------------ |
 | **Performance (Response Time)** | [`FoodTrip/backend/__tests__/non_functional_requirements/performance.test.ts`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/main/backend/__tests__/non_functional_requirements/performance.test.ts) |
-| **Usability (Clicks to navigate)**          | [`FoodTrip/frontend/app/src/androidTest/java/com/example/FoodTripFrontend/ExampleInstrumentedTest.kt`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/6ccb84af25ae10d9d3649238495f22ded40c3c05/frontend/app/src/androidTest/java/com/example/FoodTripFrontend/ExampleInstrumentedTest.kt) |
+| **Usability (Clicks to navigate)**          | [`FoodTrip/frontend/app/src/androidTest/java/com/example/FoodTripFrontend/Non-FunctionalTests.kt`](https://github.com/CPEN321-FoodTrip/FoodTrip/blob/main/frontend/app/src/androidTest/java/com/example/FoodTripFrontend/Non-FunctionalTests.kt) |
 
 ### 3.2. Test Verification and Logs
 
@@ -424,7 +428,7 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 
 ### 5.1. Commit Hash Where Codacy Ran
 
-`c4af1f3921930b82a3fe69d18c0ba64f4b2c03f4`
+`abfa2144599635f44dcd59fd106209fd80abb743`
 
 ### 5.2. Unfixed Issues per Codacy Category
 
