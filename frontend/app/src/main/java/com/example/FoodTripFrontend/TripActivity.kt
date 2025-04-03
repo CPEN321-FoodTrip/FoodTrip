@@ -145,10 +145,12 @@ class TripActivity : AppCompatActivity() {
             }
 
             // Check if the number of stops is valid (non null and at least 1 stop but less than 10)
-            if ((userNumStops != null && userNumStops < 1) || (userNumStops != null && userNumStops > 10)) {
-                Log.d(TAG,"In numStops invalid")
-                isValid = false
-                showSnackbar(findViewById(android.R.id.content), "Invalid Number of Stops")
+            if (userNumStops != null) {
+                if (userNumStops < 1 || userNumStops > 10) {
+                    Log.d(TAG, "In numStops invalid")
+                    isValid = false
+                    showSnackbar(findViewById(android.R.id.content), "Invalid Number of Stops")
+                }
             }
 
 
