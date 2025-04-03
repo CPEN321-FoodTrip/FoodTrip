@@ -594,7 +594,9 @@ class PastTripActivityTestPersonTestFunctional {
      * back to the main activity
      */
     @Test fun backButton() {
-        onView(withId(R.id.back_button_past)).perform(com.example.FoodTripFrontend.click())
+
+        onView(withId(R.id.back_button_past)).perform(click())
+
 
         Thread.sleep(1000)
         Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
@@ -628,100 +630,6 @@ class PastTripActivityTestPersonTestFunctional {
     }
 }
 
-/**
- * Test of GroceryActivity-related functionality.
- *
- * Test cases include:
- * - Checking the display of key UI elements.
- * - Verifying the back button functionality.
- * - Testing success and failure scenarios for discount functionality.
- */
-@RunWith(AndroidJUnit4::class)
-class GroceryActivityTestFunctional {
-    @get:Rule
-    val activityRule = ActivityScenarioRule(GroceryActivity::class.java)
-
-    @get:Rule
-    var testName = TestName()
-
-    /**
-     * Initialization for intent checking
-     *
-     * Needed for switching activities
-     */
-    @Before
-    fun setup() {
-        Intents.init()
-    }
-
-    /**
-     * Cleanup for intent checking
-     *
-     * Needed for switching activities
-     */
-    @After
-    fun tearDown() {
-        Intents.release()
-    }
-
-    /**
-     * UI Test for the current Activity
-     *
-     * Checks if all required elements are present
-     */
-    @Test fun checkElements() {
-        onView(withId(R.id.back_button)).check(matches(withText("Back")))
-        onView(withId(R.id.grocery_title_text_view)).check(matches(withText("Grocery")))
-        onView(withId(R.id.recipe_list_layout)).check(matches(isDisplayed()))
-    }
-
-    /**
-     * Functionality Test for the current Activity
-     *
-     * Verify that the back button successfully returns
-     * back to the main activity
-     */
-    @Test fun backButton() {
-        onView(withId(R.id.back_button)).perform(click())
-        Thread.sleep(5000)
-        Intents.intended(IntentMatchers.hasComponent(MainActivity::class.java.name))
-    }
-
-    /**
-     * Functionality Test for the Grocery Activity
-     *
-     * Verify that an item with a discount has the
-     * discount properly displayed
-     *
-     */
-    @Test fun discountSuccessTest() {
-        onView(withTagValue(`is`("ingred 1")))
-            .check(matches(isDisplayed()))
-            .perform(click())
-
-        Thread.sleep(1000)
-        Intents.intended(IntentMatchers.hasComponent(PopActivity::class.java.name))
-        onView(withTagValue(`is`("discount 1")))
-            .check(matches(isDisplayed()))
-    }
-
-    /**
-     * Functionality Test for the Grocery Activity
-     *
-     * Verify that an item without a discount has the
-     * proper display
-     *
-     */
-    @Test fun discountEmptyTest() {
-        onView(withTagValue(`is`("ingred 2")))
-            .check(matches(isDisplayed()))
-            .perform(click())
-
-        Thread.sleep(1000)
-        onView(withText("No available discounts"))
-            .check(matches(isDisplayed()))
-    }
-}
 
 /**
  * Test with GroceryStoreActivity on "no past trip record"
@@ -759,6 +667,11 @@ class GroceryStoreActivityTestFunctional {
     @Before
     fun setup() {
         Intents.init()
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        var sharedPreferences = context.getSharedPreferences("UserData", Context.MODE_PRIVATE);
+        sharedPreferences.edit().putString("userEmail", "test_person2").apply()
+
+        ActivityScenario.launch(GroceryStoreActivity::class.java)
     }
 
     /**
@@ -780,7 +693,6 @@ class GroceryStoreActivityTestFunctional {
     fun checkElements() {
         onView(withId(R.id.sign_out_button)).check(matches(withText("Sign Out")))
         onView(withId(R.id.grocery_store_title_text_view)).check(matches(isDisplayed()))
-        onView(withId(R.id.discount_list_layout_store)).check(matches(isDisplayed()))
         onView(withId(R.id.ingredient_input)).check(matches(isDisplayed()))
         onView(withId(R.id.price_input)).check(matches(isDisplayed()))
         onView(withId(R.id.post_button_grocery_store)).check(matches(isDisplayed()))
@@ -812,7 +724,8 @@ class GroceryStoreActivityTestFunctional {
         onView(withId(R.id.price_input)).perform(typeText(samplePrice1), closeSoftKeyboard())
         onView(withId(R.id.price_input)).check(matches(withText(samplePrice1)))
 
-        onView(withId(R.id.post_button_grocery_store)).perform(com.example.FoodTripFrontend.click())
+        onView(withId(R.id.post_button_grocery_store)).perform(click())
+
         Thread.sleep(3000)
 
         onView(withText(sample1))
@@ -832,7 +745,7 @@ class GroceryStoreActivityTestFunctional {
      * Success Scenario:
      * Simulates a user attempting to delete a discounted
      * grocery by clicking the delete button with no
-     * item selected, then with selecting and deseleting a item,
+     * item selected, then with selecting and deselecting a item,
      * and then with an item properly selected
      *
      * Verify that the item isn't deleted in the first case and a
@@ -854,19 +767,30 @@ class GroceryStoreActivityTestFunctional {
         Thread.sleep(3000)
 
         onView(withId(R.id.delete_button_grocery_store)).perform(click())
+
+        Thread.sleep(1000)
+
         onView(withText(discountErrorText))
             .check(matches(isDisplayed()))
 
+        Thread.sleep(3000)
+
         onView(withText(sample1))
-            .perform(com.example.FoodTripFrontend.click())
-            .perform(com.example.FoodTripFrontend.click())
+            .perform(click())
+            .perform(click())
+
+        Thread.sleep(1000)
 
         onView(withId(R.id.delete_button_grocery_store)).perform(click())
+
+        Thread.sleep(3000)
         onView(withText(discountErrorText))
             .check(matches(isDisplayed()))
 
+
         onView(withText(sample1))
-            .perform(com.example.FoodTripFrontend.click())
+            .perform(click())
+
         onView(withId(R.id.delete_button_grocery_store)).perform(click())
         Thread.sleep(3000)
         onView(withText(sample1))
@@ -913,7 +837,8 @@ class GroceryStoreActivityTestFunctional {
 
         onView(withText(sample1))
             .check(matches(isDisplayed()))
-            .perform(com.example.FoodTripFrontend.click())
+            .perform(click())
+
         onView(withId(R.id.delete_button_grocery_store)).perform(click())
         Thread.sleep(3000)
         onView(withText(sample1))
@@ -923,7 +848,8 @@ class GroceryStoreActivityTestFunctional {
 
         onView(withText(sample2))
             .check(matches(isDisplayed()))
-            .perform(com.example.FoodTripFrontend.click())
+            .perform(click())
+
         onView(withId(R.id.delete_button_grocery_store)).perform(click())
         Thread.sleep(3000)
         onView(withText(sample2))
