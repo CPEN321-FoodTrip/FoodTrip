@@ -13,11 +13,7 @@ jobs:
         uses: fountainhead/action-wait-for-check@v1.2.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-<<<<<<< Updated upstream
-          checkName: "Deploy to EC2"
-=======
           checkName: deploy
->>>>>>> Stashed changes
           ref: ${{ github.sha }}
 
   test:
