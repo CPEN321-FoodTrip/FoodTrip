@@ -36,6 +36,7 @@ The reason for changing our diagram is based on comments from our M3. We also re
     - Section 3.1: Invert arrow between "View Past Trips" and "View Recipes" to reflect implementation change.
     - Section 4.7: Update description to match test implementation.
     - Section 4.8: Update main complexity to match implementation and add images.
+    - Section 3.3: Update description to use case 4 and 6
 
 
 ## 2. Project Description
