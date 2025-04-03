@@ -11,6 +11,7 @@
 | March 30, 2025 | 3.1 | Updated links of non-functional tests to reflect changes in implementation |
 | April 2, 2025 | 3.2 | Update description to mention 2 second response time requirement, update description with justification of 2 seconds and source, and update test logs to match new implementation |
 | April 2, 2025 | 5.* | Update codacy screenshots and commit hash to account for code updates |
+| April 2, 2025 | 2.1.3 | Add database setup instructions based on feedback from M5 |
 
 ---
 
@@ -80,7 +81,15 @@
     (Optional, only for performance test) GATEWAY_BASE_URL=
     ```
 
-5. **Run the tests with or without coverage:**
+5. **Setup database for testing:**
+
+    - The backend tests use an in-memory MongoDB server for testing. No actual database setup is required. However, ensure that your environment is set up to support it:
+      - The tests use the `mongodb-memory-server` package to spin up a temporary in-memory MongoDB server for each test run.
+      - The in-memory MongoDB server is automatically initialized and torn down before and after the tests. Ensure that MongoDB is not running on your system as the in-memory server will use available resources dynamically.
+      
+    **Note:** If you want to change the default MongoDB database names for testing, you can modify the `testDbs` array in the jest setup file.
+
+6. **Run the tests with or without coverage:**
 
     - To run the tests **with** coverage, use the following command in the terminal:
 
@@ -94,7 +103,7 @@
     npm run test
     ```
 
-6. **[Optional] Run only the mocked or unmocked tests:**
+7. **[Optional] Run only the mocked or unmocked tests:**
 
     - To run the tests **with** mocks, use the following command in the terminal:
 
@@ -108,7 +117,7 @@
     npm run test __tests__/no_mock/
     ```
 
-7. **View the full coverage repo:**
+8. **View the full coverage repo:**
 
     - Within the backend directory navigate to the `coverage/lcov-report` directory.
     - Open `index.html` in the browser.
