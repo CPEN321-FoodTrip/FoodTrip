@@ -1,6 +1,6 @@
 package com.example.FoodTripFrontend
 
-import android.app.Activity
+import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
@@ -8,18 +8,14 @@ import android.os.Looper
 import android.util.Log
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.snackbar.Snackbar
-import retrofit2.http.Tag
 
 /**
  * Activity showing details of the selected recipe from PopTripActivity
@@ -83,15 +79,17 @@ class PopRecipeActivity : AppCompatActivity() {
             if (from == "grocery") {
                 createWebView(url)
             } else {
-                val urlTextView = TextView(this)
-                urlTextView.setPadding(5, 5, 5, 10)
-                urlTextView.textSize = 12f
-                urlTextView.text = url
-                urlTextView.tag = "url"
-                urlTextView.setOnClickListener {
+                val urlButtonView = Button(this)
+                urlButtonView.setPadding(5, 5, 5, 10)
+                urlButtonView.textSize = 12f
+                urlButtonView.text = "View Recipe"
+                urlButtonView.tag = "url"
+                urlButtonView.setBackgroundColor(Color.parseColor("#4db2c4"))
+                urlButtonView.setTextColor(Color.WHITE)
+                urlButtonView.setOnClickListener {
                     createWebView(url)
                 }
-                recipeList.addView(urlTextView)
+                recipeList.addView(urlButtonView)
             }
         }
     }

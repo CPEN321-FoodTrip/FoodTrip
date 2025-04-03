@@ -2,10 +2,10 @@ package com.example.FoodTripFrontend.recyclerViewHelper.adapter
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +18,6 @@ import androidx.core.view.isGone
 import androidx.core.view.size
 import androidx.recyclerview.widget.RecyclerView
 import com.example.FoodTripFrontend.BuildConfig
-import com.example.FoodTripFrontend.GroceryActivity
 import com.example.FoodTripFrontend.GroceryActivity.DiscountItem
 import com.example.FoodTripFrontend.GroceryActivity.Ingredient
 import com.example.FoodTripFrontend.PopActivity
@@ -73,7 +72,7 @@ class RecipeAdapter(private val recipeList: List<RecipeItem>) :
 
                 // create image view
                 val imageView: ImageView = ImageView(holder.itemView.context)
-                imageView.setImageResource(R.drawable.green_circle)
+                imageView.setImageResource(R.drawable.red_circle)
                 val imageParams : LinearLayout.LayoutParams = LinearLayout.LayoutParams(20, 20)
                 imageView.setLayoutParams(imageParams)
 
@@ -119,7 +118,9 @@ class RecipeAdapter(private val recipeList: List<RecipeItem>) :
     }
 
     private fun createIngredTextView(holder: RecipeViewHolder, ingredient: Ingredient) : TextView {
-        val ingredTextView = TextView(holder.itemView.context)
+        val ingredTextView = TextView(holder.itemView.context).apply {
+            setTextColor(Color.WHITE)
+        }
         var quantity = BigDecimal(ingredient.quantity.toDouble())
             .setScale(3, RoundingMode.HALF_UP)
             .stripTrailingZeros()

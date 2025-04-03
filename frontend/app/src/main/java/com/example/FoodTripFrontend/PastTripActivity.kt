@@ -153,6 +153,7 @@ class PastTripActivity : AppCompatActivity() {
             itemView.textSize = 25f
             itemView.text = "${trip.start_location.name} -> ${trip.end_location.name}"
             itemView.tag = "route ${i+1}"
+            itemView.setTextColor(Color.WHITE)
 
             itemView.setOnClickListener {
                 val intent = Intent(applicationContext, PopTripActivity::class.java)
