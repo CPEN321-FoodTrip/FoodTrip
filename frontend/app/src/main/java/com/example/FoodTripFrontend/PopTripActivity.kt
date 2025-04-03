@@ -2,6 +2,7 @@ package com.example.FoodTripFrontend
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -176,7 +177,9 @@ class PopTripActivity : Activity() {
         val startItemView = TextView(this)
         startItemView.textSize = 25f
         startItemView.text = "${route.start_location.name}"
+        startItemView.setTextColor(Color.WHITE)
         stopList.addView(startItemView)
+
 
         val stops = route.stops
         for (i in 0..<stops.count()) {
@@ -185,6 +188,7 @@ class PopTripActivity : Activity() {
             val stop = stops[i]
             itemView.textSize = 25f
             itemView.text = "-> ${stop.location.name}"
+            itemView.setTextColor(Color.WHITE)
 
             stopList.addView(itemView)
         }
@@ -192,6 +196,7 @@ class PopTripActivity : Activity() {
         val endItemView = TextView(this)
         endItemView.textSize = 25f
         endItemView.text = "-> ${route.end_location.name}"
+        endItemView.setTextColor(Color.WHITE)
         stopList.addView(endItemView)
 
         val showRouteButton = findViewById<Button>(R.id.show_past_route_button)
@@ -277,8 +282,9 @@ class PopTripActivity : Activity() {
             // val recipe = recipes[i]
             itemView.textSize = 25f
             itemView.setPadding(30, 0, 0, 0)
-            itemView.text = "recipe ${i+1}: ${recipe.recipeName}"
+            itemView.text = "Recipe ${i+1}: ${recipe.recipeName}"
             itemView.tag = "recipe ${i+1}"
+            itemView.setTextColor(Color.WHITE)
 
             itemView.setOnClickListener {
                 Log.d(TAG, "${itemView.text} is clicked")
