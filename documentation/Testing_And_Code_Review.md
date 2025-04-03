@@ -9,7 +9,7 @@
 | March 30, 2025 | 5.1 - 5.3 | Updated screenshots of codacy and commit hash where run to reflect changes in implementation |
 | March 30, 2025 | 2.1 | Updated links of backend tests and commit hash where run to reflect changes in implementation |
 | March 30, 2025 | 3.1 | Updated links of non-functional tests to reflect changes in implementation |
-| April 2, 2025 | 3.2 | Update description to mention 2 second response time requirement and update test logs to match implementation |
+| April 2, 2025 | 3.2 | Update description to mention 2 second response time requirement, update description with justification of 2 seconds and source, and update test logs to match new implementation |
 
 ---
 
@@ -154,7 +154,7 @@ The `index.ts`, `jest.config.ts` and `services.ts` files do not have 100% covera
 
 - **Performance (Response Time)**
 
-  - **Verification:** This test suite evaluates the performance of critical API endpoints in an unmocked environment, simulating real-world user interactions. It measures execution times for creating and deleting routes, recipes, discounts, notifications, and allergy preferences, ensuring each operation completes within 2 seconds. This is important for maintaining a smooth user experience, preventing delays, and ensuring the system can handle expected traffic. By logging execution times and validating responses, the tests help identify performance isssues and ensure the system is quick enough.
+  - **Verification:** This test suite evaluates the performance of critical API endpoints in an unmocked environment, simulating real-world user interactions. It measures execution times for creating and deleting routes, recipes, discounts, notifications, and allergy preferences, ensuring each operation completes within 2 seconds. This is important for maintaining a smooth user experience, preventing delays, and ensuring the system can handle expected traffic. By logging execution times and validating responses, the tests help identify performance isssues and ensure the system is quick enough. 2 seconds was selected as the ideal time based on this report (https://odown.com/blog/what-is-a-good-api-response-time/) which states that for web applications you strive for response times under 2 seconds and for mobile applications, aim for 1-3 seconds.
   - **Log Output**
     ```
     > backend@1.0.0 test
